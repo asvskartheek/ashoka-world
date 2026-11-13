@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 24, `cook/stills/r24/` (raw 56.1, calibrated 75, median of 3 critics)
+Best so far: round 26, `cook/stills/r26/` (raw 59.3, calibrated 78, median of 3 critics)
 
 ## Decisions
 
@@ -426,3 +426,26 @@ Measured: S04 sat -0.027 bright -0.066.
 Finding: the critic ensemble's run-to-run noise (±4 to 5 per shot, sometimes systematic across a whole round) is now as large as single-round gains from tuning. Only large structural changes will show above the noise.
 Decision: next rounds make large changes on the items every critic repeats: S01 gatehouse silhouette (tall multi-tier timber gate with flanking towers; parallel builder), S03 overhead tree canopy framing the top edge, S04 left-side carved timber balcony house with a stocked market stall.
 Stop check: bar no | floor no (about 3.9h) | approved no | final no -> next round
+
+## Round 26
+
+Time: about 10:12 to 11:18 UTC (container restart at about 10:50; gatehouse builder resumed from its transcript)
+Focus: large structural changes on items every critic repeats.
+Changes:
+- S01 gatehouse and watchtowers rebuilt (builder, `gatehouse` and `watchtower` in src/assets.js only): log pylons with X-bracing, heavy corner posts, gate passage with lintel brackets and swung board doors, joisted deck, open gallery with balusters and bracket arms, wide first roof skirt with rafter ends, a smaller pavilion storey with its own gallery, top hipped roof with ridge and finials; slender braced watchtowers with knee-braced overhanging galleries and flared thatch pyramids. 20k / 18k / 3.9k triangles (measured by the builder).
+- World: banner poles moved clear of the wider gatehouse (x ±14.8, z 9.5); towers that collided with the gate (x = 15) or doubled at the left (x = -35 vs -40) removed.
+- S03: a leaning tree outside the frame whose canopy hangs over the top-right (two trees placed behind the camera first shaded the whole foreground and were removed).
+- S04: the stocked thatched stall moved into the bottom-left of frame with goods and textiles.
+Stills: `cook/stills/r26/` | Side by side: `cook/compare/r26/all.jpg`
+Scores, eyeballed: median of 3 critics (sonnet, haiku, general-purpose), raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r24 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 72 | 62 | 62 | 55 | 45 | 59 | 78 | +6 |
+| S02 | 70 | 58 | 66 | 48 | 40 | 56 | 75 | 0 (identical render) |
+| S03 | 80 | 70 | 72 | 58 | 48 | 66 | 85 | +3 |
+| S04 | 62 | 60 | 66 | 50 | 42 | 56 | 75 | +5 |
+
+Overall raw 59.3, calibrated 78. Best so far by about 3 points (above the critic noise): large structural changes do register.
+User feedback this round: subagents allowed, Fable model only for the most creative ideation; bar unchanged at 99.2. A Fable strategist is preparing a plan to break the plateau.
+Stop check: bar no | floor no (about 5h) | approved no | final no -> next round
