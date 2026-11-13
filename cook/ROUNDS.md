@@ -188,7 +188,7 @@ Next focus: round 15 = S03 framing (in progress) + integrate the people builder.
 
 ## Round 15
 
-Time: about 06:57 to 07:40 UTC (the people builder ran in parallel, about 40 min)
+Time: about 06:57 to 07:34 UTC, end measured (the people builder ran in parallel, about 40 min of its own)
 Focus: people (top critic gap in every round) via a parallel builder subagent; S03 framing; S04 near field; S01 light; S02 background.
 Changes:
 - People: the human generator was rewritten by a builder subagent (people section of src/assets.js only): cross-section torso, smooth limbs with joints, hands and feet, a sculpted head with brow, nose, lips, eyes, ears, hairlines, beards, wrapped turbans, and real drapery geometry (dhoti, sari pleats with gold border, monk robe over the left shoulder, shawls, soldier tunic with belts, seated cloth tenting over the knees). 13.8k to 21k triangles per figure, measured.
