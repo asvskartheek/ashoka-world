@@ -214,7 +214,7 @@ Next focus: round 16 = measured colour fixes (prepared), then materials (wood gr
 
 ## Round 16
 
-Time: about 07:34 to 08:20 UTC (materials builder ran in parallel, about 34 min)
+Time: about 07:34 to 08:15 UTC, end measured (materials builder ran in parallel, about 34 min)
 Focus: materials (largest gap after people, all critics in round 15).
 Changes:
 - Materials builder (src/textures.js, src/materials.js only): lacquered teak with warped grain and 24 flutes, clearcoat and roughness map; carved timber bands; weathered timber with splits; weathered plaster with stains, rain streaks, cracks, spalls showing brick, plus shader grime at wall bases; barrel tiles with moss and soot; bark with deep fissures for logs and tree trunks; irregular warm brick courses for city and stupa; polished sandstone with clearcoat, inscription carved through a bump map; layered thatch courses. worldUV now passes world UVs to normal and AO maps. Canvas contexts CPU-backed (much faster under SwiftShader). buildMaterials 6.7 to 7.2 s (was 5.9 to 6.1 s), measured by the builder.
