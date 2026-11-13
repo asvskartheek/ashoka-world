@@ -22,6 +22,7 @@ Made without asking, one line each.
 ## User feedback inbox
 
 Exact words. Close an item only when a still or clip proves it.
+- 2026-11-13 11:30 "Update? Pls don't use fable for very long" | done: Fable used once (strategy plan, about 1.5 min); no further Fable use planned
 - 2026-11-13 11:05 "ok do that and if you want to use sub-agents (powered by fable only for the most creative idea it takes too much tokens) to accelerate your research, you are allowed to speed up. 99.2% goal remains" | open: subagents allowed; Fable model only for the most creative ideation; bar unchanged at 99.2
 - 2026-11-13 06:20 "continue at 8hrs. v0.8 is at 65%. we have max use upto 20%/hr its ok. we'll discuss rendering later once crossing 99.2%. visibility public" | intake | done except visibility (blocked, see Decisions)
 - 2026-11-12 "99.9% match to references in composition/scale/materials/colors, cinematic realism, detailed everywhere, realistic water/waterfalls" | standing | open

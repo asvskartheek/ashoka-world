@@ -8,6 +8,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { fbm } from './textures.js';
+import { DepthGrabPass, AtmoPass, LensPass } from './atmo.js';
 
 // ---------------- world height field ----------------
 export const RIVER = [[-900, 900], [-520, 350], [-330, 0], [-300, -300], [-250, -650], [-120, -1100], [150, -1800], [500, -2700], [900, -4000]];
@@ -176,9 +177,10 @@ export function buildSky() {
 
 // ---------------- post-processing ----------------
 const GradeShader = {
-  uniforms: { tDiffuse: { value: null }, vignette: { value: 0.35 }, lift: { value: new THREE.Vector3(0, 0, 0) }, gain: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.05 }, contrast: { value: 1.05 }, res: { value: new THREE.Vector2(1, 1) }, grain: { value: 0.012 }, seed: { value: 0 } },
+  uniforms: { tDiffuse: { value: null }, vignette: { value: 0.35 }, lift: { value: new THREE.Vector3(0, 0, 0) }, gain: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.05 }, contrast: { value: 1.05 }, res: { value: new THREE.Vector2(1, 1) }, grain: { value: 0.012 }, seed: { value: 0 },
+    shadowTint: { value: new THREE.Vector3() }, highTint: { value: new THREE.Vector3() } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform float vignette, sat, contrast, grain, seed; uniform vec3 lift, gain; uniform vec2 res; varying vec2 vUv;
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float vignette, sat, contrast, grain, seed; uniform vec3 lift, gain, shadowTint, highTint; uniform vec2 res; varying vec2 vUv;
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
     void main(){
       vec2 d = (vUv - 0.5) * 0.0015;
@@ -187,6 +189,7 @@ const GradeShader = {
       float l = dot(c, vec3(0.2126,0.7152,0.0722));
       c = mix(vec3(l), c, sat);
       c = (c - 0.5) * contrast + 0.5;
+      c += shadowTint * (1.0 - smoothstep(0.0, 0.55, l)) + highTint * smoothstep(0.45, 1.0, l);
       vec2 q = vUv - 0.5; c *= 1.0 - vignette * dot(q, q) * 1.6;
       c += (h(vUv * res + seed) - 0.5) * grain;
       gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
@@ -194,7 +197,10 @@ const GradeShader = {
 };
 export function buildComposer(renderer, scene, camera, w, h) {
   const comp = new EffectComposer(renderer); comp.setSize(w, h);
+  // depth textures on both ping-pong targets so the depth of the main scene render (foliage included) can be read
+  for (const rt of [comp.renderTarget1, comp.renderTarget2]) { rt.depthTexture = new THREE.DepthTexture(w, h); rt.depthTexture.type = THREE.FloatType; }
   comp.addPass(new RenderPass(scene, camera));
+  const depth = new DepthGrabPass(camera, w, h); comp.addPass(depth);
   comp.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: GradeShader.vertexShader,
     fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0); gl_FragColor = vec4(min(c.rgb, vec3(64.0)), 1.0); }` }));
   // ground-truth ambient occlusion; the G-buffer pass skips alpha-tested, transparent and custom-shader meshes
@@ -210,8 +216,11 @@ export function buildComposer(renderer, scene, camera, w, h) {
   };
   gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
   comp.addPass(gtao);
+  const grade = new ShaderPass(GradeShader); grade.uniforms.res.value.set(w, h);
+  const atmo = new AtmoPass(scene, camera, depth, grade, w, h); comp.addPass(atmo);
+  const lens = new LensPass(atmo, w, h); comp.addPass(lens);
   const bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), 0.18, 0.5, 0.92); comp.addPass(bloom);
   comp.addPass(new OutputPass());
-  const grade = new ShaderPass(GradeShader); grade.uniforms.res.value.set(w, h); comp.addPass(grade);
-  return { comp, bloom, grade, gtao };
+  comp.addPass(grade);
+  return { comp, bloom, grade, gtao, atmo, lens };
 }
