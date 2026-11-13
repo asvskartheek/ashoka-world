@@ -644,6 +644,8 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   rail.merge({ parts: Object.fromEntries(Object.entries(A.vedika(sq, { h: 1.0, spacing: 1.2 })).map(([k, g]) => [k, [g]])) });
   for (const [x, zq] of [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [0, 3.6], [3.6, 0], [0, -3.6], [-3.6, 0]]) rail.add(new THREE.SphereGeometry(0.17, 12, 8), 'stone', [x, 1.22, zq]);
   I.register('pillarRail2', rail.build(), { mats: { stone: M.pinkStone } }); I.put('pillarRail2', px, 0.4, pz, 0, 1.2);
+  // hanging textiles and brass pots along the left shopfronts (R04 left)
+  { const rt = rng(33); for (let zz = 292; zz > gz + 22; zz -= 2.2) { if (rt() < 0.35) continue; for (let q = 0; q < 3; q++) I.put('textile', sx - 7.9, 2.0 + rt() * 0.3, zz + q * 0.7, Math.PI / 2 + (rt() - 0.5) * 0.2, 0.9 + rt() * 0.2); } }
   // big neem tree behind the pillar canopy over top-left
   I.ground('treeBig', sx - 14, 316, 0.3, 1.05);
   // ---- crowd: people reading the pillar, monks, merchants, soldiers marching, elephants, ox cart
