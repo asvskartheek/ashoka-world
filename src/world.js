@@ -51,7 +51,7 @@ export class Instancer {
 function contactTex() { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, '#fff'); gr.addColorStop(0.45, '#888'); gr.addColorStop(1, '#000'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c); }
 // ---------------- palettes ----------------
 const PAL = {
-  skin: ['#7a4c30', '#8a5838', '#6a4028', '#94603e', '#5e3a24', '#a06a46'],
+  skin: ['#6a4028', '#7a4a2e', '#5a3620', '#84543a', '#4e301c', '#8e5c3c'],
   dhoti: ['#e9e1cf', '#efe7d6', '#e2d8c0', '#d8ccb0', '#ece4d2', '#e6dcc4', '#c9b893'],
   shawl: ['#e8e0cc', '#b8322a', '#8a2a22', '#d4a038', '#e4d8bc', '#7a5a9a', '#c86a2a', '#e4dcc8'],
   monk: ['#c8641e', '#b8561a', '#d2701e', '#a8481a', '#c05c22'],
@@ -435,7 +435,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const nearCol = (x, z) => { const gx = (x - (cx - W / 2)) / sp, gz = (z - (cz - D / 2)) / sp; return Math.hypot((gx - Math.round(gx)) * sp, (gz - Math.round(gz)) * sp) < 1.5; };
   const toThrone = (x, z) => Math.atan2(cx + tx + 3.5 - x, cz - z);
   const seat = (fw, lf, type, extra = {}) => { const [x, z] = hat(fw, lf); if (nearCol(x, z)) return; person(x, z, toThrone(x, z) + (extra.turn || 0), { type, pose: 'sit', y: Y, ...extra }); };
-  person(cx + tx + 3.65, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', s: 1.4, y: dy + 0.72, col: { garment: C('#f2ead6'), shawl: C('#9a2a3a') } });
+  person(cx + tx + 3.65, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', s: 1.6, y: dy + 0.62, col: { garment: C('#f2ead6'), shawl: C('#e9dcc2') } });
   person(cx + tx + 4.6, cz + 1.9, -Math.PI / 2 - 0.3, { type: 'noble', pose: 'stand', y: dy + 0.4, col: { garment: C('#efe6d4'), shawl: C('#e8dcc8') } }); // chauri bearer
   { // fly-whisk (chauri) held up by the bearer, and a bronze gong on a stand at the throne's left
     const fan = new A.AB(); fan.add(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 8), 'gold', [0, 0.8, 0]);
