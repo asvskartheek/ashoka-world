@@ -570,6 +570,11 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   { const [x, z] = at(5, -9); I.ground('treeBig', x, z, 2.0, 1.0); }
   { const [x, z] = at(22, 30); I.ground('treeBig2', x, z, 0.4, 1.0); }
   { const [x, z] = at(14, 17); I.ground('treeBig2', x, z, 2.4, 1.05); } // framing tree at the left edge (R03)
+  { // a leaning tree outside the frame on the right whose canopy reaches over the top-right of the view (R03)
+    I.register('leanTree', A.tree({ seed: 31, height: 15, cards: 1100, spread: 1.5, leafSize: 1.3, lean: 1.3 }), { mats: { leaves: M.leavesDark } });
+    const [x, z] = at(4, -11.5); const [tx2, tz2] = at(12, -5.5); const dx = tx2 - x, dz = tz2 - z;
+    I.ground('leanTree', x, z, Math.atan2(-dz, dx), 1.0);
+  }
   for (const [fw, lf, t] of [[12, 0.6, 'man'], [13, -0.8, 'woman'], [14.5, 0.2, 'monk'], [16, -0.5, 'man'], [10.5, -1.6, 'woman'], [17.5, 0.8, 'monk'], [9, 1.4, 'man'], [15, 1.6, 'woman']]) { const [x, z] = at(fw, lf); person(x, z, faceStupa + (r() - 0.5) * 0.3, { type: t, pose: 'walk' }); }
   { const [x, z] = at(9, 26); treeAt(x, z, 1.1); }
 }
@@ -633,8 +638,9 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
     }
   }
   // left foreground shopfront with textiles & brass pots (ref 4 left)
-  I.register('shopL', A.stall({ w: 7, d: 3.5, seed: 21 }), {}); I.ground('shopL', sx - 8.6, 352, Math.PI / 2, 1.1);
-  for (let q = 0; q < 10; q++) I.put('textile', sx - 9.0, 2.3, 348.5 + q * 0.75, Math.PI / 2, 1.1);
+  I.register('shopL', A.stall({ w: 7, d: 3.5, seed: 21 }), {}); I.ground('shopL', sx - 6.9, 337.2, Math.PI / 2, 1.05);
+  for (let q = 0; q < 8; q++) I.put('textile', sx - 8.6, 2.3, 334.6 + q * 0.7, Math.PI / 2, 1.05);
+  { const rg2 = rng(77); for (let q = 0; q < 5; q++) I.ground('streetGoods', sx - 5.4 + rg2() * 0.6, 335.2 + q * 1.1, rg2() * 6, 0.9); }
   // ---- inscribed pillar with single lion, stone railing
   const px = sx - 4.7, pz = 329.5; ref.pois.townPillar = new THREE.Vector3(px, 0.4, pz);
   I.register('pillarTown', A.ashokaPillar({ height: 9.6, capital: 'one', inscribed: true, girth: 1.85 }), { mats: { stone: M.polishedSandstone, inscr: M.inscription } });

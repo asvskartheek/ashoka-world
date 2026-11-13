@@ -1106,61 +1106,184 @@ export function palisadeLog({ h = 9, r = 0.22 } = {}) {
   b.add(new THREE.ConeGeometry(r, r * 2.6, 9), 'log', [0, h + r * 1.3, 0]);
   return b.build();
 }
-// timber watchtower with log-sheathed base, open gallery and pyramid thatch roof
+// ---- timber-frame helpers (watchtower / gatehouse) ----
+const _UP = new V3(0, 1, 0);
+// straight member between two points: square timber (r = half-thickness) or round log
+function tmember(b, key, a, c, r, round = false, seg = 6) {
+  const A = new V3(...a), C = new V3(...c); const dir = C.clone().sub(A); const L = dir.length(); if (L < 1e-4) return;
+  const g = round ? cyl(r, r * 1.06, L, seg) : box(r * 2, L, r * 2);
+  b.addM(g, key, new THREE.Matrix4().compose(A.add(C).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(_UP, dir.normalize()), new V3(1, 1, 1)));
+}
+// hipped roof skirt from an outer eave rectangle (Wo x Do) up to an inner rectangle (Wi x Di; Di = 0 gives a ridge, both 0 a pyramid)
+function roofSkirt(Wo, Do, Wi, Di, rise, sag = 0.15, nu = 8, nv = 6) {
+  const O = [[-Wo / 2, Do / 2], [Wo / 2, Do / 2], [Wo / 2, -Do / 2], [-Wo / 2, -Do / 2]], I = [[-Wi / 2, Di / 2], [Wi / 2, Di / 2], [Wi / 2, -Di / 2], [-Wi / 2, -Di / 2]];
+  const P = [], U = [];
+  for (let f = 0; f < 4; f++) {
+    const o0 = O[f], o1 = O[(f + 1) % 4], i0 = I[f], i1 = I[(f + 1) % 4]; const slope = Math.hypot(f % 2 ? (Wo - Wi) / 2 : (Do - Di) / 2, rise);
+    const pt = (s, t) => { const a = [mix(o0[0], o1[0], s), mix(o0[1], o1[1], s)], c = [mix(i0[0], i1[0], s), mix(i0[1], i1[1], s)]; return [mix(a[0], c[0], t), rise * (t - sag * Math.sin(t * Math.PI)), mix(a[1], c[1], t)]; };
+    for (let i = 0; i < nu; i++) for (let j = 0; j < nv; j++) for (const [a, c] of [[i, j], [i + 1, j], [i + 1, j + 1], [i, j], [i + 1, j + 1], [i, j + 1]]) {
+      const p = pt(a / nu, c / nv); P.push(...p); U.push((f % 2 ? p[2] : p[0]) * 0.3, (c / nv) * slope * 0.3);
+    }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.computeVertexNormals(); return g;
+}
+// eave trim for a roof skirt: fascia board, exposed rafter ends and hip rafters at the corners
+function eaveTrim(b, y, W, D, { sp = 0.62, out = 0.45, key = 'timber' } = {}) {
+  for (const [L, n, rot] of [[W, [0, 1], 0], [D, [1, 0], Math.PI / 2], [W, [0, -1], Math.PI], [D, [-1, 0], -Math.PI / 2]]) {
+    const cx = n[0] * W / 2, cz = n[1] * D / 2;
+    b.add(box(L + 0.3, 0.26, 0.16), key, [cx, y - 0.1, cz], [0, rot, 0]);
+    const k = Math.floor(L / sp);
+    for (let i = 1; i < k; i++) { const t = -L / 2 + i * L / k; const px = n[1] !== 0 ? t : cx, pz = n[0] !== 0 ? t : cz; b.add(box(0.13, 0.15, 1.3), key, [px + n[0] * (out - 0.6), y - 0.28, pz + n[1] * (out - 0.6)], [0, rot, 0]); }
+  }
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) tmember(b, key, [sx * (W / 2 - 1.6), y + 0.15, sz * (D / 2 - 1.6)], [sx * (W / 2 + 0.5), y - 0.2, sz * (D / 2 + 0.5)], 0.14);
+}
+// open gallery on a rectangle: posts, railing with balusters, wall plate, bracket arms + struts carrying the eave
+function gallery(b, y, W, D, H, { sp = 2.2, railH = 1.1, bal = 0.34, postR = 0.17, arm = 1.6, inset = 1.5, coreKey = 'timber' } = {}) {
+  const sides = [[W, [0, 1]], [D, [1, 0]], [W, [0, -1]], [D, [-1, 0]]];
+  for (const [L, n] of sides) {
+    const cx = n[0] * W / 2, cz = n[1] * D / 2; const along = n[1] !== 0 ? [1, 0] : [0, 1]; const rot = n[1] !== 0 ? 0 : Math.PI / 2;
+    const P = (t, yy, o = 0) => [cx + along[0] * t + n[0] * o, yy, cz + along[1] * t + n[1] * o];
+    const k = Math.max(1, Math.round(L / sp));
+    for (let i = 0; i <= k; i++) {
+      const t = -L / 2 + i * L / k;
+      if (i > 0 && i < k) b.add(cyl(postR, postR * 1.1, H, 7), 'timber', P(t, y + H / 2));
+      // bracket arm under the eave + diagonal strut
+      b.add(box(0.2, 0.24, arm + 0.4), 'timber', P(t, y + H - 0.32, arm / 2 - 0.1), [0, rot, 0]);
+      tmember(b, 'timber', P(t, y + H - 1.5, 0.1), P(t, y + H - 0.4, arm * 0.8), 0.08);
+      // knee braces in the plane of the gallery
+      if (i < k) { tmember(b, 'timber', P(t, y + H - 1.0, 0), P(t + Math.min(0.9, L / k * 0.4), y + H - 0.2, 0), 0.07); }
+      if (i > 0) { tmember(b, 'timber', P(t, y + H - 1.0, 0), P(t - Math.min(0.9, L / k * 0.4), y + H - 0.2, 0), 0.07); }
+    }
+    // wall plate + double beam
+    b.add(box(L + 0.5, 0.32, 0.3), 'timber', P(0, y + H - 0.05, 0), [0, rot, 0]);
+    b.add(box(L + 0.3, 0.18, 0.2), 'timber', P(0, y + H - 0.5, 0.02), [0, rot, 0]);
+    // railing
+    {
+      b.add(box(L, 0.13, 0.16), 'timber', P(0, y + railH, 0.08), [0, rot, 0]);
+      b.add(box(L, 0.1, 0.1), 'timber', P(0, y + 0.22, 0.08), [0, rot, 0]);
+      b.add(box(L, 0.08, 0.08), 'timber', P(0, y + railH * 0.6, 0.1), [0, rot, 0]);
+      const nb = Math.round(L / bal);
+      for (let i = 0; i <= nb; i++) b.add(box(0.07, railH - 0.2, 0.07), 'timber', P(-L / 2 + i * L / nb, y + 0.15 + (railH - 0.2) / 2, 0.08));
+    }
+  }
+  // inner core wall gives the gallery depth and shadow
+  if (inset > 0) b.add(box(W - 2 * inset, H, D - 2 * inset), coreKey, [0, y + H / 2, 0]);
+}
+
+// timber watchtower: battered four-post log frame, log-sheathed lower shaft, open braced band, enclosed gallery, steep thatch pyramid
 export function watchtower({ h = 15, w = 6, seed = 1 } = {}) {
   const b = new AB(); const r = rng(seed);
-  const deck = h * 0.62;
-  // log sheathing on the base
-  const n = Math.round(w / 0.42);
-  for (let s = 0; s < 4; s++) for (let i = 0; i < n; i++) {
-    const t = (i + 0.5) / n - 0.5; const hh = deck - 0.2 + r() * 0.4;
-    const p = s === 0 ? [t * w, hh / 2, w / 2] : s === 1 ? [t * w, hh / 2, -w / 2] : s === 2 ? [w / 2, hh / 2, t * w] : [-w / 2, hh / 2, t * w];
-    b.add(cyl(0.21, 0.23, hh, 7), 'log', p);
+  const yd = h * 0.66, gH = h * 0.14, ys = yd * 0.76; // gallery floor, gallery height, top of sheathing
+  const w0 = w * 0.78, w1 = w * 0.6, wg = w * 0.86; // shaft width at ground / at deck, gallery width
+  const hw = (y) => mix(w0, w1, y / yd) / 2;
+  // corner posts (logs), battered
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    tmember(b, 'log', [sx * (hw(0) + 0.05), -0.3, sz * (hw(0) + 0.05)], [sx * hw(yd), yd + 0.2, sz * hw(yd)], 0.36, true, 9);
+    b.add(cyl(0.22, 0.24, gH + 0.4, 8), 'log', [sx * (wg / 2 - 0.15), yd + (gH + 0.4) / 2, sz * (wg / 2 - 0.15)]);
   }
-  // horizontal binding beams + diagonal bracing
-  for (let s = 0; s < 4; s++) { const ang = s * Math.PI / 2; const m = new AB(); m.add(box(w + 0.6, 0.25, 0.25), 'timber', [0, 0, w / 2 + 0.25]); for (const y of [deck * 0.3, deck * 0.65, deck - 0.3]) b.merge(m, [0, y, 0], [0, ang, 0]); const d = new AB(); d.add(box(0.2, Math.hypot(w, deck * 0.35), 0.2), 'timber', [0, 0, w / 2 + 0.38], [0, 0, Math.atan2(w, deck * 0.35)]); b.merge(d, [0, deck * 0.47, 0], [0, ang, 0]); }
-  // corner posts rising through gallery
-  const gh = h * 0.2;
-  for (const [x, z] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) { b.add(cyl(0.28, 0.32, deck + gh, 8), 'log', [x * w / 2, (deck + gh) / 2, z * w / 2]); }
-  b.add(box(w + 1.2, 0.3, w + 1.2), 'timber', [0, deck + 0.15, 0]);
-  // gallery railing slats
-  for (let s = 0; s < 4; s++) { const m = new AB(); for (let i = 0; i <= 14; i++) m.add(box(0.1, 1.1, 0.08), 'timber', [-(w + 1) / 2 + i * (w + 1) / 14, 0.55, (w + 1) / 2]); m.add(box(w + 1.2, 0.14, 0.14), 'timber', [0, 1.15, (w + 1) / 2]); m.add(box(w + 1.2, 0.1, 0.1), 'timber', [0, 0.35, (w + 1) / 2]); b.merge(m, [0, deck + 0.3, 0], [0, s * Math.PI / 2, 0]); }
-  for (let s = 0; s < 4; s++) { const m = new AB(); for (let k = -1; k <= 1; k += 2) m.add(box(0.14, Math.hypot(w * 0.45, gh * 0.9), 0.14), 'timber', [k * w * 0.22, gh * 0.5, w / 2], [0, 0, k * 0.6]); b.merge(m, [0, deck + 0.3, 0], [0, s * Math.PI / 2, 0]); }
-  // pyramid thatch roof with eave
-  const roof = new THREE.ConeGeometry((w + 3) * 0.72, h * 0.22, 4, 3, true); roof.rotateY(Math.PI / 4);
-  b.add(roof, 'thatch', [0, deck + gh + h * 0.11, 0]);
-  b.add(new THREE.ConeGeometry(0.3, 1.0, 6), 'timber', [0, deck + gh + h * 0.22 + 0.4, 0]);
+  for (let s = 0; s < 4; s++) {
+    const f = new AB();
+    // log sheathing following the batter
+    const n = Math.round(w0 / 0.44);
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n - 0.5; const top = ys - 0.3 + r() * 0.7; tmember(f, 'log', [t * w0 * 0.96, 0, hw(0)], [t * 2 * hw(top) * 0.96, top, hw(top)], 0.2 + r() * 0.03, true, 7); }
+    // lashed horizontal binding rails
+    for (const y of [1.1, ys * 0.36, ys * 0.7, ys - 0.5]) b.merge(new AB().add(box(2 * hw(y) + 0.7, 0.24, 0.24), 'timber', [0, y, hw(y) + 0.24]), [0, 0, 0], [0, s * Math.PI / 2, 0]);
+    // long diagonal brace across the sheathing
+    tmember(f, 'timber', [-hw(1.1) + 0.1, 1.1, hw(1.1) + 0.42], [hw(ys - 0.5) - 0.1, ys - 0.5, hw(ys - 0.5) + 0.42], 0.13);
+    // open braced band: girt + X braces
+    const yt = yd - 0.35; f.add(box(2 * hw(yt) + 0.5, 0.26, 0.26), 'timber', [0, yt, hw(yt)]);
+    tmember(f, 'timber', [-hw(ys), ys - 0.3, hw(ys)], [hw(yt), yt, hw(yt)], 0.12);
+    tmember(f, 'timber', [hw(ys), ys - 0.3, hw(ys)], [-hw(yt), yt, hw(yt)], 0.12);
+    // knee braces carrying the overhanging gallery
+    for (const k of [-1, 1]) tmember(f, 'timber', [k * hw(yd - 2.4) * 0.9, yd - 2.4, hw(yd - 2.4)], [k * hw(yd) * 0.9, yd - 0.1, wg / 2 - 0.05], 0.12);
+    // gallery parapet of close-set boards + rails, posts and an open band above
+    const P = wg / 2; const nb = Math.round(wg / 0.36);
+    for (let i = 0; i < nb; i++) f.add(box(0.3, 1.15, 0.08), 'timber', [-wg / 2 + (i + 0.5) * wg / nb, yd + 0.2 + 0.58 + (r() - 0.5) * 0.06, P]);
+    f.add(box(wg + 0.3, 0.14, 0.2), 'timber', [0, yd + 1.38, P + 0.03]); f.add(box(wg + 0.3, 0.12, 0.16), 'timber', [0, yd + 0.55, P + 0.06]);
+    f.add(cyl(0.13, 0.14, gH, 7), 'timber', [0, yd + gH / 2, P]);
+    f.add(box(wg + 0.4, 0.26, 0.24), 'timber', [0, yd + gH, P]);
+    for (const k of [-1, 1]) tmember(f, 'timber', [k * 0.1, yd + gH - 1.0, P], [k * wg * 0.28, yd + gH - 0.1, P], 0.07), tmember(f, 'timber', [k * (wg / 2 - 0.2), yd + gH - 1.0, P], [k * wg * 0.22, yd + gH - 0.1, P], 0.07);
+    // floor joist ends
+    for (let i = 0; i < 7; i++) f.add(box(0.2, 0.2, 0.5), 'timber', [-wg / 2 + 0.3 + i * (wg - 0.6) / 6, yd - 0.05, P + 0.15]);
+    b.merge(f, [0, 0, 0], [0, s * Math.PI / 2, 0]);
+  }
+  b.add(box(wg + 0.3, 0.32, wg + 0.3), 'timber', [0, yd + 0.04, 0]);
+  // steep thatch pyramid with a flared eave, fascia, finial
+  const rw = wg + 2.4, rise = h * 0.22, yr = yd + gH + 0.05;
+  b.add(roofSkirt(rw, rw, 0, 0, rise, 0.1, 4, 6), 'thatch', [0, yr, 0]);
+  b.add(roofSkirt(rw + 0.1, rw + 0.1, rw - 0.6, rw - 0.6, 0.35, 0, 4, 1), 'thatch', [0, yr - 0.22, 0]); // thick eave lip
+  for (const [x, z, rot] of [[0, rw / 2, 0], [rw / 2, 0, Math.PI / 2], [0, -rw / 2, 0], [-rw / 2, 0, Math.PI / 2]]) b.add(box(rw + 0.1, 0.16, 0.12), 'timber', [x, yr - 0.3, z], [0, rot, 0]);
+  b.add(cyl(0.08, 0.16, 1.6, 6), 'timber', [0, yr + rise + 0.5, 0]);
+  b.add(new THREE.SphereGeometry(0.22, 8, 6), 'timber', [0, yr + rise + 1.3, 0]);
   return b.build();
 }
-// gatehouse — two flanking timber blocks with passage, two-tier tiled roofs
+// gatehouse — two log-sheathed pylons flanking a deep gate passage with heavy doors; open gallery storey,
+// wide first roof skirt, smaller pavilion storey with its own gallery, top hipped roof; brackets, rafters, braces
 export function gatehouse({ w = 22, d = 10, h = 13 } = {}) {
-  const b = new AB(); const pw = 6; // passage width
-  const block = (cx) => {
-    const bw = (w - pw) / 2; const n = Math.round(bw / 0.45), nd = Math.round(d / 0.45);
-    for (let i = 0; i < n; i++) for (const z of [-d / 2, d / 2]) b.add(cyl(0.22, 0.24, h * 0.55, 7), 'log', [cx - bw / 2 + (i + 0.5) * bw / n, h * 0.275, z]);
-    for (let i = 0; i < nd; i++) for (const x of [cx - bw / 2, cx + bw / 2]) b.add(cyl(0.22, 0.24, h * 0.55, 7), 'log', [x, h * 0.275, -d / 2 + (i + 0.5) * d / nd]);
-    for (const y of [h * 0.15, h * 0.35, h * 0.52]) { b.add(box(bw + 0.5, 0.3, 0.3), 'timber', [cx, y, d / 2 + 0.25]); b.add(box(bw + 0.5, 0.3, 0.3), 'timber', [cx, y, -d / 2 - 0.25]); }
-    for (let k = -1; k <= 1; k += 2) b.add(box(0.25, h * 0.5, 0.25), 'timber', [cx + k * bw * 0.2, h * 0.3, d / 2 + 0.4], [0, 0, k * 0.5]);
-  };
-  block(-(pw + (w - pw) / 2) / 2 - pw / 4); block((pw + (w - pw) / 2) / 2 + pw / 4);
-  // lintel & upper storey over passage
-  const y1 = h * 0.55;
-  b.add(box(w + 1, 0.6, d + 1), 'timber', [0, y1 + 0.3, 0]);
-  // open gallery storey: posts + railing
-  const gH = h * 0.22;
-  for (let i = 0; i <= 10; i++) for (const z of [-d / 2, d / 2]) b.add(box(0.3, gH, 0.3), 'timber', [-w / 2 + i * w / 10, y1 + 0.6 + gH / 2, z]);
-  for (let i = 0; i <= 50; i++) for (const z of [-d / 2 - 0.05, d / 2 + 0.05]) b.add(box(0.08, 1.0, 0.06), 'timber', [-w / 2 + i * w / 50, y1 + 1.1, z]);
-  for (const z of [-d / 2 - 0.05, d / 2 + 0.05]) { b.add(box(w, 0.12, 0.12), 'timber', [0, y1 + 1.6, z]); b.add(box(w, 0.1, 0.1), 'timber', [0, y1 + 0.75, z]); }
-  // lower roof skirt
-  const r1 = curvedRoof(w + 5, d + 5, 2.8, 0.18); b.add(r1, 'tiles', [0, y1 + 0.6 + gH, 0]);
-  // upper pavilion and roof
-  const y2 = y1 + 0.6 + gH + 1.6;
-  for (let i = 0; i <= 6; i++) for (const z of [-d * 0.3, d * 0.3]) b.add(box(0.25, 2.6, 0.25), 'timber', [-w * 0.35 + i * w * 0.7 / 6, y2 + 1.3, z]);
-  for (let i = 0; i <= 30; i++) for (const z of [-d * 0.3 - 0.05, d * 0.3 + 0.05]) b.add(box(0.07, 0.8, 0.05), 'timber', [-w * 0.35 + i * w * 0.7 / 30, y2 + 0.45, z]);
-  b.add(box(w * 0.72, 0.25, d * 0.62), 'timber', [0, y2, 0]);
-  const r2 = curvedRoof(w * 0.95, d * 0.95, 3.4, 0.2); b.add(r2, 'tiles', [0, y2 + 2.6, 0]);
-  // gate doors (open)
-  for (const s of [-1, 1]) b.add(box(pw * 0.48, y1 - 0.5, 0.25), 'timber', [s * (pw / 2 - 0.1), (y1 - 0.5) / 2, -d / 2 + pw * 0.25], [0, s * 1.3, 0]);
+  const b = new AB(); const r = rng(7);
+  const H = h * 1.7;
+  const pw = w * 0.3, bw = (w - pw) / 2; // passage width, pylon width
+  const yb = H * 0.4, ph = H * 0.3; // top of the solid base, passage height
+  const g1 = H * 0.16; // first gallery height
+  const xs = [-w / 2, -pw / 2, pw / 2, w / 2];
+  // pylons: vertical log sheathing on all faces
+  for (const cx of [-(pw + bw) / 2, (pw + bw) / 2]) {
+    const n = Math.round(bw / 0.46), nd = Math.round(d / 0.46);
+    for (let i = 0; i < n; i++) for (const z of [-d / 2, d / 2]) b.add(cyl(0.23, 0.25, yb, 7), 'log', [cx - bw / 2 + (i + 0.5) * bw / n, yb / 2, z + (r() - 0.5) * 0.06]);
+    for (let i = 0; i < nd; i++) for (const x of [cx - bw / 2, cx + bw / 2]) b.add(cyl(0.23, 0.25, yb, 7), 'log', [x, yb / 2, -d / 2 + (i + 0.5) * d / nd]);
+    // lashed binding beams on front/back/outer faces
+    for (const y of [1.3, yb * 0.45, yb - 0.9]) {
+      for (const z of [-d / 2 - 0.3, d / 2 + 0.3]) b.add(box(bw + 0.4, 0.3, 0.28), 'timber', [cx, y, z]);
+      for (const x of [cx - bw / 2 - 0.3, cx + bw / 2 + 0.3]) b.add(box(0.28, 0.3, d + 0.4), 'timber', [x, y, 0]);
+    }
+    // X bracing on the front and back faces
+    for (const z of [-d / 2 - 0.45, d / 2 + 0.45]) for (const k of [-1, 1]) tmember(b, 'timber', [cx - k * (bw / 2 - 0.5), 1.3, z], [cx + k * (bw / 2 - 0.5), yb - 0.9, z], 0.13);
+    // plinth
+    b.add(box(bw + 1.2, 0.6, d + 1.2), 'timber', [cx, 0.1, 0]);
+  }
+  // heavy corner posts rising from the ground through the gallery to the roof plate
+  for (const x of xs) for (const z of [-d / 2, d / 2]) b.add(cyl(0.42, 0.5, yb + g1 + 0.5, 10), 'log', [x + Math.sign(x) * 0.2, (yb + g1 + 0.5) / 2, z + Math.sign(z) * 0.2]);
+  // gate passage: lintel with corbels, ceiling, recessed tympanum panel, heavy doors
+  for (const z of [-d / 2 - 0.1, d / 2 + 0.1]) {
+    b.add(box(pw + 1.6, 0.8, 0.7), 'timber', [0, ph + 0.4, z]);
+    for (const s of [-1, 1]) tmember(b, 'timber', [s * pw / 2, ph - 1.6, z + Math.sign(z) * 0.1], [s * (pw / 2 - 1.2), ph, z + Math.sign(z) * 0.1], 0.16);
+    const nb = Math.round(pw / 0.5);
+    for (let i = 0; i < nb; i++) b.add(box(pw / nb - 0.04, yb - ph - 0.8, 0.14), 'timber', [-pw / 2 + (i + 0.5) * pw / nb, (ph + 0.8 + yb) / 2, z - Math.sign(z) * 0.35]);
+    b.add(box(pw, 0.25, 0.3), 'timber', [0, (ph + yb) / 2 + 0.4, z]);
+  }
+  b.add(box(pw + 0.2, 0.4, d), 'timber', [0, ph + 0.9, 0]);
+  for (let i = 0; i < 6; i++) b.add(box(pw + 0.4, 0.3, 0.3), 'timber', [0, ph + 0.55, -d / 2 + (i + 0.5) * d / 6]);
+  for (const s of [-1, 1]) { // door leaves hinged at the passage sides, swung open inward
+    const leaf = new AB(); const lw = pw / 2 - 0.1, lh = ph - 0.15;
+    const nb = 7; for (let i = 0; i < nb; i++) leaf.add(box(lw / nb - 0.03, lh, 0.22), 'timber', [s * (-(i + 0.5) * lw / nb), lh / 2, 0]);
+    for (const y of [0.8, lh * 0.38, lh * 0.7, lh - 0.6]) leaf.add(box(lw, 0.32, 0.14), 'timber', [-s * lw / 2, y, 0.17]);
+    tmember(leaf, 'timber', [-s * 0.3, 1.0, 0.2], [-s * (lw - 0.3), lh * 0.38 - 0.1, 0.2], 0.1);
+    b.merge(leaf, [s * (pw / 2 - 0.15), 0, d / 2 - 1.3], [0, -s * 1.05, 0]);
+  }
+  // first-floor deck with projecting joist ends
+  b.add(box(w + 1.0, 0.55, d + 1.0), 'timber', [0, yb + 0.27, 0]);
+  for (let x = -w / 2; x <= w / 2 + 0.01; x += 0.9) for (const z of [-1, 1]) b.add(box(0.26, 0.28, 0.6), 'timber', [x, yb + 0.15, z * (d / 2 + 0.7)]);
+  for (let z = -d / 2; z <= d / 2 + 0.01; z += 0.9) for (const x of [-1, 1]) b.add(box(0.6, 0.28, 0.26), 'timber', [x * (w / 2 + 0.7), yb + 0.15, z]);
+  // first gallery
+  const y1 = yb + 0.55;
+  gallery(b, y1, w + 0.4, d + 0.4, g1, { sp: 2.25, arm: 2.0, inset: 1.6 });
+  // first roof skirt, up to the pavilion
+  const W2 = w * 0.74, D2 = d * 0.7, o1 = w * 0.12;
+  const ye1 = y1 + g1 - 0.15, Wo1 = w + 0.4 + 2 * o1, Do1 = d + 0.4 + 2 * o1;
+  const rise1 = Math.tan(0.46) * (Do1 - D2) / 2;
+  b.add(roofSkirt(Wo1, Do1, W2 + 0.6, D2 + 0.6, rise1, 0.16, 10, 5), 'tiles', [0, ye1, 0]);
+  eaveTrim(b, ye1, Wo1, Do1);
+  // pavilion storey
+  const y2 = ye1 + rise1 - 0.15, g2 = H * 0.13;
+  b.add(box(W2 + 0.6, 0.35, D2 + 0.6), 'timber', [0, y2 + 0.17, 0]);
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) b.add(cyl(0.3, 0.34, g2 + 1.2 + rise1, 9), 'log', [sx * W2 / 2, y2 + 0.35 + g2 - (g2 + 1.2 + rise1) / 2, sz * D2 / 2]);
+  gallery(b, y2 + 0.35, W2, D2, g2, { sp: 2.0, railH: 0.95, arm: 1.6, postR: 0.15, inset: 1.3 });
+  // top hipped roof with ridge beam and finials
+  const o2 = w * 0.1, ye2 = y2 + 0.35 + g2 - 0.15, Wo2 = W2 + 2 * o2, Do2 = D2 + 2 * o2, rise2 = Math.tan(0.5) * Do2 / 2;
+  b.add(roofSkirt(Wo2, Do2, Wo2 - Do2, 0, rise2, 0.14, 10, 6), 'tiles', [0, ye2, 0]);
+  eaveTrim(b, ye2, Wo2, Do2);
+  b.add(box(Wo2 - Do2 + 0.6, 0.3, 0.34), 'timber', [0, ye2 + rise2 + 0.1, 0]);
+  for (const s of [-1, 1]) { b.add(cyl(0.06, 0.2, 1.3, 6), 'timber', [s * (Wo2 - Do2) / 2, ye2 + rise2 + 0.75, 0]); b.add(new THREE.SphereGeometry(0.24, 8, 6), 'timber', [s * (Wo2 - Do2) / 2, ye2 + rise2 + 1.45, 0]); }
   return b.build();
 }
 // generic brick/plaster house; style: 'flat' (parapet roof), 'hip' (tile roof), 'balcony' (2-storey w/ wooden balcony)
