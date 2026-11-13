@@ -42,7 +42,7 @@ export function buildMaterials() {
   M.stupaBrick = std({ map: stupaBrick.map, bumpMap: stupaBrick.bump, bumpScale: 1.5, roughness: 0.95 });
 
   const logs = T.woodTex({ base: [104, 80, 58], dark: [52, 40, 30], light: [140, 120, 96], rings: 10, seed: 5 });
-  M.log = std({ map: logs.map, bumpMap: logs.bump, bumpScale: 2, roughness: 0.95 });
+  M.log = std({ map: logs.map, bumpMap: logs.bump, bumpScale: 4.5, roughness: 0.95 }); M.log.map.repeat.set(1, 3); M.log.bumpMap.repeat.set(1, 3);
   const timber = T.woodTex({ base: [118, 82, 52], dark: [60, 40, 25], light: [156, 116, 74], seed: 6 });
   M.timber = worldUV(std({ map: timber.map, bumpMap: timber.bump, bumpScale: 1, roughness: 0.85 }), 0.6);
   M.timberUV = std({ map: timber.map, bumpMap: timber.bump, bumpScale: 1, roughness: 0.85 });

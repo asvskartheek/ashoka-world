@@ -135,7 +135,7 @@ export function buildWorld(scene, M) {
   // ======================= ZONE A: PALISADED CITY =======================
   const wall = { x0: -175, x1: 330, z0: -470, z1: 0 };
   ref.pois.gate = new THREE.Vector3(0, 0, 0);
-  I.register('log', A.palisadeLog({ h: 9 }), {});
+  I.register('log', A.palisadeLog({ h: 9 }), { colors: { log: (k) => { const q = rng(k * 7 + 3); const v = 0.72 + q() * 0.5; return new THREE.Color(v * (0.95 + q() * 0.1), v, v * (0.9 + q() * 0.15)); } } });
   I.register('tower', A.watchtower({ h: 23, w: 7 }), {});
   I.register('rail', { timber: new THREE.BoxGeometry(1, 0.28, 0.3) }, {});
   const palisade = (x0, z0, x1, z1, gaps = []) => {
@@ -267,6 +267,11 @@ export function buildWorld(scene, M) {
     const off = (R() - 0.3) * hw * 1.2; const L = 9 + R() * 8;
     const name = 'boat' + (i % 3); if (!I.reg.has(name)) I.register(name, A.boat({ L: 10 + (i % 3) * 3, canopy: i % 3 !== 2, sail: i % 3 === 2 }), {});
     I.put(name, bx + off, WATER_Y - 0.3, z, R() * 0.6 - 0.3 + (R() < 0.5 ? 0 : Math.PI), 1);
+  }
+  // river traffic in the stretch visible from the gate shot (R01 top left)
+  for (let i = 0; i < 34; i++) {
+    const z = -300 - R() * 1300; let bx = -300, bd = 1e9; for (let x = -900; x < 400; x += 6) { const d = riverDist(x, z); if (d < bd) { bd = d; bx = x; } }
+    const hw = riverHalfWidth(z); I.put('boat' + (i % 3), bx + (R() - 0.5) * hw * 1.4, WATER_Y - 0.3, z, R() * 6, 1.1 + R() * 0.6);
   }
   // far bank trees and countryside
   for (let i = 0; i < 2600; i++) {
@@ -485,6 +490,15 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   I.register('colonnade', col.build(), { mats: { stone: M.pinkStone, tiles: M.roofTilesRed } });
   I.put('colonnade', cx - 90, 0.4, cz - D / 2 - 75, 0, 1);
   crowd2(person, cx - 10, cz - D / 2 - 40, 30, 10, 18);
+  // eastern garden court seen through the open end of the hall (R02 background): pool, fountains, flowers, trees, red colonnade with tower
+  I.put('gardenRim', cx + 70, 0.4, cz - 4, Math.PI / 2, 0.8);
+  const gp2 = new THREE.Mesh(new THREE.PlaneGeometry(48, 19), new THREE.MeshStandardMaterial({ color: 0x3a5a58, roughness: 0.04, metalness: 0.3 }));
+  gp2.rotation.x = -Math.PI / 2; gp2.rotation.z = Math.PI / 2; gp2.position.set(cx + 70, 0.75, cz - 4); G.add(gp2);
+  for (const dz of [-12, 0, 12]) { const j = new THREE.Mesh(A.lathe([[0.02, 0], [0.12, 0.6], [0.22, 1.8], [0.08, 3.2], [0, 3.4]], 16), jetMat); j.position.set(cx + 70, 2.0, cz - 4 + dz); G.add(j); }
+  for (let i = 0; i < 900; i++) { const zz = cz - 30 + RR() * 52, xx = cx + 70 + (RR() < 0.5 ? -1 : 1) * (11 + RR() * 3); I.put('flowers', xx, 0.55 + RR() * 0.35, zz, RR() * 6, 0.6 + RR() * 0.6); }
+  for (let i = 0; i < 22; i++) treeAt(cx + 50 + RR() * 50, cz - 40 + RR() * 70, 0.9);
+  for (let z = -30; z <= 24; z += 9) { I.put('cypress', cx + 52, 0.4, cz + z, 0, 0.85); I.put('cypress', cx + 88, 0.4, cz + z, 0, 0.85); }
+  I.put('colonnade', cx + 100, 0.4, cz + 40, Math.PI / 2, 1);
 }
 function crowd2(person, cx, cz, rx, rz, n) { const r = rng(cx | 0); for (let i = 0; i < n; i++) person(cx + (r() - 0.5) * 2 * rx, cz + (r() - 0.5) * 2 * rz, r() * 6.28, {}); }
 
@@ -598,10 +612,13 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   // left side (west) faces east, right side faces west. Street half-width ~9
   let z = 352; let i = 0;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx - 12.5, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 12.5 + 4.62, 0.9, z - w / 2, 0, [0.12, 0.8, w]); z -= w + 0.4; i++; }
+    I.put(k, sx - 12.5, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 12.5 + 4.62, 1.0, z - w / 2, 0, [0.12, 1.2, w]); z -= w + 0.4; i++; }
   z = 340; i = 2;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); z -= w + 0.4; i++; }
+    I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); I.put('trim', sx + 13.5 - 4.62, 1.0, z - w / 2, 0, [0.12, 1.2, w]); z -= w + 0.4; i++; }
+  // pots, baskets and grain sacks along both street edges
+  I.register('streetGoods', (() => { const g = new A.AB(); const rr = rng(8); for (let q = 0; q < 7; q++) g.add(A.lathe([[0, 0], [0.18 + rr() * 0.08, 0.05], [0.26, 0.22], [0.16, 0.42], [0.1, 0.46], [0.12, 0.5]], 12), q % 3 ? 'clay' : 'basket', [(rr() - 0.5) * 1.6, 0, (rr() - 0.5) * 1.2], [0, rr() * 6, 0], 0.7 + rr() * 0.6); for (let q = 0; q < 3; q++) { const sk = new THREE.SphereGeometry(0.3, 10, 8); sk.scale(1, 0.75, 1.3); g.add(sk, 'sack', [(rr() - 0.5) * 1.4, 0.2, (rr() - 0.5) * 1.0]); } return g.build(); })(), {});
+  { const rg = rng(19); for (let zz = 350; zz > gz + 20; zz -= 4.5) for (const s of [-1, 1]) { if (s < 0 && zz < 346 && zz > 296) continue; I.ground('streetGoods', sx + s * (s < 0 ? 5.6 : 6.6), zz + (rg() - 0.5) * 2, rg() * 6, 1); } }
   // stalls & awnings in front of buildings, hanging textiles
   I.register('awning', { thatch: new THREE.PlaneGeometry(1, 1), pole: new THREE.CylinderGeometry(0.06, 0.07, 1, 6) }, {});
   const clothG = new THREE.PlaneGeometry(0.7, 1.8, 2, 6); { const p = clothG.attributes.position; for (let q = 0; q < p.count; q++) p.setZ(q, Math.sin(p.getY(q) * 3) * 0.04); clothG.computeVertexNormals(); }
@@ -618,8 +635,8 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   I.register('shopL', A.stall({ w: 7, d: 3.5, seed: 21 }), {}); I.ground('shopL', sx - 8.6, 352, Math.PI / 2, 1.1);
   for (let q = 0; q < 10; q++) I.put('textile', sx - 9.0, 2.3, 348.5 + q * 0.75, Math.PI / 2, 1.1);
   // ---- inscribed pillar with single lion, stone railing
-  const px = sx - 5, pz = 328; ref.pois.townPillar = new THREE.Vector3(px, 0.4, pz);
-  I.register('pillarTown', A.ashokaPillar({ height: 10.5, capital: 'one', inscribed: true, girth: 1.75 }), { mats: { stone: M.pinkStone, inscr: M.inscription } });
+  const px = sx - 4.7, pz = 329.5; ref.pois.townPillar = new THREE.Vector3(px, 0.4, pz);
+  I.register('pillarTown', A.ashokaPillar({ height: 9.6, capital: 'one', inscribed: true, girth: 1.85 }), { mats: { stone: M.polishedSandstone, inscr: M.inscription } });
   I.put('pillarTown', px, 0.4, pz, -Math.PI / 2 + 0.25, 1);
   I.put('plinth', px, 0.55, pz, 0, [4.4, 0.7, 4.4]);
   const rail = new A.AB(); const sq = [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [-3.6, -3.6]];
@@ -643,6 +660,8 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   oxCart(sx - 1.5, 302, 0.05, 'sacks');
   mahoutElephant(sx + 9.5, 322, -0.15, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
   const r = rng(51);
+  // foreground crowd between the camera and the pillar (R04 lower half)
+  for (let q = 0; q < 26; q++) { const zz = 331 + r() * 10, xx = sx - 3 + r() * 13; if (Math.hypot(xx - px, zz - pz) < 4.6) continue; person(xx, zz, r() < 0.55 ? Math.PI + (r() - 0.5) * 0.9 : (r() - 0.5) * 0.9, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
   for (let q = 0; q < 170; q++) { const zz = 262 + r() * 78, xx = sx - 4.5 + r() * 10; person(xx, zz, r() < 0.5 ? (r() - 0.5) * 0.8 : Math.PI + (r() - 0.5) * 0.8, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
   for (let q = 0; q < 16; q++) person(sx - 4 + r() * 8, 284 - r() * 18, Math.PI, { type: 'soldier', pose: 'walk', y: Y });
   // town outskirts houses (fill around street, behind facades)

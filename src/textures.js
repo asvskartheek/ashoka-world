@@ -227,11 +227,11 @@ export function clothTex({ size = 256 } = {}) {
 }
 
 // Ashokan-style inscription glyphs (abstract Brahmi-like strokes) on stone
-export function inscriptionTex({ w = 512, h = 1024, base = [190, 128, 92], seed = 29 } = {}) {
+export function inscriptionTex({ w = 1024, h = 1024, base = [214, 172, 124], seed = 29 } = {}) {
   const r = rng(seed); const s = stoneTex({ size: 256, base, polish: true, seed });
   const c = canvas(w, h); const g = c.getContext('2d');
   g.drawImage(s.map.image, 0, 0, w, h);
-  g.strokeStyle = 'rgba(70,35,20,0.85)'; g.lineWidth = 2.2; g.lineCap = 'round';
+  g.strokeStyle = 'rgba(96,58,32,0.5)'; g.lineWidth = 1.5; g.lineCap = 'round';
   const lineH = 26;
   for (let y = 60; y < h - 120; y += lineH) {
     let x = 30 + r() * 10;
