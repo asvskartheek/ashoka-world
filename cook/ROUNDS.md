@@ -235,3 +235,24 @@ Measured: S01 sat +0.048 bright -0.063; S02 sat -0.024 bright -0.008; S03 sat -0
 Top gaps from critics: 1) people still read as smooth mannequins at close range (S02 worst): skin shading, faces, hands; 2) S01: sky reads flat beige (the 0.8 saturation grade drains it), river empty, palace and pillar faint, moat reflections blocky; 3) S04: carts and elephant not visible, no hill stupa visible, stalls without goods on the left; 4) S03: railing and stairs read low, capital unreadable, pillar on its dark side.
 Stop check: bar no | floor no (about 2h of 8h) | approved no | final no -> next round
 Next focus: round 17 = S01 sky (prepared), visibility of S04 animals/carts/hill stupa, S03 pillar lighting and stairs.
+
+## Round 17
+
+Time: about 08:15 to 08:26 UTC (end measured)
+Focus: visibility items from round-16 critics (S04 elephant, cart, hill stupa; S03 stairs; S01 haze and pillar).
+Changes: S04 howdah elephant moved to the right foreground (three-quarter view), crowd cleared around it and the ox cart, soldiers marching in front, hill stupa R 11 and hill moved toward centre; S03 terrace 0.15R with stepped stairs; S01 haze density 0.00011, softer horizon band, city pillar ×1.5 on a larger plinth. Measured diagnosis: S01's top band is already more saturated than R01 (+0.24); what reads flat is the far city (row 2 brightness -0.14 to -0.21), hence the haze cut.
+Stills: `cook/stills/r17/` | Side by side: `cook/compare/r17/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r16 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 65 | 50 | 59 | 40 | 33 | 49 | 68 | -4 |
+| S02 | 64 | 45 | 56 | 34 | 30 | 46 | 65 | -5 (render unchanged: noise) |
+| S03 | 77 | 60 | 65 | 49 | 40 | 58 | 77 | -2 |
+| S04 | 59 | 53 | 55 | 40 | 30 | 47 | 66 | -8 |
+
+Overall raw 50, calibrated 69. Lower than round 16 (55). S02's unchanged render dropping 5 shows the noise floor again, but S04's drop is real: both critics say the pillar railing now reads as a fence across the middle of the frame, the close elephant looks cartoonish, and big foreground figures dominate instead of a receding crowd.
+Measured: S01 sat +0.045 bright -0.068; S04 sat +0.030 bright -0.073.
+Best so far stays round 16.
+Stop check: bar no | floor no (about 2.1h) | approved no | final no -> next round
+Next focus: round 18 = fix the S04 regression (higher camera so the railing sits at the bottom edge as in R04, elephant back to mid-distance right), keep S03 and S01 changes.

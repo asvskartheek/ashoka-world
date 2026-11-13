@@ -12,7 +12,7 @@ export const SHOTS = {
        sun: { az: 122, el: 40 }, sky: { zenith: 0x5c8ed0, horizon: 0xdce6ee, glow: 0.5, intensity: 1.3 }, exposure: 0.6, cloud: 0.55,
        fog: { color: 0xd0dce6, density: 0.00013 }, shadow: { center: [1020, 0, -140], size: 140 },
        grade: { lift: [0.03, 0.02, 0.01], gain: [1.08, 1.02, 0.92], sat: 0.95, contrast: 1.02 }, sunInt: 4.4, sunCol: 0xffe6c4, hemi: 0.95 },
-  4: { name: 'market_street', pos: [879, 2.0, 342.5], target: [884, 12.0, 250], fov: 62,
+  4: { name: 'market_street', pos: [879, 3.3, 340], target: [884, 15.0, 250], fov: 64,
        sun: { az: 135, el: 52 }, sky: { zenith: 0x6a98d4, horizon: 0xe4e8e8, glow: 0.5, intensity: 1.3 }, exposure: 0.7, cloud: 0.6,
        fog: { color: 0xd6dcdc, density: 0.0004 }, shadow: { center: [885, 0, 280], size: 160 },
        grade: { lift: [0.03, 0.02, 0.01], gain: [1.07, 1.02, 0.93], sat: 1.0, contrast: 1.02 }, sunInt: 5.6, sunCol: 0xffe2b8, hemi: 0.8 },

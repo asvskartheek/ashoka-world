@@ -658,9 +658,9 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   person(sx + 10.5, 338, -0.3, { type: 'woman', pose: 'walk', y: Y }); person(sx + 10.8, 342, 0.2, { type: 'woman', pose: 'stand', y: Y });
   person(sx - 9.6, 344, Math.PI / 2, { type: 'man', pose: 'stand', y: Y }); person(sx - 8.8, 340, -Math.PI / 2 - 0.2, { type: 'woman', pose: 'stand', y: Y });
   oxCart(sx - 2.2, 297, 0.05, 'sacks');
-  mahoutElephant(sx + 6.2, 327, -0.95, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
+  mahoutElephant(sx + 6.0, 303, -0.5, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
   const r = rng(51);
-  const clearOf = (x, z) => Math.hypot(x - (sx + 6.2), z - 327) < 4.4 || (Math.abs(x - (sx - 2.2)) < 2.2 && z > 293 && z < 307);
+  const clearOf = (x, z) => Math.hypot(x - (sx + 6.0), z - 303) < 4.0 || (Math.abs(x - (sx - 2.2)) < 2.2 && z > 293 && z < 307);
   // foreground crowd between the camera and the pillar (R04 lower half)
   for (let q = 0; q < 26; q++) { const zz = 331 + r() * 10, xx = sx - 3 + r() * 13; if (Math.hypot(xx - px, zz - pz) < 4.6 || clearOf(xx, zz)) continue; person(xx, zz, r() < 0.55 ? Math.PI + (r() - 0.5) * 0.9 : (r() - 0.5) * 0.9, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
   for (let q = 0; q < 170; q++) { const zz = 262 + r() * 78, xx = sx - 4.5 + r() * 10; if (clearOf(xx, zz)) continue; person(xx, zz, r() < 0.5 ? (r() - 0.5) * 0.8 : Math.PI + (r() - 0.5) * 0.8, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
