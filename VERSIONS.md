@@ -33,3 +33,4 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.22 | [v0.22](versions/v0.22/compare.jpg) | Cook round 22: S04 blue sky with white clouds, lit gate passage, softer dado; S02 shallower dais. Raw 55.9 / calibrated 75 (median of 3), best so far. |
 | v0.23 | [v0.23](versions/v0.23/compare.jpg) | Cook round 23: close-range seated people (builder), darker skin, white-clad king, denser S01 city and boats. Raw 54 / calibrated 73. |
 | v0.24 | [v0.24](versions/v0.24/compare.jpg) | Cook round 24: S02 reframed like R02 (huge foreground monks and scribes, seated eye height). Raw 56.1 / calibrated 75, best so far. |
+| v0.25 | [v0.25](versions/v0.25/compare.jpg) | Cook round 25: S04 directional sun and shopfront textiles. Raw 52.7 / calibrated 72 (unchanged shots dropped 4 to 5 points: critic noise). |

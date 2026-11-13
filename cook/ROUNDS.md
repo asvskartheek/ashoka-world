@@ -404,3 +404,24 @@ Overall raw 56.1, calibrated 75. Best so far. S02 (the weakest shot in every rou
 Weakest now: S04 (51) and S01 (53). Repeated items: S04 flat diffuse light with no clear sun direction, plain facades without goods, hill stupa not seen, pillar inscription not legible; S01 empty foreground band, hazy far field, gate reads squat.
 Stop check: bar no | floor no (about 3.7h) | approved no | final no -> next round
 Next focus: round 25 = S04 light (stronger, lower warm sun with cast shadows), facade goods, legible inscription.
+
+## Round 25
+
+Time: about 10:05 to 10:11 UTC
+Focus: S04 (weakest at round 24): light with a clear direction.
+Changes: S04 sun lowered to 36° (az 140), intensity 6.6, hemisphere fill 0.55, env 0.38, warmer gain; exposure rebalanced over three renders (brightness -0.115 to -0.066, saturation +0.092 to -0.027, measured); hanging textiles along the left shopfronts. S01 to S03 stills are round 24's.
+Stills: `cook/stills/r25/` | Side by side: `cook/compare/r25/all.jpg`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r24 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 58 | 50 | 55 | 45 | 30 | 48 | 67 | -5 (identical render) |
+| S02 | 62 | 55 | 65 | 48 | 35 | 53 | 72 | -4 (identical render) |
+| S03 | 70 | 60 | 65 | 55 | 45 | 59 | 78 | -4 (identical render) |
+| S04 | 60 | 55 | 50 | 50 | 40 | 51 | 70 | 0 |
+
+Overall raw 52.7, calibrated 72. The three unchanged shots dropped 4 to 5 points each with identical images: critic noise in this round is about -4 across the board. S04, the only changed shot, held level relative to round 24. Best so far stays round 24.
+Measured: S04 sat -0.027 bright -0.066.
+Finding: the critic ensemble's run-to-run noise (±4 to 5 per shot, sometimes systematic across a whole round) is now as large as single-round gains from tuning. Only large structural changes will show above the noise.
+Decision: next rounds make large changes on the items every critic repeats: S01 gatehouse silhouette (tall multi-tier timber gate with flanking towers; parallel builder), S03 overhead tree canopy framing the top edge, S04 left-side carved timber balcony house with a stocked market stall.
+Stop check: bar no | floor no (about 3.9h) | approved no | final no -> next round
