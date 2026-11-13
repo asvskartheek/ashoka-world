@@ -164,3 +164,24 @@ Top gaps from critics (all four critics, rounds 11 and 13): 1) people read as fa
 Parallel work started: a builder subagent is rebuilding the human generator (people section of src/assets.js only), with a close-up lineup harness.
 Stop check: bar no | floor no (about 0.5h of 8h) | stills approved no | final no -> next round
 Next focus: S01 sun disc and towers (round 14), integrate the new people, then props and materials.
+
+## Round 14
+
+Time: about 06:49 to 06:56 UTC
+Focus: S01 sun, towers and near-bank layout (critic items repeated over three rounds).
+Changes: watchtowers 23 m (were 17 m); sky glow reduced so the sun disc separates from the horizon band, disc tinted orange; diagonal short bridge across the narrow moat arm; a market road leaving the bridge foot to the south-west with stalls on both sides, crowd along the road, elephant and ox carts on it; thatched huts and the timber yard (log piles, scaffolds) moved into the bottom of frame on the moat's south bank; city interior about twice as many trees. S02 to S04 stills are round 13's.
+Stills: `cook/stills/r14/` | Side by side: `cook/compare/r14/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r13 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 62 | 40 | 53 | 40 | 30 | 45 | 64 | -3 |
+| S02 | 65 | 43 | 54 | 33 | 25 | 44 | 63 | -1 (unchanged render) |
+| S03 | 75 | 52 | 61 | 50 | 35 | 54 | 73 | -1 (unchanged render) |
+| S04 | 63 | 46 | 55 | 36 | 28 | 46 | 65 | -1 (unchanged render) |
+
+Overall raw 47, calibrated 66. Within critic noise of round 13; S01's large layout change did not move its score, because the critics' S01 complaints are now light (no golden rim light, faint sun) and detail (low-poly houses, palisade texture, tiny people).
+Measured: S01 sat +0.072 bright -0.009.
+Top gaps: 1) people (all critics, every round); 2) S01 golden light and river boats; 3) architecture surfaces (palisade logs, house roofs) look repeated and low-poly.
+Stop check: bar no | floor no | approved no | final no -> next round
+Next focus: round 15 = S03 framing (in progress) + integrate the people builder.

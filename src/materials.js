@@ -67,7 +67,7 @@ export function buildMaterials() {
   const baseSt = T.stoneTex({ base: [196, 184, 162], seed: 41 });
   M.baseStone = worldUV(std({ map: baseSt.map, bumpMap: baseSt.bump, bumpScale: 2, roughness: 0.8 }), 0.5);
   const rock = T.stoneTex({ base: [128, 118, 104], seed: 16 });
-  M.rock = worldUV(std({ map: rock.map, bumpMap: rock.bump, bumpScale: 4, roughness: 0.95 }), 0.25);
+  M.rock = worldUV(std({ map: rock.map, bumpMap: rock.bump, bumpScale: 5, roughness: 0.95, color: 0xd6c8b4 }), 0.35);
   const pinkStone = T.stoneTex({ base: [196, 140, 108], seed: 18, polish: true });
   M.pinkStone = worldUV(std({ map: pinkStone.map, bumpMap: pinkStone.bump, bumpScale: 0.6, roughness: 0.5 }), 0.5);
 

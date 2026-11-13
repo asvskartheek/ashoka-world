@@ -22,3 +22,4 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.11 | [v0.11](versions/v0.11/compare.jpg) | Cook round 11: pillar girth parameter (lion capital fixed), open hall with hanging banner. Raw 46 / calibrated 65. |
 | v0.12 | [v0.12](versions/v0.12/compare.jpg) | Cook round 12: flat north horizon, near-bank ground mask bug fixed, murky moat, thin chhatra discs, bluer S03 sky. Not separately scored. |
 | v0.13 | [v0.13](versions/v0.13/compare.jpg) | Cook round 13: S02 hall in depth (longer lens, throne one bay deeper, carved throne, bigger king, column rings, chauri, gong, warm floor). Raw 48.5 / calibrated 67.5, best so far. |
+| v0.14 | [v0.14](versions/v0.14/compare.jpg) | Cook round 14: S01 near bank rebuilt to R01's layout (diagonal bridge, market road, huts and timber yard in frame), taller watchtowers, orange sun disc, greener city. Raw 47 / calibrated 66. |

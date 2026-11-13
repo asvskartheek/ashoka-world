@@ -180,12 +180,13 @@ export function buildWorld(scene, M) {
 
   // moat bridge: stone abutments + timber deck + railings
   const bridge = new A.AB();
-  bridge.add(new THREE.BoxGeometry(8, 3.6, 7), 'stone', [0, -1.0, 5]).add(new THREE.BoxGeometry(8, 3.6, 6), 'stone', [0, -1.0, 39]);
-  bridge.add(new THREE.BoxGeometry(7, 0.35, 34), 'timber', [0, 0.9, 22]);
-  for (let z = 8; z <= 36; z += 4) bridge.add(new THREE.CylinderGeometry(0.22, 0.22, 4.5, 8), 'log', [-3, -1.5, z]).add(new THREE.CylinderGeometry(0.22, 0.22, 4.5, 8), 'log', [3, -1.5, z]);
-  for (let z = 6; z <= 40; z += 1.6) for (const x of [-3.4, 3.4]) bridge.add(new THREE.BoxGeometry(0.14, 1.1, 0.14), 'timber', [x, 1.6, z]);
-  for (const x of [-3.4, 3.4]) bridge.add(new THREE.BoxGeometry(0.16, 0.16, 35), 'timber', [x, 2.15, 22]);
-  I.register('bridge', bridge.build(), {}); I.put('bridge', -1, 0, 0, 0, 1);
+  // short bridge crossing the narrow left arm of the moat diagonally toward the south-west road (as in R01)
+  bridge.add(new THREE.BoxGeometry(8, 3.6, 5), 'stone', [0, -1.0, 4]).add(new THREE.BoxGeometry(8.5, 3.2, 5), 'stone', [0, -1.0, 19]);
+  bridge.add(new THREE.BoxGeometry(7, 0.35, 18), 'timber', [0, 0.9, 11.5]);
+  for (let z = 7; z <= 16; z += 3) bridge.add(new THREE.CylinderGeometry(0.22, 0.22, 4.5, 8), 'log', [-3, -1.5, z]).add(new THREE.CylinderGeometry(0.22, 0.22, 4.5, 8), 'log', [3, -1.5, z]);
+  for (let z = 3; z <= 20; z += 1.4) for (const x of [-3.4, 3.4]) bridge.add(new THREE.BoxGeometry(0.14, 1.1, 0.14), 'timber', [x, 1.6, z]);
+  for (const x of [-3.4, 3.4]) bridge.add(new THREE.BoxGeometry(0.16, 0.16, 18), 'timber', [x, 2.15, 11.5]);
+  I.register('bridge', bridge.build(), {}); I.put('bridge', -1, 0, 0, -0.46, 1);
   // stone embankment along wall foot facing moat
   I.register('embank', { stone: new THREE.BoxGeometry(1, 1, 1) }, {});
   I.put('embank', 77, -0.6, 4.6, 0, [154, 2.2, 3]); I.put('embank', -90, -0.6, 4.6, 0, [170, 2.2, 3]);
@@ -212,9 +213,9 @@ export function buildWorld(scene, M) {
   for (let x = wall.x0 + 18; x < wall.x1 - 10; x += 15) for (let z = -24; z > wall.z0 + 12; z -= 14) {
     const r = rng(x * 31 + z * 17); const jx = x + (r() - 0.5) * 3, jz = z + (r() - 0.5) * 3;
     if (!free(jx, jz, 6)) continue;
-    if (r() < 0.12) { treeAt(jx, jz, 1.1); continue; }
+    if (r() < 0.2) { treeAt(jx, jz, 1.15); continue; }
     I.put(pick(r, houseKinds), jx, 0.4, jz, Math.round(r() * 4) * Math.PI / 2 + (r() - 0.5) * 0.06, 0.9 + r() * 0.25);
-    if (r() < 0.25) treeAt(jx + 7, jz + 6, 0.9);
+    if (r() < 0.55) treeAt(jx + 7, jz + 6, 0.95);
   }
   // avenue trees and people
   for (let z = -40; z > -460; z -= 16) { if (z < -95 && z > -150) continue; treeAt(-12, z, 0.9); treeAt(12, z + 8, 0.9); }
@@ -286,23 +287,30 @@ export function buildWorld(scene, M) {
   I.register('hut', A.hut({ w: 5, d: 4.4, h: 2.6, seed: 3 }), {}); I.register('hutOpen', A.hut({ w: 4.6, d: 4, h: 2.5, seed: 4, open: true }), {});
   I.register('logPile', A.logPile({ n: 36, L: 6 }), {}); I.register('scaffold', A.scaffold({ w: 9, h: 7, d: 3 }), {});
   // road from bridge heading south-west, market on its west side
-  // market on the near bank, left of the bridge (stalls face the road which runs from the bridge to the south-west)
-  for (let i = 0; i < 8; i++) { const z = 18 + i * 4.8; I.ground(i % 2 ? 'stall' : 'stall2', -30 - i * 1.6, z, Math.PI / 2 - 0.35 + (R() - 0.5) * 0.15); }
-  for (let i = 0; i < 6; i++) { const z = 16 + i * 5.2; I.ground(i % 2 ? 'stall2' : 'stall', -42 - i * 1.6, z, Math.PI / 2 - 0.35); }
-  for (let i = 0; i < 6; i++) I.ground('hutOpen', -52 - i * 6, 20 + (i % 2) * 6, R() * 0.3);
-  crowd(-14, 30, 7, 14, 90, {}); crowd(-24, 24, 3, 12, 30, {}); crowd(-1, 22, 2.4, 13, 34, { pose: 'walk' });
-  for (let i = 0; i < 8; i++) person(-4 + R() * 7, 4 + R() * 3, 0, { type: 'soldier', pose: 'stand' });
-  for (let i = 0; i < 10; i++) person(-3 + (i % 2) * 2, 12 + i * 1.6, Math.PI, { type: 'monk', pose: 'walk' });
-  mahoutElephant(-21, 31, 2.5, 'elephant'); I.ground('elephantPlain', -48, 50, 0.8, 0.9);
-  oxCart(-11, 24, Math.PI - 0.5); oxCart(-30, 52, -0.4, 'pots');
-  // foreground huts and the timber yard (south bank, right of the bridge)
-  for (const [x, z, r] of [[6, 52, 0.1], [15, 50, -0.05], [-4, 56, 0.2], [24, 56, 0.05]]) I.ground('hut', x, z, r, 1);
-  for (const [x, z, r] of [[36, 47, 0.1], [44, 49, 0.05], [52, 46, -0.1]]) I.ground('logPile', x, z, r, 1);
-  I.ground('scaffold', 48, 44, 0.0, 1); I.ground('scaffold', 32, 52, 0.1, 0.8);
-  crowd(42, 47, 9, 3, 10, { type: 'man', pose: 'stand' });
+  // market street on the near bank: the road leaves the bridge foot and runs south-west, stalls on both sides (R01 lower left)
+  const road0 = new THREE.Vector2(-9.5, 18.5), rdir = new THREE.Vector2(-0.75, 0.66).normalize(), rn = new THREE.Vector2(rdir.y, -rdir.x);
+  const along = (t, off) => [road0.x + rdir.x * t + rn.x * off, road0.y + rdir.y * t + rn.y * off];
+  for (let i = 0; i < 9; i++) for (const side of [-1, 1]) {
+    const [x, z] = along(4 + i * 4.6 + (side > 0 ? 2 : 0), side * 6.2);
+    I.ground(i % 2 ? 'stall' : 'stall2', x, z, Math.atan2(-side * rn.x, -side * rn.y) + (R() - 0.5) * 0.12);
+  }
+  for (let i = 0; i < 6; i++) { const [x, z] = along(8 + i * 7, -12); I.ground('hutOpen', x, z, Math.atan2(rn.x, rn.y) + R() * 0.3); }
+  for (let i = 0; i < 120; i++) { const t = R() * 46, off = (R() - 0.5) * 7.5; const [x, z] = along(t, off); person(x, z, Math.atan2(rdir.x, rdir.y) + (R() < 0.5 ? Math.PI : 0) + (R() - 0.5) * 0.8, {}); }
+  for (let i = 0; i < 30; i++) { const t = R() * 46, side = R() < 0.5 ? -1 : 1; const [x, z] = along(t, side * 4.4); person(x, z, Math.atan2(side * rn.x, side * rn.y), { pose: 'stand' }); }
+  for (let i = 0; i < 26; i++) { const a = -0.46; const zz = 2 + R() * 17, xx = (R() - 0.5) * 5; person(-1 + Math.sin(a) * zz + Math.cos(a) * xx, Math.cos(a) * zz - Math.sin(a) * xx, a + (R() < 0.5 ? Math.PI : 0), { pose: 'walk', y: 1.1 }); }
+  for (let i = 0; i < 8; i++) person(-4 + R() * 7, 1 + R() * 3, 0, { type: 'soldier', pose: 'stand' });
+  { const [x, z] = along(11, 1.2); mahoutElephant(x, z, Math.atan2(-rdir.x, -rdir.y) + 0.2, 'elephant'); }
+  { const [x, z] = along(22, -1.5); oxCart(x, z, Math.atan2(-rdir.x, -rdir.y)); }
+  { const [x, z] = along(34, 1.5); oxCart(x, z, Math.atan2(rdir.x, rdir.y), 'pots'); }
+  I.ground('elephantPlain', -60, 60, 0.8, 0.9);
+  // foreground huts and the timber yard on the south bank of the moat, right of the bridge (R01 bottom centre and right)
+  for (const [x, z, r] of [[6, 45.5, 0.08], [14.5, 44.5, -0.05], [23, 45.5, 0.1], [-1, 50, 0.2]]) I.ground('hut', x, z, r, 1);
+  for (const [x, z, r] of [[34, 44, 0.05], [41, 45.5, 0.1], [50, 44, -0.05]]) I.ground('logPile', x, z, r, 1);
+  I.ground('scaffold', 45, 41.5, 0.0, 1); I.ground('scaffold', 33, 41.8, 0.08, 0.85);
+  crowd(42, 44.5, 9, 1.5, 12, { type: 'man', pose: 'stand' });
   for (let i = 0; i < 40; i++) { const x = 60 + R() * 200, z = 45 + R() * 30; I.ground('shrub', x, z, R() * 6, 1 + R()); }
   for (let i = 0; i < 14; i++) treeAt(-80 + R() * 160, 50 + R() * 60 + (R() < 0.5 ? 0 : 40), 0.9);
-  treeAt(10, 44, 0.8); treeAt(-38, 10, 0.8); treeAt(28, 43, 0.7);
+  treeAt(-6, 30, 0.75); treeAt(-40, 12, 0.8); treeAt(29, 47, 0.7); treeAt(-24, 52, 0.9);
 
   // ======================= ZONE B: STUPA HILL =======================
   buildStupaHill(G, I, M, ref, person, treeAt);
@@ -319,7 +327,7 @@ export function buildWorld(scene, M) {
     rect(20, -255, 240, -380, 'rgb(150,0,0)');
     rect(-40, -150, 40, -100, 'rgb(255,0,0)'); rect(30, -180, 66, -156, 'rgb(255,0,0)');
     g.lineCap = 'round'; g.strokeStyle = 'rgb(255,0,0)';
-    g.lineWidth = ts(16); g.beginPath(); g.moveTo(tx(0), tz(0)); g.lineTo(tx(-2), tz(24)); g.lineTo(tx(-30), tz(60)); g.lineTo(tx(-80), tz(200)); g.stroke();
+    g.lineWidth = ts(12); g.beginPath(); g.moveTo(tx(0), tz(0)); g.lineTo(tx(-9.5), tz(18.5)); g.lineTo(tx(-45), tz(49.5)); g.lineTo(tx(-90), tz(200)); g.stroke();
     rect(-70, 13, -2, 60, 'rgb(230,0,0)'); rect(-10, 41, 70, 64, 'rgb(200,0,0)');
     // town street & plaza
     rect(820, 150, 960, 400, 'rgb(230,0,0)');
@@ -506,7 +514,7 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   const sd = new THREE.Vector2(1, -1).normalize();
   I.put('stairs', sx + sd.x * R * 1.18, sy - 0.15, sz + sd.y * R * 1.18, Math.atan2(sd.x, sd.y), 1);
   // ---- composition relative to the shot-3 camera (NE of stupa, looking SW at the stairs)
-  const CAM = { x: sx + 27, z: sz - 27 }; const f = new THREE.Vector2(-1, 1).normalize(); const L = new THREE.Vector2(0.7071, 0.7071); // left of view
+  const CAM = { x: sx + 33, z: sz - 33 }; const f = new THREE.Vector2(-1, 1).normalize(); const L = new THREE.Vector2(0.7071, 0.7071); // left of view
   const at = (fw, lf) => [CAM.x + f.x * fw + L.x * lf, CAM.z + f.y * fw + L.y * lf];
   const faceStupa = Math.atan2(f.x, f.y);
   // Ashoka pillar with four lions, square railing (front-left)
@@ -522,9 +530,9 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   for (const [x, z] of [[-3, -2.6], [-3, 2.6], [3, -2.6], [3, 2.6]]) pv.add(new THREE.CylinderGeometry(0.15, 0.18, 3.2, 8), 'log', [x, 1.85, z]);
   pv.add(A.curvedRoof(9, 8, 2, 0.12, 5), 'thatch', [0, 3.3, 0]); pv.add(new THREE.BoxGeometry(2.4, 0.4, 1.4), 'stone', [0.6, 0.7, 0.2]);
   I.register('restPav', pv.build(), {});
-  const [pvx, pvz] = at(17, 19); I.ground('restPav', pvx, pvz, faceStupa + 0.3, 1);
+  const [pvx, pvz] = at(21, 12.5); I.ground('restPav', pvx, pvz, faceStupa + 0.3, 1);
   person(pvx, pvz, faceStupa + Math.PI / 2 - 0.6, { type: 'monk', pose: 'sit', y: height(pvx, pvz) + 0.9 });
-  { const [x, z] = at(16, 16.5); person(x, z, faceStupa - 0.9, { type: 'man', pose: 'sit', y: height(x, z) + 0.5 }); }
+  { const [x, z] = at(20, 10.5); person(x, z, faceStupa - 0.9, { type: 'man', pose: 'sit', y: height(x, z) + 0.5 }); }
   { const [x, z] = at(10.5, 9); person(x, z, faceStupa + Math.PI - 0.6, { type: 'soldier', pose: 'stand' }); }
   { const [x, z] = at(12, 10.5); person(x, z, faceStupa + Math.PI - 0.9, { type: 'man', pose: 'stand' }); }
   { const [x, z] = at(17, 7); person(x, z, faceStupa + 0.2, { type: 'man', pose: 'walk' }); person(x - 1, z + 0.4, faceStupa, { type: 'man', pose: 'stand' }); }
@@ -538,7 +546,7 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   const r = rng(91);
   for (let i = 0; i < 220; i++) { const a = r() * 6.28, d = 30 + r() * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; I.ground('rock' + (i % 4), x, z, r() * 6, 0.4 + r() * 1.6, { dy: -0.25 }); }
   for (let i = 0; i < 9000; i++) { const a = r() * 6.28, d = R * 1.18 + 4 + Math.pow(r(), 1.6) * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; const [cx2, cz2] = at(4, 0); if (Math.hypot(x - cx2, z - cz2) < 3) continue; I.ground('grass', x, z, r() * 6, 0.7 + r() * 0.8); }
-  for (const [fw, lf, s] of [[4, 2.6, 1.2], [6, 3.9, 2.0], [9, 6.2, 2.6], [5, 1.5, 0.6], [12, 7.5, 1.8], [3, 1.7, 0.5], [7.5, 5.0, 1.0], [3.2, 2.4, 0.8]]) { const [x, z] = at(fw, lf); I.ground('rock' + ((fw * 3 | 0) % 4), x, z, fw * 2, s, { dy: -0.18 * s }); }
+  for (const [fw, lf, s] of [[4, 2.6, 1.2], [6, 3.9, 2.0], [9, 6.2, 2.6], [5, 1.5, 0.6], [12, 7.5, 1.8], [3, 1.7, 0.5], [7.5, 5.0, 1.0], [3.2, 2.4, 0.8], [2.4, 1.2, 0.7], [5.5, 4.6, 1.6]]) { const [x, z] = at(fw, lf); I.ground('rock' + ((fw * 3 | 0) % 4), x, z, fw * 2, s, { dy: -0.06 * s }); }
   // path edging stones along both sides of the path to the stairs
   for (let i = 0; i < 26; i++) { const fw = 3 + i * 0.9; for (const lf of [1.9, -2.2]) { const [x, z] = at(fw, lf + Math.sin(i) * 0.2); I.ground('rock' + (i % 4), x, z, i, 0.22 + r() * 0.1, { dy: -0.04 }); } }
   for (let i = 0; i < 60; i++) { const a = r() * 6.28, d = 55 + r() * 150; treeAt(sx + Math.cos(a) * d, sz + Math.sin(a) * d, 0.9); }
@@ -546,6 +554,8 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   // big overhanging tree near the camera (top right) and one far left
   { const [x, z] = at(5, -9); I.ground('treeBig', x, z, 2.0, 1.0); }
   { const [x, z] = at(22, 30); I.ground('treeBig2', x, z, 0.4, 1.0); }
+  { const [x, z] = at(14, 17); I.ground('treeBig2', x, z, 2.4, 1.05); } // framing tree at the left edge (R03)
+  for (const [fw, lf, t] of [[12, 0.6, 'man'], [13, -0.8, 'woman'], [14.5, 0.2, 'monk'], [16, -0.5, 'man'], [10.5, -1.6, 'woman'], [17.5, 0.8, 'monk'], [9, 1.4, 'man'], [15, 1.6, 'woman']]) { const [x, z] = at(fw, lf); person(x, z, faceStupa + (r() - 0.5) * 0.3, { type: t, pose: 'walk' }); }
   { const [x, z] = at(9, 26); treeAt(x, z, 1.1); }
 }
 
