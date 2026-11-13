@@ -12,7 +12,7 @@ import { fbm } from './textures.js';
 export const RIVER = [[-900, 900], [-520, 350], [-330, 0], [-300, -300], [-250, -650], [-120, -1100], [150, -1800], [500, -2700], [900, -4000]];
 export const MOAT = { x0: -300, x1: 340, z0: 7, z1: 37 };
 export const HILL = { x: 1000, z: -120, h: 55, r: 210, top: 48 };
-export const HILL2 = { x: 950, z: 92, h: 44, r: 84, top: 40 };
+export const HILL2 = { x: 938, z: 96, h: 46, r: 84, top: 42 };
 export const WATER_Y = -0.7;
 
 function distSeg(px, pz, ax, az, bx, bz) {

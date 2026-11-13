@@ -1,8 +1,8 @@
 // Camera + lighting presets matched to each reference image.
 export const SHOTS = {
   1: { name: 'city_gate_sunset', pos: [-4, 42, 104], target: [2, 11.3, -3], fov: 38,
-       sun: { az: 161, el: 2.3 }, light: { az: 66, el: 10 }, sky: { zenith: 0x6c84c8, horizon: 0xf8b4a4, band: 0xff9068, bandAmt: 0.85, glow: 1.0, sunCol: 0xffb860, intensity: 1.12 }, exposure: 1.15, cloud: 0.62,
-       fog: { color: 0xecd2c2, density: 0.00019 }, water: { color: 0x3c5a50, distortion: 4.5 }, shadow: { center: [40, 0, -120], size: 420 },
+       sun: { az: 161, el: 2.3 }, light: { az: 66, el: 10 }, sky: { zenith: 0x6c84c8, horizon: 0xf8b4a4, band: 0xff9068, bandAmt: 0.6, glow: 1.0, sunCol: 0xffb860, intensity: 1.12 }, exposure: 1.15, cloud: 0.62,
+       fog: { color: 0xf4dccc, density: 0.00011 }, water: { color: 0x3c5a50, distortion: 4.5 }, shadow: { center: [40, 0, -120], size: 420 },
        grade: { lift: [0.04, 0.025, 0.03], gain: [1.07, 1.0, 0.92], sat: 0.8, contrast: 1.03 }, sunInt: 5.2, sunCol: 0xffb070, hemi: 0.55 },
   2: { name: 'palace_hall', pos: [139.8, 4.45, -307.6], target: [151.8, 4.6, -316.6], fov: 50,
        sun: { az: -140, el: 34 }, env: 0.6, sky: { zenith: 0x4a7ac8, horizon: 0xd8e4ee, glow: 0.4, intensity: 1.3 }, exposure: 0.95, cloud: 0.62,

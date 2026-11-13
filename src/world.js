@@ -240,9 +240,9 @@ export function buildWorld(scene, M) {
   // Ashoka pillar on the plaza (palace garden axis)
   I.register('pillarCity', A.ashokaPillar({ height: 15, capital: 'four' }), { mats: { stone: M.polishedSandstone } });
   ref.pois.cityPillar = new THREE.Vector3(48, 0, -168);
-  I.put('pillarCity', 48, 0.4, -168, 0.4, 1);
+  I.put('pillarCity', 48, 0.4, -168, 0.4, 1.5);
   I.register('plinth', { stone: new THREE.BoxGeometry(1, 1, 1) }, { mats: { stone: M.paleStone } });
-  I.put('plinth', 48, 0.6, -168, 0.4, [4.5, 0.8, 4.5]);
+  I.put('plinth', 48, 0.6, -168, 0.4, [6.5, 1.2, 6.5]);
   // palace garden: cypress rows, lawns, pools, people
   for (let x = 0; x <= 190; x += 9) for (const z of [-118, -222]) I.put(x % 18 ? 'cypress' : 'cypress2', x, 0.4, z, 0, 0.9);
   for (let z = -130; z >= -210; z -= 10) for (const x of [-6, 196]) I.put('cypress', x, 0.4, z, 0, 0.9);
@@ -519,11 +519,11 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   let k = 0; for (const s of segs) { I.register('vedika' + k, A.vedika(s, { h: 1.5, spacing: 1.6 }), { mats: { stone: M.weatheredStone } }); I.put('vedika' + k, sx, sy - 0.1, sz, 0, 1); k++; }
   // upper terrace railing on the medhi
   const up = []; for (let i = 0; i <= 64; i++) { const a = i / 64 * Math.PI * 2; up.push([Math.cos(a) * R * 1.16, Math.sin(a) * R * 1.16]); }
-  I.register('vedikaUp', A.vedika(up, { h: 1.0, spacing: 1.2 }), { mats: { stone: M.weatheredStone } }); I.put('vedikaUp', sx, sy + R * 0.11, sz, 0, 1);
+  I.register('vedikaUp', A.vedika(up, { h: 1.0, spacing: 1.2 }), { mats: { stone: M.weatheredStone } }); I.put('vedikaUp', sx, sy + R * 0.15, sz, 0, 1);
   // stairs from ground to medhi terrace (facing gap direction)
   const st = new A.AB(); const nSt = 10;
-  for (let i = 0; i < nSt; i++) st.add(new THREE.BoxGeometry(6, (R * 0.11) / nSt, 0.7), 'stone', [0, (i + 0.5) * R * 0.11 / nSt, (nSt - i) * 0.7]);
-  st.add(new THREE.BoxGeometry(0.5, R * 0.11 + 0.6, nSt * 0.7 + 0.5), 'stone', [3.2, R * 0.055, nSt * 0.35]).add(new THREE.BoxGeometry(0.5, R * 0.11 + 0.6, nSt * 0.7 + 0.5), 'stone', [-3.2, R * 0.055, nSt * 0.35]);
+  for (let i = 0; i < nSt; i++) st.add(new THREE.BoxGeometry(6, (i + 1) * (R * 0.15) / nSt, 0.7), 'stone', [0, (i + 1) * R * 0.15 / nSt / 2, (nSt - i) * 0.7]);
+  st.add(new THREE.BoxGeometry(0.5, R * 0.15 + 0.9, nSt * 0.7 + 0.5), 'stone', [3.2, R * 0.075 + 0.2, nSt * 0.35]).add(new THREE.BoxGeometry(0.5, R * 0.15 + 0.9, nSt * 0.7 + 0.5), 'stone', [-3.2, R * 0.075 + 0.2, nSt * 0.35]);
   I.register('stairs', st.build(), { mats: { stone: M.weatheredStone } });
   const sd = new THREE.Vector2(1, -1).normalize();
   I.put('stairs', sx + sd.x * R * 1.18, sy - 0.15, sz + sd.y * R * 1.18, Math.atan2(sd.x, sd.y), 1);
@@ -555,7 +555,7 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   for (const [fw, lf, t] of walkers) { const [x, z] = at(fw, lf); person(x, z, faceStupa + (lf < -2 ? 0.25 : 0.05), { type: t, pose: 'walk' }); }
   // pilgrims circumambulating at the base & monks on the terrace
   for (let i = 0; i < 12; i++) { const a = gapA + 0.5 + i * 0.42; const rr2 = R * 1.18 + 2.4; person(sx + Math.cos(a) * rr2, sz + Math.sin(a) * rr2, -a, { type: i % 3 ? 'monk' : 'man', pose: 'walk' }); }
-  for (let i = 0; i < 8; i++) { const a = gapA - 0.9 + i * 0.25 + (i > 3 ? 0.9 : 0); person(sx + Math.cos(a) * R * 1.11, sz + Math.sin(a) * R * 1.11, -a + Math.PI / 2, { type: i % 4 ? 'monk' : 'man', pose: 'stand', y: sy + R * 0.11 - 0.2 }); }
+  for (let i = 0; i < 8; i++) { const a = gapA - 0.9 + i * 0.25 + (i > 3 ? 0.9 : 0); person(sx + Math.cos(a) * R * 1.11, sz + Math.sin(a) * R * 1.11, -a + Math.PI / 2, { type: i % 4 ? 'monk' : 'man', pose: 'stand', y: sy + R * 0.15 - 0.2 }); }
   // rocks (granite slabs), grass, trees
   const r = rng(91);
   for (let i = 0; i < 220; i++) { const a = r() * 6.28, d = 30 + r() * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; I.ground('rock' + (i % 4), x, z, r() * 6, 0.4 + r() * 1.6, { dy: -0.25 }); }
@@ -654,15 +654,16 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   person(px + 4.4, pz + 4.6, -Math.PI / 2 - 0.9, { type: 'man', pose: 'stand', y: Y, col: { accent: C('#f0e8d8') } });
   person(sx + 0.5, 333, 0.6, { type: 'noble', pose: 'stand', y: Y }); person(sx - 1.2, 334, -0.3, { type: 'man', pose: 'stand', y: Y });
   person(sx + 3.0, 334, Math.PI + 0.3, { type: 'man', pose: 'walk', y: Y });
-  for (let q = 0; q < 6; q++) person(sx + 4.5 + (q % 2) * 1.4, 318 - Math.floor(q / 2) * 3.0, 0.05, { type: 'soldier', pose: 'walk', y: Y });
+  for (let q = 0; q < 6; q++) person(sx + 1.0 + (q % 2) * 1.4, 324 - Math.floor(q / 2) * 2.6, 0.05, { type: 'soldier', pose: 'walk', y: Y });
   person(sx + 10.5, 338, -0.3, { type: 'woman', pose: 'walk', y: Y }); person(sx + 10.8, 342, 0.2, { type: 'woman', pose: 'stand', y: Y });
   person(sx - 9.6, 344, Math.PI / 2, { type: 'man', pose: 'stand', y: Y }); person(sx - 8.8, 340, -Math.PI / 2 - 0.2, { type: 'woman', pose: 'stand', y: Y });
-  oxCart(sx - 1.5, 302, 0.05, 'sacks');
-  mahoutElephant(sx + 9.5, 322, -0.15, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
+  oxCart(sx - 2.2, 297, 0.05, 'sacks');
+  mahoutElephant(sx + 6.2, 327, -0.95, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
   const r = rng(51);
+  const clearOf = (x, z) => Math.hypot(x - (sx + 6.2), z - 327) < 4.4 || (Math.abs(x - (sx - 2.2)) < 2.2 && z > 293 && z < 307);
   // foreground crowd between the camera and the pillar (R04 lower half)
-  for (let q = 0; q < 26; q++) { const zz = 331 + r() * 10, xx = sx - 3 + r() * 13; if (Math.hypot(xx - px, zz - pz) < 4.6) continue; person(xx, zz, r() < 0.55 ? Math.PI + (r() - 0.5) * 0.9 : (r() - 0.5) * 0.9, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
-  for (let q = 0; q < 170; q++) { const zz = 262 + r() * 78, xx = sx - 4.5 + r() * 10; person(xx, zz, r() < 0.5 ? (r() - 0.5) * 0.8 : Math.PI + (r() - 0.5) * 0.8, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
+  for (let q = 0; q < 26; q++) { const zz = 331 + r() * 10, xx = sx - 3 + r() * 13; if (Math.hypot(xx - px, zz - pz) < 4.6 || clearOf(xx, zz)) continue; person(xx, zz, r() < 0.55 ? Math.PI + (r() - 0.5) * 0.9 : (r() - 0.5) * 0.9, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
+  for (let q = 0; q < 170; q++) { const zz = 262 + r() * 78, xx = sx - 4.5 + r() * 10; if (clearOf(xx, zz)) continue; person(xx, zz, r() < 0.5 ? (r() - 0.5) * 0.8 : Math.PI + (r() - 0.5) * 0.8, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
   for (let q = 0; q < 16; q++) person(sx - 4 + r() * 8, 284 - r() * 18, Math.PI, { type: 'soldier', pose: 'walk', y: Y });
   // town outskirts houses (fill around street, behind facades)
   const r2 = rng(61);
@@ -678,7 +679,7 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   for (let q = 0; q < 70; q++) hp.add(new THREE.BoxGeometry(0.07, 0.9, 0.07), 'timber', [-10.5 + q * 0.3, 1.65, 6]);
   I.register('hillPav', hp.build(), { mats: { stone: M.paleStone, tiles: M.roofTilesRed } });
   const hpx = HILL2.x + 28, hpz = HILL2.z + 4;
-  I.register('stupaWhite', A.stupa({ R: 8 }), { mats: { dome: M.plaster, plaster: M.plaster, stone: M.weatheredStone, medhi: M.plaster } });
+  I.register('stupaWhite', A.stupa({ R: 11 }), { mats: { dome: M.plaster, plaster: M.plaster, stone: M.weatheredStone, medhi: M.plaster } });
   I.ground('stupaWhite', HILL2.x, HILL2.z, 0, 1, { dy: -0.3 });
   for (let q = 0; q < 24; q++) { const a = r2() * 6.28, d = 20 + r2() * 60; treeAt(HILL2.x + Math.cos(a) * d, HILL2.z + Math.sin(a) * d, 1.0); } I.ground('hillPav', hpx, hpz, -0.3, 1, { dy: -0.5 });
 }

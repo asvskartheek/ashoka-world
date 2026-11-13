@@ -740,7 +740,7 @@ export function ashokaPillar({ height = 12, capital = 'four', inscribed = false,
 // Stupa (Sanchi-style). Dome radius R
 export function stupa({ R = 16 } = {}) {
   const b = new AB();
-  const drumH = R * 0.11;
+  const drumH = R * 0.15;
   b.add(cyl(R * 1.18, R * 1.2, drumH, 64), 'medhi', [0, drumH / 2, 0]); // medhi terrace
   b.add(cyl(R * 1.19, R * 1.19, R * 0.06, 64), 'stone', [0, drumH + R * 0.03, 0]);
   const dome = new THREE.SphereGeometry(R, 72, 36, 0, Math.PI * 2, 0, Math.PI * 0.5); dome.scale(1, 0.86, 1);
