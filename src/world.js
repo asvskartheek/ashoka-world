@@ -66,6 +66,33 @@ export function buildWorld(scene, M) {
   const G = new THREE.Group(); scene.add(G);
   const I = new Instancer(M); const R = rng(77);
   const ref = { pois: {} };
+  // ---- set-dressing prop kit (instanced; seeded variation in scale, rotation and tint)
+  const kit = {};
+  { const rk = rng(4040); const AB = A.AB;
+    const heap = new AB(); for (let q = 0; q < 26; q++) { const a = rk() * 6.28, rr = Math.sqrt(rk()) * 0.45; heap.add(new THREE.SphereGeometry(0.07 + rk() * 0.04, 6, 5), 'goods' + (q % 4), [Math.cos(a) * rr, 0.06 + (0.45 - rr) * 0.5 + rk() * 0.05, Math.sin(a) * rr]); }
+    heap.add(new THREE.CylinderGeometry(0.55, 0.6, 0.06, 14), 'basket', [0, 0.03, 0]);
+    kit.heap = I.register('kit_heap', heap.build(), {});
+    const bs = new AB(); for (let q = 0; q < 5; q++) bs.add(A.lathe([[0, 0], [0.2, 0.02], [0.26, 0.16], [0, 0.16]], 12), 'basket', [(q % 3 - 1) * 0.5 + rk() * 0.05, Math.floor(q / 3) * 0.17, (rk() - 0.5) * 0.2]);
+    kit.baskets = I.register('kit_baskets', bs.build(), {});
+    const mat = new AB(); mat.add(new THREE.BoxGeometry(1.6, 0.02, 1.1), 'basket', [0, 0.01, 0]); for (let q = 0; q < 9; q++) mat.add(A.lathe([[0, 0], [0.09, 0.02], [0.12, 0.1], [0.07, 0.19], [0.05, 0.21], [0.06, 0.23]], 10), q % 2 ? 'clay' : 'gold', [(q % 3 - 1) * 0.45, 0.02, (Math.floor(q / 3) - 1) * 0.32]);
+    kit.mat = I.register('kit_mat', mat.build(), {});
+    const fw = new AB(); for (let q = 0; q < 14; q++) fw.add(new THREE.CylinderGeometry(0.04, 0.05, 1.1 + rk() * 0.3, 6), 'log', [(q % 5 - 2) * 0.09, 0.05 + Math.floor(q / 5) * 0.08, 0], [Math.PI / 2, (rk() - 0.5) * 0.15, 0]);
+    kit.firewood = I.register('kit_firewood', fw.build(), {});
+    const ld = new AB(); for (const sx2 of [-0.22, 0.22]) ld.add(new THREE.CylinderGeometry(0.03, 0.03, 3.2, 6), 'pole', [sx2, 1.6, 0]); for (let q = 0; q < 9; q++) ld.add(new THREE.CylinderGeometry(0.02, 0.02, 0.44, 5), 'pole', [0, 0.3 + q * 0.33, 0], [0, 0, Math.PI / 2]);
+    kit.ladder = I.register('kit_ladder', ld.build(), {});
+    const sk = new AB(); for (let q = 0; q < 6; q++) { const g = new THREE.SphereGeometry(0.3, 10, 8); g.scale(1, 0.75, 1.3); sk.add(g, 'sack', [(q % 3 - 1) * 0.55, 0.22 + Math.floor(q / 3) * 0.38, (rk() - 0.5) * 0.1]); }
+    kit.sacks = I.register('kit_sacks', sk.build(), {});
+  }
+  // scatter props along a line (x0,z0)->(x1,z1), facing ry, spacing about `step`
+  const dress = (x0, z0, x1, z1, step, ry, seed, skip = () => false) => {
+    const rd = rng(seed); const L = Math.hypot(x1 - x0, z1 - z0); const names = ['heap', 'heap', 'baskets', 'mat', 'mat', 'sacks', 'firewood', 'baskets'];
+    for (let t = rd() * step; t < L; t += step * (0.6 + rd() * 0.8)) {
+      const x = x0 + (x1 - x0) * t / L + (rd() - 0.5) * 0.6, z = z0 + (z1 - z0) * t / L + (rd() - 0.5) * 0.6; if (skip(x, z)) continue;
+      I.ground(kit[pick(rd, names)], x, z, ry + (rd() - 0.5) * 0.8, 0.85 + rd() * 0.35);
+      if (rd() < 0.06) I.ground(kit.ladder, x + 0.4, z, ry, 1, { rx: -0.25 });
+    }
+  };
+  ref.dress = dress;
 
   // ---- people registry (many variants)
   const peopleKinds = [];
@@ -309,6 +336,7 @@ export function buildWorld(scene, M) {
   { const [x, z] = along(22, -1.5); oxCart(x, z, Math.atan2(-rdir.x, -rdir.y)); }
   { const [x, z] = along(34, 1.5); oxCart(x, z, Math.atan2(rdir.x, rdir.y), 'pots'); }
   I.ground('elephantPlain', -60, 60, 0.8, 0.9);
+  for (const side of [-1, 1]) { const [ax, az] = along(2, side * 4.6), [bx, bz] = along(46, side * 4.6); dress(ax, az, bx, bz, 1.6, Math.atan2(-side * rn.x, -side * rn.y), 900 + side); }
   // foreground huts and the timber yard on the south bank of the moat, right of the bridge (R01 bottom centre and right)
   for (const [x, z, r] of [[6, 45.5, 0.08], [14.5, 44.5, -0.05], [23, 45.5, 0.1], [-1, 50, 0.2]]) I.ground('hut', x, z, r, 1);
   for (const [x, z, r] of [[34, 44, 0.05], [41, 45.5, 0.1], [50, 44, -0.05]]) I.ground('logPile', x, z, r, 1);
@@ -624,6 +652,7 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
     I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); z -= w + 0.4; i++; }
   // pots, baskets and grain sacks along both street edges
   I.register('streetGoods', (() => { const g = new A.AB(); const rr = rng(8); for (let q = 0; q < 7; q++) g.add(A.lathe([[0, 0], [0.18 + rr() * 0.08, 0.05], [0.26, 0.22], [0.16, 0.42], [0.1, 0.46], [0.12, 0.5]], 12), q % 3 ? 'clay' : 'basket', [(rr() - 0.5) * 1.6, 0, (rr() - 0.5) * 1.2], [0, rr() * 6, 0], 0.7 + rr() * 0.6); for (let q = 0; q < 3; q++) { const sk = new THREE.SphereGeometry(0.3, 10, 8); sk.scale(1, 0.75, 1.3); g.add(sk, 'sack', [(rr() - 0.5) * 1.4, 0.2, (rr() - 0.5) * 1.0]); } return g.build(); })(), {});
+  if (ref.dress) for (const side of [-1, 1]) ref.dress(sx + side * (side < 0 ? 5.2 : 6.2), 352, sx + side * (side < 0 ? 5.2 : 6.2), gz + 22, 1.4, side < 0 ? Math.PI / 2 : -Math.PI / 2, 950 + side, (x, z) => (side < 0 && z < 346 && z > 296));
   { const rg = rng(19); for (let zz = 350; zz > gz + 20; zz -= 4.5) for (const s of [-1, 1]) { if (s < 0 && zz < 346 && zz > 296) continue; I.ground('streetGoods', sx + s * (s < 0 ? 5.6 : 6.6), zz + (rg() - 0.5) * 2, rg() * 6, 1); } }
   // stalls & awnings in front of buildings, hanging textiles
   I.register('awning', { thatch: new THREE.PlaneGeometry(1, 1), pole: new THREE.CylinderGeometry(0.06, 0.07, 1, 6) }, {});
