@@ -3,3 +3,4 @@ renders/dbg*.png
 renders/crop*.png
 renders/cmp*.png
 renders/sheet*.png
+cook/stills/**/*.png

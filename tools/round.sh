@@ -12,4 +12,5 @@ ARGS=""; for i in 1 2 3 4; do [ -f cook/stills/r$NN/S0$i.png ] && ARGS="$ARGS co
 node .claude/skills/cook/scripts/side-by-side.mjs --aspect 4:3 --out cook/compare/r$NN/all.jpg $ARGS
 : > cook/compare/r$NN/color.txt
 for i in 1 2 3 4; do [ -f cook/stills/r$NN/S0$i.png ] && { echo "S0$i:"; python3 tools/color_check.py cook/refs/R0$i.png cook/stills/r$NN/S0$i.png; } >> cook/compare/r$NN/color.txt; done
+for f in cook/stills/r$NN/S0*.png; do ffmpeg -loglevel error -y -i $f -q:v 2 ${f%.png}.jpg; done
 cat cook/compare/r$NN/color.txt
