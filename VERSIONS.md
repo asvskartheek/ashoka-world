@@ -30,3 +30,4 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.19 | [v0.19](versions/v0.19/compare.jpg) | Cook round 19: S02 daylight, glossier floor, smaller banner; bluer skies. Raw 52 / calibrated 71. |
 | v0.20 | [v0.20](versions/v0.20/compare.jpg) | Cook round 20: GTAO ambient occlusion, sculpted lion capitals (builder). Raw 51 / calibrated 70 (critics split by 10-20 points). |
 | v0.21 | [v0.21](versions/v0.21/compare.jpg) | Cook round 21: physical skin and cloth sheen, larger sun disc, S03 path ground. Raw 55.8 / calibrated 75 (median of 3 critics), best so far. |
+| v0.22 | [v0.22](versions/v0.22/compare.jpg) | Cook round 22: S04 blue sky with white clouds, lit gate passage, softer dado; S02 shallower dais. Raw 55.9 / calibrated 75 (median of 3), best so far. |

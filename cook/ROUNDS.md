@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 21, `cook/stills/r21/` (raw 55.8, calibrated 75, median of 3 critics)
+Best so far: round 22, `cook/stills/r22/` (raw 55.9, calibrated 75, median of 3 critics; round 21 within 0.1)
 
 ## Decisions
 
@@ -343,3 +343,23 @@ Measured: S01 sat +0.053; S02 sat -0.052; S03 sat -0.003; S04 sat -0.003.
 Repeated across all three critics: S04 red dado band reads as an unnatural barrier, gate opening is a black void, sky reads overcast beige; S02 figures still the biggest gap, dais too blocky and tall; S01 far city sparse and river empty.
 Stop check: bar no | floor no (about 3.2h) | approved no | final no -> next round
 Next focus: round 22 = S04 sky, gate, dado; S02 dais.
+
+## Round 22
+
+Time: about 09:25 to 09:30 UTC
+Focus: S04 items repeated by all three round-21 critics, S02 dais.
+Changes: daytime clouds lit white (the warm sun tint read as "overcast beige"); S04 cloud cover 0.6 so the blue sky shows; S04 gate passage lit as a sunlit tunnel instead of a black void; red dado removed from the right side, left dado lower and browner; S02 dais steps 0.22 m (throne lowered to match). S01 and S03 stills are round 21's.
+Stills: `cook/stills/r22/` | Side by side: `cook/compare/r22/all.jpg`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r21 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 72 | 60 | 65 | 45 | 40 | 56 | 75 | +1 (unchanged render) |
+| S02 | 70 | 55 | 60 | 40 | 35 | 52 | 71 | +1 |
+| S03 | 80 | 65 | 70 | 55 | 45 | 63 | 82 | -1 (unchanged render) |
+| S04 | 65 | 60 | 60 | 40 | 35 | 52 | 71 | 0 (sonnet critic: 56 to 63) |
+
+Overall raw 55.9, calibrated 75. Tied with round 21 within noise; best so far by 0.1.
+Unanimous weakest item: S02 foreground people (seated monks seen from behind, scribes) at close range: faces, hands, cloth folds. Next: S01 far-field density and river traffic; S04 facades and shop goods.
+Stop check: bar no | floor no (about 3.2h) | approved no | final no -> next round
+Next focus: round 23 = a second people builder focused on close-range seated figures (S02), in parallel with S01 far-field density.
