@@ -38,3 +38,4 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.27 | [v0.27](versions/v0.27/compare.jpg) | Cook round 27: atmosphere and lens pass, accumulation renderer (spp 8), set dressing. Raw 53 / calibrated 72; A/B: S03 better, S01 and S02 worse (haze, cold floor). |
 | v0.28 | [v0.28](versions/v0.28/compare.jpg) | Cook round 28: S01 lighter haze, S02 warmer floor (keeps accumulation, atmosphere, set dressing). Raw 60.1 / calibrated 79, best so far. |
 | v0.29 | [v0.29](versions/v0.29/compare.jpg) | Cook round 29: S04 haze cut (A/B: preferred over round 26 by both critics). Working best (round 28 scored calibrated 79). |
+| v0.30 | [v0.30](versions/v0.30/compare.jpg) | Cook round 30: world-space weathering layer on walls, stone, roofs and thatch (builder); calmer, darker S01 moat; pinker S01 sunset sky. Not yet scored. |
