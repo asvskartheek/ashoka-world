@@ -34,9 +34,9 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 // occlusion; it carries a fraction of the hemisphere light's sky term), and a time offset hook (motion blur later).
 // URL: ?spp=N (1 = legacy single frame), &sky=0..1 (sky fraction moved to the sky light), &sundisc=deg, &focus=m, &aperture=m (lens radius), &shutter=s
 const qn = (k, d) => (q.get(k) !== null && q.get(k) !== '' ? +q.get(k) : d);
-const ACC = { spp: Math.max(1, Math.round(qn('spp', 8))), sky: qn('sky', 0.75), sunDisc: qn('sundisc', 1.4), reflEvery: Math.max(1, qn('reflevery', 4)), shutter: qn('shutter', 0), aoScale: qn('aoscale', 0.85) };
+const ACC = { spp: Math.max(1, Math.round(qn('spp', 8))), sky: qn('sky', 1.0), sunDisc: qn('sundisc', 0.9), reflEvery: Math.max(1, qn('reflevery', 4)), shutter: qn('shutter', 0), aoScale: qn('aoscale', 0.85) };
 // per-shot lens defaults (focus distance in m, lens radius in m); S.dof in shots.js or URL params override
-const DOF = { 2: { focus: 14, aperture: 0.012 }, 4: { focus: 30, aperture: 0.01 } };
+const DOF = { 2: { focus: 14, aperture: 0.006 }, 4: { focus: 11, aperture: 0.012 } };
 const HEMI_SKY = new THREE.Color(0xbfd4ff);
 const skyLight = new THREE.DirectionalLight(HEMI_SKY, 0); skyLight.castShadow = true; skyLight.visible = ACC.spp > 1;
 skyLight.shadow.mapSize.set(1024, 1024); skyLight.shadow.bias = -0.0006; skyLight.shadow.normalBias = 0.04;
