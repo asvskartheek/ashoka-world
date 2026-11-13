@@ -481,7 +481,7 @@ Stop check: bar no | floor no (about 7.1h) | approved no | final no -> next roun
 
 ## Round 28
 
-Time: about 13:27 to 13:45 UTC
+Time: about 13:27 to 13:37 UTC (end measured)
 Focus: fix the two round-27 side effects named by both A/B critics.
 Changes: S01 haze density 0.00018 to 0.00007, sky haze 0.3 to 0.14; per-shot `envSky` override in main.js, S02 envSky 0.25 (less cool environment light moved into the sky light); warmer, softer hall floor reflection. S03 and S04 stills are round 27's.
 Stills: `cook/stills/r28/` | Side by side: `cook/compare/r28/all.jpg` | A/B sheets vs round 26: `cook/compare/r28/ab_S0*.jpg`
