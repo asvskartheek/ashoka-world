@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 15, `cook/stills/r15/` (raw 53, calibrated 72)
+Best so far: round 16, `cook/stills/r16/` (raw 55, calibrated 74)
 
 ## Decisions
 
@@ -211,3 +211,27 @@ Measured: S01 sat +0.085 bright -0.030; S02 sat +0.021 bright -0.024; S03 sat -0
 Top gaps from critics: 1) materials: no wood grain or carving on columns and timber, plaster and roofs untextured, smooth palisade; 2) S02 king and throne too small, scribes cropped, foreground monks still smooth; 3) S01 gate needs tiered carved form and yellow banners, stalls need goods, moat reflections look noisy; 4) S03 dry golden grass instead of green, distant hills and river; 5) S04 carts and elephant hidden, inscription not legible, overhanging foliage.
 Stop check: bar no | floor no (about 1.3h of 8h) | approved no | final no -> next round
 Next focus: round 16 = measured colour fixes (prepared), then materials (wood grain and carving, plaster weathering, roof tiles) as the largest gap after people.
+
+## Round 16
+
+Time: about 07:34 to 08:20 UTC (materials builder ran in parallel, about 34 min)
+Focus: materials (largest gap after people, all critics in round 15).
+Changes:
+- Materials builder (src/textures.js, src/materials.js only): lacquered teak with warped grain and 24 flutes, clearcoat and roughness map; carved timber bands; weathered timber with splits; weathered plaster with stains, rain streaks, cracks, spalls showing brick, plus shader grime at wall bases; barrel tiles with moss and soot; bark with deep fissures for logs and tree trunks; irregular warm brick courses for city and stupa; polished sandstone with clearcoat, inscription carved through a bump map; layered thatch courses. worldUV now passes world UVs to normal and AO maps. Canvas contexts CPU-backed (much faster under SwiftShader). buildMaterials 6.7 to 7.2 s (was 5.9 to 6.1 s), measured by the builder.
+- S02: scribes fully in frame at lower right, king scale 1.4, lotus pot 0.7×.
+- S03: dry golden grass (ground shader and clumps), taller distant hills.
+Stills: `cook/stills/r16/` | Side by side: `cook/compare/r16/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r15 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 68 | 53 | 62 | 46 | 37 | 53 | 72 | +1 |
+| S02 | 69 | 53 | 59 | 41 | 34 | 51 | 70 | +3 |
+| S03 | 80 | 62 | 65 | 54 | 43 | 61 | 80 | +2 |
+| S04 | 70 | 58 | 61 | 49 | 40 | 56 | 75 | +3 |
+
+Overall raw 55, calibrated 74. Best so far. Materials rose +5 to +6 in every shot.
+Measured: S01 sat +0.048 bright -0.063; S02 sat -0.024 bright -0.008; S03 sat -0.019 bright -0.015; S04 sat +0.039 bright -0.068.
+Top gaps from critics: 1) people still read as smooth mannequins at close range (S02 worst): skin shading, faces, hands; 2) S01: sky reads flat beige (the 0.8 saturation grade drains it), river empty, palace and pillar faint, moat reflections blocky; 3) S04: carts and elephant not visible, no hill stupa visible, stalls without goods on the left; 4) S03: railing and stairs read low, capital unreadable, pillar on its dark side.
+Stop check: bar no | floor no (about 2h of 8h) | approved no | final no -> next round
+Next focus: round 17 = S01 sky (prepared), visibility of S04 animals/carts/hill stupa, S03 pillar lighting and stairs.
