@@ -641,7 +641,7 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   I.put('plinth', px, 0.55, pz, 0, [4.4, 0.7, 4.4]);
   const rail = new A.AB(); const sq = [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [-3.6, -3.6]];
   rail.merge({ parts: Object.fromEntries(Object.entries(A.vedika(sq, { h: 1.0, spacing: 1.2 })).map(([k, g]) => [k, [g]])) });
-  for (const [x, zq] of [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [0, 3.6], [3.6, 0], [0, -3.6], [-3.6, 0]]) rail.add(new THREE.SphereGeometry(0.28, 12, 8), 'stone', [x, 1.35, zq]);
+  for (const [x, zq] of [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [0, 3.6], [3.6, 0], [0, -3.6], [-3.6, 0]]) rail.add(new THREE.SphereGeometry(0.17, 12, 8), 'stone', [x, 1.22, zq]);
   I.register('pillarRail2', rail.build(), { mats: { stone: M.pinkStone } }); I.put('pillarRail2', px, 0.4, pz, 0, 1.2);
   // big neem tree behind the pillar canopy over top-left
   I.ground('treeBig', sx - 14, 316, 0.3, 1.05);

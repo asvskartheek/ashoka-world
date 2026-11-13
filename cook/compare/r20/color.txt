@@ -1,0 +1,3 @@
+S02:
+saturation: mean delta -0.035, worst cell -0.220
+brightness: mean delta +0.018, worst cell +0.301

@@ -6,6 +6,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { fbm } from './textures.js';
 
 // ---------------- world height field ----------------
@@ -196,8 +197,21 @@ export function buildComposer(renderer, scene, camera, w, h) {
   comp.addPass(new RenderPass(scene, camera));
   comp.addPass(new ShaderPass({ uniforms: { tDiffuse: { value: null } }, vertexShader: GradeShader.vertexShader,
     fragmentShader: `uniform sampler2D tDiffuse; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); if (any(isnan(c)) || any(isinf(c))) c = vec4(0.0, 0.0, 0.0, 1.0); gl_FragColor = vec4(min(c.rgb, vec3(64.0)), 1.0); }` }));
+  // ground-truth ambient occlusion; the G-buffer pass skips alpha-tested, transparent and custom-shader meshes
+  // (leaf cards, grass, water, sky, clouds, decals) so cut-out foliage does not occlude as solid squares
+  const gtao = new GTAOPass(scene, camera, w, h);
+  gtao.overrideVisibility = function () {
+    const cache = this._visibilityCache;
+    this.scene.traverse((o) => {
+      cache.set(o, o.visible);
+      const m = o.material;
+      if (o.isPoints || o.isLine || (o.isMesh && m && (m.alphaTest > 0 || m.transparent || m.isShaderMaterial))) o.visible = false;
+    });
+  };
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
+  comp.addPass(gtao);
   const bloom = new UnrealBloomPass(new THREE.Vector2(w / 2, h / 2), 0.18, 0.5, 0.92); comp.addPass(bloom);
   comp.addPass(new OutputPass());
   const grade = new ShaderPass(GradeShader); grade.uniforms.res.value.set(w, h); comp.addPass(grade);
-  return { comp, bloom, grade };
+  return { comp, bloom, grade, gtao };
 }

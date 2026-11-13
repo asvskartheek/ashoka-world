@@ -277,3 +277,24 @@ Measured: S04 sat +0.010 bright -0.085.
 Top gaps: S02 reads as a sunset sky and a matte floor (critics now ask for more gloss), small king, oversized banner; S03 and S04 skies read hazy, too few clouds; S01 needs a busier river and denser city; people still read as mannequins close up.
 Stop check: bar no | floor no (about 2.2h) | approved no | final no -> next round
 Next focus: round 19 = S02 (weakest shot every round): daylight sky, glossier floor, crown, smaller banner; clearer skies for S03 and S04.
+
+## Round 19
+
+Time: about 08:31 to 08:36 UTC
+Focus: S02 (weakest every round) plus clearer S03 and S04 skies.
+Changes: S02 daylight sky behind the hall, floor reflection alpha 0.24, banner 2.4 × 5.4 m, warmer grade with sat 1.26 (first try measured S02 saturation at -0.137, corrected to -0.040); S03 and S04 bluer zeniths and cloud cover 0.46.
+Stills: `cook/stills/r19/` | Side by side: `cook/compare/r19/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r18 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 70 | 53 | 62 | 45 | 37 | 53 | 72 | 0 (unchanged render) |
+| S02 | 66 | 44 | 53 | 35 | 28 | 45 | 64 | -2 |
+| S03 | 79 | 60 | 64 | 51 | 41 | 59 | 78 | -2 |
+| S04 | 62 | 53 | 59 | 44 | 37 | 51 | 70 | -1 |
+
+Overall raw 52, calibrated 71. No gain: the S02 changes did not move its score, and the cloudier S03 sky read as "uniform". Best so far stays round 16.
+Measured: S02 sat -0.040 bright +0.039; S03 sat -0.010 bright -0.014; S04 sat -0.004 bright -0.073.
+Diagnosis: scores have plateaued at about 52 to 55 raw (71 to 74 calibrated) for four rounds. Every critic names the same remaining gaps: (1) close-range people (faces, cloth, hands), (2) flat shading with no contact shadows or ambient occlusion, (3) unreadable lion capitals, (4) sparse near-field props. Scene-tuning rounds no longer move the median by more than the noise (about ±4).
+Decision: round 20 attacks (2) and (3) globally: a GTAO ambient-occlusion pass in the renderer, and a parallel builder sculpting proper lion capitals. S03 cloud cover goes back to 0.55; the S04 railing finials shrink.
+Stop check: bar no | floor no (about 2.3h) | approved no | final no -> next round
