@@ -160,7 +160,7 @@ export function buildWorld(scene, M) {
   palisade(wall.x1, 0, wall.x1, wall.z0);
   palisade(wall.x0, wall.z0, wall.x1, wall.z0);
   const towersAt = [];
-  for (let x = wall.x0; x <= wall.x1 + 1; x += 50) if (Math.abs(x) > 20) towersAt.push([x === wall.x0 ? x : x - 10, 0]);
+  for (let x = wall.x0; x <= wall.x1 + 1; x += 50) { const xx = x === wall.x0 ? x : x - 10; if (Math.abs(xx) > 24 && Math.abs(xx + 40) > 14 && Math.abs(xx - 52) > 14) towersAt.push([xx, 0]); }
   towersAt.push([-40, 0], [52, 0]);
   for (let z = -50; z > wall.z0; z -= 58) { towersAt.push([wall.x0, z]); towersAt.push([wall.x1, z]); }
   for (let x = wall.x0 + 55; x < wall.x1; x += 62) towersAt.push([x, wall.z0]);
@@ -177,7 +177,7 @@ export function buildWorld(scene, M) {
   const bannerPole = (x, z, h = 12, kind = 'banner') => { const y0 = height(x, z); const r = I.reg.get(kind); const m1 = new THREE.Matrix4().compose(new THREE.Vector3(x + 0.85, y0 + h - 2, z), new THREE.Quaternion(), new THREE.Vector3(1, 1, 1)); r.items.push({ m: m1, col: {} }); };
   // (banner geometry and pole share one matrix — pole scaled separately below)
   I.register('pole', { pole: new THREE.CylinderGeometry(0.07, 0.09, 1, 6) }, {});
-  for (const x of [-13, 13]) { bannerPole(x, 6.5, 14); I.put('pole', x, 7, 6.5, 0, [1, 14, 1]); }
+  for (const x of [-14.8, 14.8]) { bannerPole(x, 9.5, 15); I.put('pole', x, 7.5, 9.5, 0, [1, 15, 1]); }
 
   // moat bridge: stone abutments + timber deck + railings
   const bridge = new A.AB();
