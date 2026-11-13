@@ -159,7 +159,7 @@ function keyInterp(K, y) {
   return o;
 }
 // torso key rings relative to hip-joint height: [y, half width, front depth, back depth, z shift]
-const TK_M = [[-0.13, 0.095, 0.065, 0.08, -0.01], [-0.07, 0.146, 0.09, 0.11, -0.012], [0.02, 0.16, 0.094, 0.112, -0.006], [0.1, 0.15, 0.094, 0.095, 0], [0.18, 0.138, 0.098, 0.084, 0], [0.28, 0.148, 0.104, 0.09, 0], [0.37, 0.163, 0.114, 0.096, 0.004], [0.44, 0.174, 0.108, 0.1, 0], [0.49, 0.166, 0.084, 0.094, -0.01], [0.535, 0.115, 0.062, 0.072, -0.016], [0.575, 0.056, 0.05, 0.054, -0.012]];
+const TK_M = [[-0.13, 0.095, 0.065, 0.08, -0.01], [-0.07, 0.146, 0.09, 0.11, -0.012], [0.02, 0.16, 0.094, 0.112, -0.006], [0.1, 0.15, 0.094, 0.095, 0], [0.18, 0.138, 0.098, 0.084, 0], [0.28, 0.148, 0.104, 0.09, 0], [0.37, 0.163, 0.114, 0.096, 0.004], [0.44, 0.172, 0.108, 0.1, 0], [0.49, 0.158, 0.084, 0.094, -0.01], [0.535, 0.108, 0.062, 0.072, -0.016], [0.575, 0.056, 0.05, 0.054, -0.012]];
 const TK_F = [[-0.13, 0.1, 0.07, 0.088, -0.012], [-0.07, 0.158, 0.094, 0.122, -0.014], [0.02, 0.166, 0.094, 0.115, -0.008], [0.1, 0.142, 0.09, 0.09, 0], [0.19, 0.12, 0.085, 0.076, 0], [0.28, 0.132, 0.09, 0.08, 0], [0.37, 0.142, 0.098, 0.086, 0.004], [0.44, 0.15, 0.094, 0.088, 0], [0.49, 0.146, 0.078, 0.085, -0.01], [0.53, 0.104, 0.058, 0.068, -0.014], [0.565, 0.05, 0.045, 0.049, -0.012]];
 function torsoRel(B, th, y, off = 0) {
   const k = keyInterp(B.K, y); const a = k[0] * B.bw, bf = k[1] + B.belly * gss(y - 0.15, 0.08), bb = k[2], dz = k[3];
@@ -169,7 +169,7 @@ function torsoRel(B, th, y, off = 0) {
   const ax = Math.abs(x), front = Math.max(0, c), back = Math.max(0, -c);
   let push = 0;
   if (B.fem) push += B.bust * gss(ax - 0.068, 0.036) * gss(y - 0.36, 0.038) * front;
-  else push += 0.013 * gss(ax - 0.068, 0.045) * gss(y - 0.415, 0.032) * front * B.musc - 0.005 * gss(x, 0.012) * gss(y - 0.25, 0.12) * front;
+  else push += (0.017 * gss(ax - 0.066, 0.045) * gss(y - 0.415, 0.03) - 0.006 * gss(x, 0.01) * gss(y - 0.4, 0.06)) * front * B.musc - 0.005 * gss(x, 0.012) * gss(y - 0.25, 0.12) * front + 0.004 * gss(ax - 0.035, 0.02) * gss(y - 0.27, 0.05) * front * B.musc - 0.004 * gss(x, 0.006) * gss(y - 0.19, 0.008) * front;
   push += 0.008 * gss(ax - 0.075, 0.04) * gss(y - 0.43, 0.05) * back - 0.007 * gss(x, 0.016) * sstep(0.04, 0.16, y) * sstep(0.56, 0.44, y) * back;
   push += 0.006 * gss(y - 0.512, 0.012) * gss(ax - 0.06, 0.035) * front;
   const r = push + off; const nx = s / Math.max(a, 0.01), nz = c / Math.max(c > 0 ? bf : bb, 0.01); const nl = Math.hypot(nx, nz) || 1;
@@ -180,16 +180,16 @@ const HA = (u) => { const w = 2 * u - 1; return Math.PI * (0.45 * w + 0.55 * w *
 const HP = (v) => 0.001 + (Math.PI - 0.002) * (v + 0.1 * Math.sin(2 * Math.PI * v)); // polar, dense at the face
 function headPt(H, a, pol, off = 0) {
   const sp = Math.sin(pol), x = Math.sin(a) * sp, y = Math.cos(pol), z = Math.cos(a) * sp;
-  const ra = 0.074 * H.w, rb = 0.113, rc = z > 0 ? 0.092 : 0.102;
+  const ra = 0.077 * H.w, rb = 0.11, rc = z > 0 ? 0.094 : 0.104;
   let X = x * ra, Y = y * rb, Z = z * rc;
   const low = sstep(0.0, -0.105, Y);
-  X *= 1 - low * (0.3 - 0.12 * H.jaw);
+  X *= (1 - low * (0.26 - 0.1 * H.jaw)) * (1 + 0.05 * gss(Y - 0.035, 0.04));
   if (z < 0) Z *= 1 - 0.5 * sstep(-0.02, -0.1, Y);
   if (z > 0) { Z -= 0.03 * x * x * z; Z *= 1 - 0.12 * low; }
   if (Y > 0.02) Z -= 0.006 * sstep(0.02, 0.1, Y) * z; // forehead slopes back
   if (z > 0.2) {
     const fx = X, fy = Y, ax = Math.abs(fx); let dz = 0;
-    dz -= 0.0105 * gss(ax - 0.031, 0.013) * gss(fy - 0.01, 0.0105); // eye sockets
+    dz -= 0.012 * gss(ax - 0.031, 0.013) * gss(fy - 0.01, 0.0105); // eye sockets
     dz += 0.006 * gss(fy - 0.031, 0.008) * gss(fx, 0.035) * H.brow; // brow ridge
     const nt = sstep(0.028, -0.033, fy);
     let nA = 0; if (fy < 0.03 && fy > -0.05) nA = (0.003 + 0.021 * nt * nt) * (fy < -0.033 ? sstep(-0.047, -0.033, fy) : 1);
@@ -211,32 +211,33 @@ const BEARDTOP = [[0, 2.36], [0.22, 2.3], [0.42, 2.02], [0.8, 1.78], [1.2, 1.62]
 function buildHead(type, r, pose) {
   const hb = new AB(); const fem = type === 'woman';
   const H = { w: fem ? 0.95 : 0.98 + r() * 0.06, jaw: fem ? 0.2 : 0.5 + r() * 0.5, nose: 0.85 + r() * 0.35, chin: fem ? 0.8 : 0.9 + r() * 0.4, brow: fem ? 0.6 : 1 + r() * 0.3, lips: fem ? 1.2 : 1 };
-  hb.add(surf((u, v) => headPt(H, HA(u), HP(v)), 48, 36, { closeU: true, flip: true }), 'skin');
+  hb.add(surf((u, v) => headPt(H, HA(u), HP(v)), 40, 30, { closeU: true, flip: true }), 'skin');
   // eyes, lids, lips, ears
+  const brows = type !== 'monk' || r() < 0.5;
   for (const side of [-1, 1]) {
     const pe = new V3(...headPt(H, side * 0.37, 1.462)); const ne = new V3(side * 0.25, 0.08, 1).normalize();
-    hb.add(sph(0.0115, 10, 8), 'eye', pe.clone().addScaledVector(ne, -0.0085).toArray());
-    const lid = new THREE.SphereGeometry(0.0128, 10, 5, 0, Math.PI * 2, 0, Math.PI * 0.52); hb.add(lid, 'skin', pe.clone().addScaledVector(ne, -0.0082).toArray(), [0.35, side * 0.25, 0]);
-    const ep = new V3(...headPt(H, side * 1.66, 1.6, 0.002));
+    const eye = sph(0.0115, 10, 8); eye.scale(1.3, 0.75, 1); hb.add(eye, 'eye', pe.clone().addScaledVector(ne, -0.0078).toArray(), [0, side * 0.3, 0]);
+    if (brows) hb.add(tubeSurf([0.17, 0.32, 0.47, 0.6].map((a, i) => headPt(H, side * a, 1.25 + i * i * 0.012, 0.0015)), (v) => (fem ? 0.0022 : 0.003) * (1 - 0.5 * v), 5, 8), 'hair');
+    const ep = new V3(...headPt(H, side * 1.62, 1.6, 0.002));
     const ear = sph(1, 10, 8); ear.scale(0.009, 0.031, 0.02); hb.add(ear, 'skin', ep.toArray(), [0, side * 0.35, -side * 0.08]);
     const rim = new THREE.TorusGeometry(0.019, 0.0045, 5, 12, Math.PI * 1.3); rim.scale(0.7, 1.4, 1); hb.add(rim, 'skin', ep.clone().add(new V3(side * 0.006, 0.004, -0.003)).toArray(), [0, side * Math.PI / 2 + side * 0.35, Math.PI * 0.35]);
     if (fem || type === 'noble') hb.add(sph(0.009, 8, 6), 'gold', ep.clone().add(new V3(side * 0.006, -0.036, 0)).toArray());
   }
-  const ul = sph(1, 12, 6); ul.scale(0.019, 0.0045, 0.006); hb.add(ul, 'lips', headPt(H, 0, 2.08, -0.0015));
-  const ll = sph(1, 12, 6); ll.scale(0.017, 0.0055, 0.006); hb.add(ll, 'lips', headPt(H, 0, 2.2, -0.0018));
+  const ul = sph(1, 12, 6); ul.scale(0.0175, 0.0035, 0.005); hb.add(ul, 'lips', headPt(H, 0, 2.09, -0.003));
+  const ll = sph(1, 12, 6); ll.scale(0.016, 0.0045, 0.005); hb.add(ll, 'lips', headPt(H, 0, 2.2, -0.003));
   // hair
   const hairShell = (lineFn, th, key, nu = 40, nv = 14, extra = null) => hb.add(surf((u, v) => {
-    const a = HA(u), pm = lineFn(a); const pol = 0.001 + v * (pm - 0.001);
+    const a = (u - 0.5) * 2 * Math.PI, pm = lineFn(a); const pol = 0.001 + v * (pm - 0.001);
     let t = th(v, a); const p = headPt(H, a, pol, t); if (extra) extra(p, a, v); return p;
   }, nu, nv, { closeU: true, flip: true, uS: 2, vS: 2 }), key);
   const hl = (a) => pwl(HAIRLINE, Math.abs(a));
   const style = type === 'monk' ? 'shaved' : fem ? 'bun' : type === 'scribe' ? (r() < 0.7 ? 'topknot' : 'short') : type === 'noble' ? 'long' : ['short', 'short', 'topknot', 'long', 'curly'][Math.floor(r() * 5)];
-  if (style === 'shaved') hairShell(hl, () => 0.0012, 'stubble', 36, 12);
+  if (style === 'shaved') { if (r() < 0.4) hairShell(hl, () => 0.0022, 'stubble', 44, 12); }
   else {
     const thick = style === 'curly' ? 0.012 : style === 'short' ? 0.007 : 0.009;
     const crv = style === 'curly' ? r() * 10 : 0;
     hairShell((a) => hl(a) + (fem || style === 'long' ? 0.06 + 0.12 * sstep(1.2, 2.6, Math.abs(a)) : 0), (v, a) => thick * (0.3 + 0.7 * sstep(1, 0.55, v)) * (fem ? 1.2 : 1),
-      'hair', 40, 14, (p, a, v) => {
+      'hair', 36, 12, (p, a, v) => {
         if (crv) { const k = 1 + 0.06 * Math.sin(p[0] * 160 + crv) * Math.sin(p[1] * 150) * Math.sin(p[2] * 170); p[0] *= k; p[1] *= k; p[2] *= k; }
         if (fem || style === 'long') { const part = gss(p[0], 0.004) * sstep(-0.02, 0.06, p[2]) * 0.004; p[1] -= part; }
       });
@@ -261,12 +262,12 @@ function buildHead(type, r, pose) {
   if (turban) {
     const big = type === 'noble' ? 1.25 : type === 'soldier' ? 0.9 : 1 + r() * 0.2;
     const tl = (a) => mix(1.2, 1.62, sstep(0.3, 2.6, Math.abs(a)));
-    hb.add(surf((u, v) => { const a = HA(u); const pol = 0.001 + v * (tl(a) - 0.001); const p = headPt(H, a, pol, 0.018 + 0.02 * big * (1 - v)); p[1] += 0.028 * big * (1 - v) * (1 - v); return p; }, 36, 12, { closeU: true, flip: true, uS: 3, vS: 2 }), 'accent');
-    const nb = type === 'soldier' ? 3 : 4 + (r() < 0.5 ? 1 : 0);
+    hb.add(surf((u, v) => { const a = (u - 0.5) * 2 * Math.PI; const pol = 0.001 + v * (tl(a) - 0.001); const p = headPt(H, a, pol, 0.018 + 0.02 * big * (1 - v)); p[1] += 0.028 * big * (1 - v) * (1 - v); return p; }, 36, 12, { closeU: true, flip: true, uS: 3, vS: 2 }), 'accent');
+    const nb = type === 'soldier' ? 3 : 4;
     for (let k = 0; k < nb; k++) {
       const sgn = k % 2 ? 1 : -1, tilt = (0.12 + r() * 0.08) * sgn, base = k / nb;
       const pts = []; for (let i = 0; i < 24; i++) { const a = -Math.PI + i / 24 * Math.PI * 2; const pol = tl(a) - 0.06 - base * mix(0.85, 0.55, sstep(0, 2.6, Math.abs(a))) + tilt * Math.sin(a); const p = headPt(H, a, Math.max(0.25, pol), 0.022 + 0.01 * big); p[1] += 0.01 * base * big; pts.push(p); }
-      hb.add(tubeSurf(pts, (v, d, u) => 0.016 + 0.004 * Math.sin(v * 37 + k), 8, 40, { closed: true, uS: 1, vS: 6 }), 'accent');
+      hb.add(tubeSurf(pts, (v, d, u) => 0.016 + 0.004 * Math.sin(v * 37 + k), 6, 28, { closed: true, uS: 1, vS: 6 }), 'accent');
     }
     if (type === 'noble') {
       const pts = []; for (let i = 0; i < 24; i++) { const a = -Math.PI + i / 24 * Math.PI * 2; pts.push(headPt(H, a, tl(a) - 0.05, 0.05)); }
@@ -329,7 +330,7 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
   for (const L of legs) {
     const H0 = toV(L.hip), K = toV(L.knee), A = toV(L.ankle);
     const pts = [H0.clone().add(new V3(-L.side * 0.02, 0.07, -0.01)), H0, H0.clone().lerp(K, 0.82), K, K.clone().lerp(A, 0.18), A];
-    if (!sit) b.add(tubeSurf(pts, (v) => legR(v), 12, 22), 'skin');
+    if (!sit) b.add(tubeSurf(pts, (v) => legR(v), 10, 20), 'skin');
     else b.add(tubeSurf([K.clone().lerp(A, 0.3), A], () => 0.042, 8, 4), 'skin');
     // foot
     let F, U = [0, 1, 0], o;
@@ -342,11 +343,11 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
   }
   // ---------------- torso
   const TP = (th, y, off = 0) => { const p = torsoRel(B, th, y, off); p[1] += hipJ; return p; };
-  b.add(surf((u, v) => TP((u - 0.5) * 2 * Math.PI, mix(-0.13, 0.575, v)), 32, 26, { closeU: true }), 'skin');
+  b.add(surf((u, v) => TP((u - 0.5) * 2 * Math.PI, mix(-0.13, 0.575, v)), 28, 22, { closeU: true }), 'skin');
   // ---------------- arms
-  const shY = hipJ + 0.485, shX = torsoRel(B, Math.PI / 2, 0.47)[0] - 0.032;
+  const shY = hipJ + 0.475, shX = torsoRel(B, Math.PI / 2, 0.45)[0] - 0.03;
   const armL1 = fem ? 0.27 : 0.285, armL2 = fem ? 0.24 : 0.255;
-  const holdShawl = !seated && type !== 'soldier' && r() < 0.18 ? (r() < 0.5 ? -1 : 1) : 0;
+  const longSk = type === 'monk' || fem || type === 'noble';
   const armPose = (side) => {
     const S = [side * shX, shY, -0.012];
     if (throne && side === -1) return { W: [-0.36, shY + 0.02, 0.36], pole: [-1, -1, -0.3], pn: [0.2, 0.3, 1], fd: null };
@@ -356,9 +357,8 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     if (sit) return { W: [side * 0.3, hipJ + 0.12, 0.25], pole: [side, -0.2, -1], pn: [0, -1, 0] };
     if (type === 'soldier' && side === 1) return { W: [0.25, shY - 0.33, 0.16], pole: [1, -0.5, -1], pn: [-1, 0, 0] };
     if (type === 'soldier') return { W: [-0.27, shY - 0.36, 0.12], pole: [-1, -0.3, -1], pn: [-1, 0, 0] };
-    if (holdShawl === side) return { W: [side * 0.05, shY - 0.2, 0.15], pole: [side, -1, -0.2], pn: [0, 0, -1] };
     const a = pose === 'walk' ? -side * sw * 1.0 : (r() - 0.5) * 0.12;
-    const ln = 0.52; return { W: [side * (shX + 0.05), shY - ln * Math.cos(a), ln * Math.sin(a) + 0.05], pole: [side * 0.4, 0, -1], pn: [-side, 0, 0] };
+    const ln = 0.52; return { W: [side * (shX + (fem ? 0.12 : longSk ? 0.09 : 0.06)), shY - ln * Math.cos(a), ln * Math.sin(a) + (longSk ? 0.08 : 0.05)], pole: [side * 0.4, 0, -1], pn: [-side, 0, 0] };
   };
   const arms = [];
   for (const side of [-1, 1]) {
@@ -366,9 +366,9 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     const [E, W] = ik(S, ap.W, armL1, armL2, ap.pole);
     arms.push({ side, S, E, W });
     const k = fem ? 0.84 : (type === 'soldier' ? 1.08 : 1);
-    const pts = [S.clone().add(new V3(-side * 0.035, 0.012, 0)), S, S.clone().lerp(E, 0.85), E, E.clone().lerp(W, 0.15), W];
-    b.add(tubeSurf(pts, (v) => k * pwl([[0, 0.05], [0.12, 0.054], [0.3, 0.046], [0.5, 0.036], [0.6, 0.04], [0.82, 0.03], [1, 0.025]], v), 12, 22), 'skin');
-    const dl = sph(1, 12, 8); dl.scale(0.05 * k, 0.058 * k, 0.052 * k); b.add(dl, 'skin', S.clone().add(new V3(side * 0.012, -0.005, 0)).toArray());
+    const ud = E.clone().sub(S).normalize(); const pts = [S.clone().addScaledVector(ud, -0.035).add(new V3(-side * 0.012, 0, 0)), S, S.clone().lerp(E, 0.78), E, E.clone().lerp(W, 0.22), W];
+    b.add(sph(0.03 * k, 10, 8), 'skin', pts[0].clone().add(new V3(-side * 0.012, -0.004, 0)).toArray());
+    b.add(tubeSurf(pts, (v) => k * pwl([[0, 0.032], [0.05, 0.048], [0.1, 0.054], [0.17, 0.053], [0.32, 0.045], [0.5, 0.036], [0.6, 0.04], [0.82, 0.03], [1, 0.025]], v), 11, 22), 'skin');
     const fd = W.clone().sub(E).normalize();
     const hm = basisM(W, fd, toV(ap.pn)); const hand = buildHand(side, fem);
     for (const g of hand.parts.skin) b.addM(g, 'skin', hm);
@@ -376,13 +376,13 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     if (type === 'noble' || (fem && r() < 0.5)) { const d2 = E.clone().sub(S).normalize(); b.addM(new THREE.TorusGeometry(0.047 * k, 0.008, 6, 16), 'gold', new THREE.Matrix4().compose(S.clone().lerp(E, 0.45), new THREE.Quaternion().setFromUnitVectors(new V3(0, 0, 1), d2), new V3(1, 1, 1))); }
     if (type === 'soldier' && side === 1) { b.add(cyl(0.012, 0.012, 2.3, 6), 'pole', [W.x, W.y + 0.55, W.z + 0.03]); b.add(new THREE.ConeGeometry(0.028, 0.24, 6), 'iron', [W.x, W.y + 1.82, W.z + 0.03]); }
     if (type === 'soldier' && side === -1) {
-      const shd = lathe([[0, 0.05], [0.08, 0.045], [0.2, 0.025], [0.29, 0.0], [0.3, -0.01], [0, -0.01]], 28); const c = W.clone().add(new V3(-0.07, 0.1, 0.04));
+      const shd = lathe([[0, 0.05], [0.08, 0.045], [0.2, 0.025], [0.29, 0.0], [0.3, -0.01], [0, -0.01]], 28); const c = W.clone().add(new V3(-0.03, 0.06, 0.13));
       b.add(shd, 'prop', c.toArray(), [Math.PI / 2, 0, -0.35]); b.add(new THREE.TorusGeometry(0.295, 0.016, 6, 28), 'iron', c.toArray(), [0, -0.35, 0]); b.add(sph(0.05, 10, 6), 'iron', c.clone().add(new V3(0.02, 0, 0.05)).toArray());
     }
   }
   // ---------------- neck & head
   const HC = new V3(0, hipJ + 0.68, 0.016 + (sit && type === 'scribe' ? 0.04 : 0));
-  b.add(tubeSurf([[0, hipJ + 0.48, -0.016], [0, hipJ + 0.57, -0.006], [0, HC.y - 0.03, HC.z - 0.012]], (v) => mix(0.056, 0.047, v) * (fem ? 0.9 : 1), 12, 6), 'skin');
+  b.add(tubeSurf([[0, hipJ + 0.44, -0.018], [0, hipJ + 0.56, -0.006], [0, HC.y - 0.03, HC.z - 0.012]], (v) => pwl([[0, 0.075], [0.3, 0.064], [0.45, 0.056], [1, 0.047]], v) * (fem ? 0.9 : 1), 14, 10), 'skin');
   const pitch = sit && type === 'scribe' ? 0.38 : type === 'monk' && sit ? 0.12 : (r() - 0.5) * 0.14, yaw = throne ? -0.25 : (r() - 0.5) * 0.4;
   b.merge(buildHead(type, r, pose), HC.toArray(), [pitch, yaw, 0]);
   // ---------------- garments
@@ -404,19 +404,19 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     const tp = torsoRel(B, th, Math.max(yR, -0.13), off);
     let best = -1e9, hx = 0, hz = 0;
     for (const L of legs) { const c = legAt(L, yA); const pr = c[0] * dx + c[1] * dz + c[2]; if (pr > best) { best = pr; hx = c[0] + dx * (c[2] + off); hz = c[1] + dz * (c[2] + off); } }
-    const w = sstep(-0.02, -0.15, yR);
+    let w = sstep(-0.02, -0.15, yR); const prT = tp[0] * dx + tp[2] * dz, prH = hx * dx + hz * dz; if (prH > prT) w = Math.max(w, clamp01((prH - prT) / 0.015)); else if (yR > -0.13) w = Math.min(w, 1 - clamp01((prT - prH) / 0.015));
     return [mix(tp[0], hx, w), yA, mix(tp[2], hz, w)];
   };
-  const skirt = (key, o, nu = 64, nv = 26) => b.add(surf((u, v) => skirtPt((u - 0.5) * 2 * Math.PI, v, o), nu, nv, { closeU: true, flip: true, uS: 3, vS: 3 }), key);
+  const skirt = (key, o, nu = 56, nv = 22) => b.add(surf((u, v) => skirtPt((u - 0.5) * 2 * Math.PI, v, o), nu, nv, { closeU: true, flip: true, uS: 3, vS: 3 }), key);
   const border = (key, o, frac = 0.07) => b.add(surf((u, v) => { const p = skirtPt((u - 0.5) * 2 * Math.PI, 1 - frac + frac * v, { ...o, off: o.off + 0.0025 }); return p; }, 64, 2, { closeU: true, flip: true, uS: 6, vS: 0.3 }), key);
-  const hemRoll = (key, o, rad = 0.007) => { const pts = []; for (let i = 0; i < 48; i++) pts.push(skirtPt(-Math.PI + i / 48 * Math.PI * 2, 1, o)); b.add(tubeSurf(pts, () => rad, 5, 64, { closed: true }), key); };
+  const hemRoll = (key, o, rad = 0.007) => { const pts = []; for (let i = 0; i < 40; i++) pts.push(skirtPt(-Math.PI + i / 40 * Math.PI * 2, 1, o)); b.add(tubeSurf(pts, () => rad, 5, 48, { closed: true }), key); };
   const waistRoll = (key, y, off, rad = 0.016) => { const pts = []; for (let i = 0; i < 24; i++) pts.push(TP(-Math.PI + i / 24 * Math.PI * 2, y, off)); b.add(tubeSurf(pts, (v) => rad * (1 + 0.25 * Math.sin(v * 31)), 6, 40, { closed: true }), key); };
-  const pleatsFront = (key, o, w0 = 0.07, w1 = 0.2, n = 5) => { const pts = []; for (let i = 0; i <= 5; i++) { const p = skirtPt(0, i / 5, o); p[2] += 0.014; pts.push(p); } b.add(panel(pts, (v) => mix(w0, w1, v), { pleats: n, depth: 0.011, out: [0, 0, 1] }), key); };
+  const pleatsFront = (key, o, w0 = 0.07, w1 = 0.2, n = 5, th = 0, dep = 0.011) => { const pts = []; for (let i = 0; i <= 5; i++) { const p = skirtPt(th, i / 5, o); p[0] += Math.sin(th) * 0.01; p[2] += Math.cos(th) * 0.01; pts.push(p); } b.add(panel(pts, (v) => mix(w0, w1, v), { pleats: n, depth: dep, out: [Math.sin(th), 0, Math.cos(th)] }), key); };
   // shell on the torso between yLo(th) and yHi(th) (relative y)
-  const shell = (key, yLo, yHi, off, A, { th0 = -Math.PI, th1 = Math.PI, nu = 56, nv = 18, diag = 0.6, edge = 0 } = {}) => {
+  const shell = (key, yLo, yHi, off, A, { th0 = -Math.PI, th1 = Math.PI, nu = 48, nv = 16, diag = 0.6, edge = 0 } = {}) => {
     const fn = (u, v) => { const th = mix(th0, th1, u); const y0 = yLo(th), y1 = Math.min(0.57, yHi(th)); const y = mix(y0, y1, v); const x = Math.sin(th) * 0.17; const q = y - diag * x; const f = A * Math.sin(q * 55 + ph + 2 * Math.sin(th * 3)) * (0.5 + 0.5 * Math.sin(th * 5 + ph2)); return TP(th, y, off + A + f); };
     b.add(surf(fn, nu, nv, { closeU: th1 - th0 > 6, uS: 3, vS: 1.5 }), key);
-    if (edge) { const closed = th1 - th0 > 6; const pts = []; const n = 40; for (let i = 0; i < (closed ? n : n + 1); i++) pts.push(fn(i / n, 1)); b.add(tubeSurf(pts, () => edge, 5, 60, { closed }), key); if (edge > 0 && !closed) { } }
+    if (edge) { const closed = th1 - th0 > 6; const pts = []; const n = 40; for (let i = 0; i < (closed ? n : n + 1); i++) pts.push(fn(i / n, 1)); b.add(tubeSurf(pts, () => edge, 5, 48, { closed }), key); if (edge > 0 && !closed) { } }
     return fn;
   };
   const sleeve = (key, arm, reach = 0.55, rad = 0.066, droop = 0.07) => { const { S, E, W } = arm; b.add(tubeSurf([S.clone().add(new V3(-arm.side * 0.04, 0.045, 0)), S.clone().add(new V3(arm.side * 0.01, 0.01, 0)), S.clone().lerp(E, 0.6), E, E.clone().lerp(W, reach)], (v, d, u) => rad + 0.012 * v + droop * v * Math.max(0, -d.y) ** 2 + 0.005 * Math.sin(u * 31 + v * 9), 14, 18), key); };
@@ -430,12 +430,12 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     if (!seated) {
       const outO = { top: 0.12, hem: 0.3 + r() * 0.08, off: 0.03, A: 0.014, flare: 0.06, hemWave: 0.03, hemBack: -0.04 };
       skirt('garment', lowO, 48, 18); skirt('garment', outO); hemRoll('garment', outO, 0.008);
-      pleatsFront('garment', outO, 0.08, 0.16, 3);
+      pleatsFront('garment', outO, 0.06, 0.12, 3, 0.2, 0.009);
     }
     shell('garment', () => 0.06, topFn, 0.018, 0.006, { edge: 0.011 });
-    sleeve('garment', arms[1], 0.62, 0.068, 0.09);
+    sleeve('garment', arms[1], 0.62, 0.064, seated ? 0.04 : 0.07);
     // fold of cloth hanging from the left shoulder down the back
-    const a1 = arms[1].S; b.add(panel([[a1.x - 0.04, a1.y + 0.04, -0.05], [a1.x - 0.02, a1.y - 0.1, -0.13], [a1.x - 0.04, hipJ + 0.15, -0.135]], (v) => mix(0.08, 0.16, v), { pleats: 3, depth: 0.012, side: [1, 0, 0], out: [0, 0, -1] }), 'garment');
+    b.add(panel([TP(Math.PI - 0.75, 0.53, 0.035), TP(Math.PI - 0.6, 0.4, 0.045), TP(Math.PI - 0.5, 0.15, 0.05)], (v) => mix(0.08, 0.16, v), { pleats: 3, depth: 0.012, side: [1, 0, 0], out: [0, 0, -1] }), 'garment');
   } else if (fem) {
     const sk = { top: 0.15, hem: 0.035, off: 0.014, A: 0.01, flare: 0.07, hemWave: 0.008 };
     if (!seated) { skirt('garment', sk); border('accent', sk, 0.06); pleatsFront('garment', sk, 0.06, 0.2, 6); }
@@ -444,14 +444,15 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     shell('shawl', () => 0.29, (th) => 0.53 - 0.06 * Math.max(0, Math.cos(th)), 0.008, 0.002, { nv: 10, edge: 0.005 });
     for (const a of arms) b.add(tubeSurf([a.S.clone().add(new V3(-a.side * 0.03, 0.02, 0)), a.S, a.S.clone().lerp(a.E, 0.35)], () => 0.058, 10, 6), 'shawl');
     // pallu: band from the right hip across the chest over the left shoulder, then hanging down the back
-    const lo = diagTop(0.1, 0.42), hi = diagTop(0.26, 0.62);
+    const lo = diagTop(0.17, 0.42), hi = diagTop(0.31, 0.62);
     shell('garment', lo, hi, 0.022, 0.006, { edge: 0.006, diag: 1.3 });
+    sleeve('garment', arms[1], 0.04, 0.072, 0.0);
     const a1 = arms[1].S;
     b.add(panel([[a1.x - 0.05, a1.y + 0.05, -0.04], [a1.x - 0.05, a1.y - 0.08, -0.12], [a1.x - 0.07, hipJ, -0.15], [a1.x - 0.08, hipJ - 0.28, -0.13]], (v) => mix(0.12, 0.3, v), { pleats: 4, depth: 0.014, side: [1, 0, 0.3], out: [0, 0, -1] }), 'garment');
   } else if (type === 'soldier') {
     const tu = { top: 0.2, hem: 0.47 + r() * 0.05, off: 0.02, A: 0.01, flare: 0.05, hemWave: 0.015 };
     if (!seated) { skirt('garment', tu, 56, 14); hemRoll('garment', tu, 0.007); }
-    shell('garment', () => 0.16, (th) => 0.56 - 0.05 * Math.max(0, Math.cos(th)), 0.012, 0.003, { nv: 14 });
+    shell('garment', () => 0.16, (th) => 0.545 - 0.05 * Math.max(0, Math.cos(th)), 0.012, 0.003, { nv: 14, edge: 0.008 });
     for (const a of arms) b.add(tubeSurf([a.S.clone().add(new V3(-a.side * 0.03, 0.03, 0)), a.S, a.S.clone().lerp(a.E, 0.45)], (v) => 0.064 + 0.008 * v, 10, 6), 'garment');
     // cross belts + waist belt (leather)
     for (const sg of [-1, 1]) shell('shawl', (th) => 0.34 + sg * 0.22 * Math.sin(th) * Math.sign(Math.cos(th) || 1) - 0.022, (th) => 0.34 + sg * 0.22 * Math.sin(th) * Math.sign(Math.cos(th) || 1) + 0.022, 0.02, 0, { nv: 2, nu: 48 });
@@ -464,17 +465,17 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
     if (!seated) {
       skirt('garment', dh); hemRoll('garment', dh, 0.007);
       if (type === 'noble') border('accent', dh, 0.05);
-      pleatsFront('garment', dh, 0.06, 0.15, 4);
+      pleatsFront('garment', dh, 0.045, 0.1, 3, -0.25 + r() * 0.15, 0.008);
     }
     waistRoll('garment', 0.15, 0.016, 0.014);
     // uttariya
     const st = type === 'noble' || type === 'scribe' ? 'sash' : ['sash', 'sash', 'both', 'none', 'none'][Math.floor(r() * 5)];
     if (st === 'sash') {
-      const lo = diagTop(0.12, 0.42), hi = diagTop(0.27, 0.62);
+      const lo = diagTop(0.19, 0.42), hi = diagTop(0.33, 0.62);
       shell('shawl', lo, hi, 0.02, 0.007, { edge: 0.007, diag: 1.3 });
       sleeve('shawl', arms[1], 0.05, 0.064, 0.0);
       const a1 = arms[1].S;
-      b.add(panel([[a1.x - 0.05, a1.y + 0.045, 0.03], [a1.x - 0.04, a1.y - 0.1, 0.11], [a1.x - 0.03, hipJ + 0.16, 0.13], [a1.x - 0.03, hipJ - (seated ? 0.05 : 0.25), 0.15]], (v) => mix(0.1, 0.16, v), { pleats: 3, depth: 0.01, side: [1, 0, 0], out: [0, 0, 1] }), 'shawl');
+      b.add(panel([[a1.x - 0.05, a1.y + 0.045, 0.03], [a1.x - 0.04, a1.y - 0.1, 0.11], [a1.x - 0.03, hipJ + 0.16, 0.14], [a1.x - 0.02, hipJ - (seated ? 0.05 : 0.25), seated ? 0.17 : 0.215]], (v) => mix(0.1, 0.16, v), { pleats: 3, depth: 0.01, side: [1, 0, 0], out: [0, 0, 1] }), 'shawl');
     } else if (st === 'both') {
       shell('shawl', (th) => mix(0.48, 0.3, Math.max(0, -Math.cos(th))) - 0.08 * Math.abs(Math.sin(th)), () => 0.6, 0.02, 0.006, { edge: 0.007, diag: 0 });
       for (const a of arms) {
@@ -485,31 +486,48 @@ export function human({ type = 'man', pose = 'stand', seed = 1, h = 1.7 } = {}) 
   }
   // seated lower garments
   if (sit) {
-    const discs = [[0, -0.02, 0.17]]; for (const L of legs) discs.push([L.knee[0], L.knee[2], 0.075]); if (type === 'monk') for (const L of legs) discs.push([L.ankle[0] * 0.8, L.ankle[2] + 0.02, 0.07]);
-    const kneeH = Math.max(legs[0].knee[1], legs[1].knee[1]) + 0.06;
-    const lapPt = (th, v) => {
-      const dx = Math.sin(th), dz = Math.cos(th); let best = -1e9, gx = 0, gz = 0; const off = 0.025;
-      for (const c of discs) { const pr = c[0] * dx + c[1] * dz + c[2]; if (pr > best) { best = pr; gx = c[0] + dx * (c[2] + off); gz = c[1] + dz * (c[2] + off); } }
-      const tp = TP(th, 0.14, 0.02); const fr = clamp01(dz * 1.3 + 0.4); const hT = mix(0.1, kneeH, fr);
-      const c1 = [mix(tp[0], gx, 0.8), hT + 0.03, mix(tp[2], gz, 0.8)];
-      const A = 0.018 * v * v; const fold = A * Math.sin(nf * 1.4 * th + ph) + 0.01 * v * Math.sin(5 * th + ph2);
-      const a = (1 - v) ** 2, bb = 2 * v * (1 - v), c = v * v;
-      return [a * tp[0] + bb * c1[0] + c * gx + dx * fold, a * tp[1] + bb * c1[1] + c * 0.012, a * tp[2] + bb * c1[2] + c * gz + dz * fold];
+    // cloth tented over the crossed legs and pooled on the floor (height field in polar coords around the waist)
+    const caps = []; for (const L of legs) { caps.push([L.hip, L.knee, 0.085]); caps.push([L.knee, L.ankle, 0.06]); }
+    const tent = (x, z) => {
+      let hh = 0.012;
+      for (const [A, Bp, rr] of caps) {
+        const ex = Bp[0] - A[0], ez = Bp[2] - A[2]; const t = clamp01(((x - A[0]) * ex + (z - A[2]) * ez) / (ex * ex + ez * ez));
+        const py = mix(A[1], Bp[1], t), dist = Math.hypot(x - A[0] - ex * t, z - A[2] - ez * t);
+        hh = Math.max(hh, py + rr + 0.025 - 1.6 * Math.max(0, dist - rr * 0.5));
+      }
+      return hh;
     };
-    b.add(surf((u, v) => lapPt((u - 0.5) * 2 * Math.PI, v), 64, 16, { closeU: true, flip: true, uS: 3, vS: 2 }), 'garment');
-    const pts = []; for (let i = 0; i < 48; i++) pts.push(lapPt(-Math.PI + i / 48 * Math.PI * 2, 1)); b.add(tubeSurf(pts, () => 0.01, 5, 64, { closed: true }), 'garment');
+    const lapCache = new Map();
+    const lapPt = (th, v) => {
+      const dx = Math.sin(th), dz = Math.cos(th); const s0 = TP(th, 0.13, 0.02);
+      let R = lapCache.get(th);
+      if (R === undefined) { R = 0.05; while (R < 0.8 && Math.max(tent(s0[0] + dx * R, s0[2] + dz * R), s0[1] - 1.5 * R) > 0.014) R += 0.01; R += 0.03 + 0.02 * Math.sin(7 * th + ph); lapCache.set(th, R); }
+      const rho = R * v; const x = s0[0] + dx * rho, z = s0[2] + dz * rho;
+      let y = Math.max(tent(x, z), s0[1] - 1.5 * rho);
+      const wr = 0.008 * Math.sin(nf * 1.3 * th + ph + rho * 9) * sstep(0.1, 0.5, v);
+      if (v === 1) y = 0.006;
+      return [x + dx * wr, y + Math.abs(wr) * 0.6, z + dz * wr];
+    };
+    b.add(surf((u, v) => lapPt((u - 0.5) * 2 * Math.PI, v), 64, 20, { closeU: true, uS: 3, vS: 2 }), 'garment');
+    const pts = []; for (let i = 0; i < 48; i++) pts.push(lapPt(-Math.PI + i / 48 * Math.PI * 2, 1)); b.add(tubeSurf(pts, () => 0.008, 5, 64, { closed: true }), 'garment');
     if (type !== 'monk') b.add(surf((u, v) => TP((u - 0.5) * 2 * Math.PI, mix(0.16, -0.12, v), 0.022), 40, 6, { closeU: true }), 'garment');
   }
   if (throne) {
     b.add(surf((u, v) => TP((u - 0.5) * 2 * Math.PI, mix(0.16, -0.13, v), 0.02 + 0.03 * v), 48, 8, { closeU: true }), 'garment');
-    for (const L of legs) {
-      const H0 = toV(L.hip), K = toV(L.knee), A = toV(L.ankle);
-      b.add(tubeSurf([H0.clone().add(new V3(0, 0.02, -0.06)), H0, K.clone().add(new V3(0, 0.0, 0.03))], (v, d, u) => 0.105 - 0.015 * v + 0.006 * Math.sin(u * 37 + v * 5) + 0.02 * Math.max(0, -d.y), 16, 10), 'garment');
-      b.add(tubeSurf([K.clone().add(new V3(0, 0.02, 0.0)), K.clone().lerp(A, 0.5), A.clone().add(new V3(0, 0.0, 0))], (v, d, u) => 0.075 + 0.025 * v + 0.006 * Math.sin(u * 41 + v * 7) + 0.015 * v * Math.max(0, -d.z), 16, 10), 'garment');
-      b.add(tubeSurf([A.clone().add(new V3(0, 0.01, 0)), A.clone().add(new V3(0, -0.01, 0.0))], () => 0.1, 16, 1), 'accent');
-    }
+    const legPt = (L, v) => (v < 0.5 ? toV(L.hip).lerp(toV(L.knee), v * 2) : toV(L.knee).lerp(toV(L.ankle).add(new V3(0, 0.03, 0)), (v - 0.5) * 2));
+    const X = new V3(1, 0, 0);
+    const loft = (u, v) => {
+      const p0 = legPt(legs[0], v), p1 = legPt(legs[1], v); const c = p0.clone().add(p1).multiplyScalar(0.5); const hx = Math.abs(p1.x - p0.x) / 2;
+      const T = legPt(legs[0], Math.min(1, v + 0.09)).sub(legPt(legs[0], Math.max(0, v - 0.09))).normalize();
+      const Yp = new V3().crossVectors(T, X).normalize(); const th = (u - 0.5) * 2 * Math.PI, sx = Math.sin(th);
+      const d = X.clone().multiplyScalar(sx).addScaledVector(Yp, Math.cos(th));
+      const rr = legR(v) + 0.026 + 0.03 * v + 0.006 * Math.sin(th * 9 + v * 6 + ph) * (0.4 + v) + 0.03 * Math.max(0, -d.y) * (v < 0.5 ? 1 : 0);
+      return c.addScaledVector(X, Math.sign(sx) * hx).addScaledVector(d, rr).toArray();
+    };
+    b.add(surf(loft, 40, 24, { closeU: true, uS: 3, vS: 3 }), 'garment');
+    { const pts = []; for (let i = 0; i < 32; i++) pts.push(loft(i / 32, 1)); b.add(tubeSurf(pts, () => 0.008, 5, 48, { closed: true }), 'accent'); }
     const kz = legs[0].knee[2];
-    b.add(panel([[0, hipJ + 0.16, 0.12], [0, hipJ + 0.11, 0.28], [0, hipJ + 0.06, kz + 0.03], [0, hipJ - 0.2, kz + 0.07], [0, 0.07, kz + 0.07]], (v) => mix(0.1, 0.22, v), { pleats: 5, depth: 0.012, out: [0, 1, 1] }), 'garment');
+    b.add(panel([[0, hipJ + 0.17, 0.12], [0, hipJ + 0.145, 0.28], [0, hipJ + 0.125, kz + 0.06], [0, hipJ - 0.15, kz + 0.12], [0, 0.07, kz + 0.12]], (v) => mix(0.1, 0.22, v), { pleats: 5, depth: 0.012, out: [0, 1, 1] }), 'garment');
   }
   if (type === 'noble' || fem) { const pts = []; for (let i = 0; i < 20; i++) pts.push(TP(-Math.PI + i / 20 * Math.PI * 2, 0.535 - 0.07 * Math.max(0, Math.cos(-Math.PI + i / 20 * Math.PI * 2)) ** 2, 0.008)); b.add(tubeSurf(pts, () => 0.007, 6, 30, { closed: true }), 'gold'); }
   // contact shadow decal
