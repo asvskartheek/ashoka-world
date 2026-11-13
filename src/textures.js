@@ -649,3 +649,24 @@ export function waterNormals({ size = 512 } = {}) {
   });
   return finish(c, { srgb: false });
 }
+
+// Shared weathering noise (linear RGBA, tileable, 256^2, no premultiplied alpha):
+// R, G = two independent low-frequency fbm fields (macro variation), B = fine isotropic fbm (detail normal height),
+// A = vertically stretched fbm (rain streaks: sample with a small v scale).
+let _wxNoise = null;
+export function weatherNoise({ size = 256 } = {}) {
+  if (_wxNoise) return _wxNoise;
+  const d = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const u = x / size, v = y / size, o = (y * size + x) * 4;
+    const r = fbm2(u * 4, v * 4, 5, 4, 4), g = fbm2(u * 4 + 17.3, v * 4 + 5.1, 5, 4, 4);
+    const b = fbm2(u * 16, v * 16, 4, 16, 16);
+    const a = fbm2(u * 32, v * 2, 4, 32, 2) * 0.75 + vnoise2(u * 64, v * 4, 64, 4) * 0.25;
+    const st = (t) => clamp(Math.round(sstep(0.0, 1.0, (t - 0.5) * 1.9 + 0.5) * 255));
+    d[o] = st(r); d[o + 1] = st(g); d[o + 2] = st(b); d[o + 3] = st(a);
+  }
+  const t = new THREE.DataTexture(d, size, size, THREE.RGBAFormat);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter;
+  t.generateMipmaps = true; t.colorSpace = THREE.NoColorSpace; t.needsUpdate = true;
+  _wxNoise = t; return t;
+}
