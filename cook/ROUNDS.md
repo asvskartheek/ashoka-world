@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 13, `cook/stills/r13/` (raw 48.5, calibrated 67.5)
+Best so far: round 15, `cook/stills/r15/` (raw 53, calibrated 72)
 
 ## Decisions
 
@@ -185,3 +185,29 @@ Measured: S01 sat +0.072 bright -0.009.
 Top gaps: 1) people (all critics, every round); 2) S01 golden light and river boats; 3) architecture surfaces (palisade logs, house roofs) look repeated and low-poly.
 Stop check: bar no | floor no | approved no | final no -> next round
 Next focus: round 15 = S03 framing (in progress) + integrate the people builder.
+
+## Round 15
+
+Time: about 06:57 to 07:40 UTC (the people builder ran in parallel, about 40 min)
+Focus: people (top critic gap in every round) via a parallel builder subagent; S03 framing; S04 near field; S01 light; S02 background.
+Changes:
+- People: the human generator was rewritten by a builder subagent (people section of src/assets.js only): cross-section torso, smooth limbs with joints, hands and feet, a sculpted head with brow, nose, lips, eyes, ears, hairlines, beards, wrapped turbans, and real drapery geometry (dhoti, sari pleats with gold border, monk robe over the left shoulder, shawls, soldier tunic with belts, seated cloth tenting over the knees). 13.8k to 21k triangles per figure, measured.
+- S03: camera 47 m back and 2.6 m up on a 54° lens; shelter moved into frame; framing tree at left; 8 more pilgrims on the path; lighter, textured rocks; sun moved so the pillar's shadow no longer crosses the dome.
+- S04: pillar 13 m from camera (height 9.6, girth 1.85) in polished sandstone with finer, fainter inscription; foreground crowd of about 26; red dados on both sides; pots, baskets and sacks along the street edges; warmer, more contrasty sun.
+- S01: key light el 10° and warmer, less fill; 34 more boats on the visible river; per-log colour variation and deeper bark on the palisade.
+- S02: eastern garden court beyond the open hall (pool, fountains, flower beds, cypresses, trees, red colonnade with tower).
+Stills: `cook/stills/r15/` | Side by side: `cook/compare/r15/all.jpg`
+Scores, eyeballed: mean of 2 critics (general-purpose, sonnet), raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r14 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 72 | 55 | 62 | 40 | 33 | 52 | 71 | +7 |
+| S02 | 65 | 52 | 61 | 36 | 27 | 48 | 67 | +4 |
+| S03 | 80 | 61 | 67 | 48 | 40 | 59 | 78 | +5 |
+| S04 | 69 | 58 | 61 | 44 | 33 | 53 | 72 | +7 |
+
+Overall raw 53, calibrated 72. Best so far (+4.5 over round 13).
+Measured: S01 sat +0.085 bright -0.030; S02 sat +0.021 bright -0.024; S03 sat -0.023 bright -0.017; S04 sat +0.048 bright -0.083.
+Top gaps from critics: 1) materials: no wood grain or carving on columns and timber, plaster and roofs untextured, smooth palisade; 2) S02 king and throne too small, scribes cropped, foreground monks still smooth; 3) S01 gate needs tiered carved form and yellow banners, stalls need goods, moat reflections look noisy; 4) S03 dry golden grass instead of green, distant hills and river; 5) S04 carts and elephant hidden, inscription not legible, overhanging foliage.
+Stop check: bar no | floor no (about 1.3h of 8h) | approved no | final no -> next round
+Next focus: round 16 = measured colour fixes (prepared), then materials (wood grain and carving, plaster weathering, roof tiles) as the largest gap after people.
