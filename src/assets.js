@@ -678,61 +678,333 @@ export function grassClump({ seed = 1 } = {}) {
 export function rockGeo(seed = 1, s = 1) { const g = new THREE.IcosahedronGeometry(s, 3); noisify(g, s * 0.18, 3.1 / s, seed); noisify(g, s * 0.05, 9 / s, seed + 7); g.scale(1.5, 0.42, 1.1); return g; }
 
 // ---------- MAURYAN MONUMENTS ----------
+// ---- carved-stone sculpture kit: smooth-union SDF primitives meshed with surface nets (lions, relief animals)
+const hyp3 = (a, b, c) => Math.sqrt(a * a + b * b + c * c);
+const sminK = (a, b, k) => { if (k <= 0) return Math.min(a, b); const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; };
+const smaxK = (a, b, k) => -sminK(-a, -b, k);
+function sdEll(x, y, z, rx, ry, rz) { const k0 = hyp3(x / rx, y / ry, z / rz), k1 = hyp3(x / (rx * rx), y / (ry * ry), z / (rz * rz)); return k1 > 1e-9 ? k0 * (k0 - 1) / k1 : -Math.min(rx, ry, rz); }
+function sdSeg(x, y, z, a, b, r1, r2) { const bx = b[0] - a[0], by = b[1] - a[1], bz = b[2] - a[2], px = x - a[0], py = y - a[1], pz = z - a[2]; const t = clamp01((px * bx + py * by + pz * bz) / (bx * bx + by * by + bz * bz)); return hyp3(px - bx * t, py - by * t, pz - bz * t) - (r1 + (r2 - r1) * t); }
+const rot3 = (rx = 0, ry = 0, rz = 0) => { const e = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(rx, ry, rz)).elements; return [e[0], e[4], e[8], e[1], e[5], e[9], e[2], e[6], e[10]]; }; // row-major world->local is transpose
+const bound = (pts, r) => { const c = [0, 1, 2].map(i => pts.reduce((a, p) => a + p[i], 0) / pts.length); return { bc: c, br: r + Math.max(...pts.map(p => hyp3(p[0] - c[0], p[1] - c[1], p[2] - c[2]))) }; };
+// primitive list: { f(x,y,z), k, sub, m (mirror in x) }
+const pE = (c, r, o = {}) => { const R = o.rot ? rot3(...o.rot) : null; return { ...o, bc: c, br: Math.max(...r), f: (x, y, z) => { let a = x - c[0], b = y - c[1], d = z - c[2]; if (R) { const u = R[0] * a + R[3] * b + R[6] * d, v = R[1] * a + R[4] * b + R[7] * d, w = R[2] * a + R[5] * b + R[8] * d; a = u; b = v; d = w; } return sdEll(a, b, d, r[0], r[1], r[2]); } }; };
+const pC = (pts, r1, r2, o = {}) => ({ ...o, ...bound(pts, Math.max(r1, r2)), f: (x, y, z) => { let d = 1e9; const n = pts.length - 1; for (let i = 0; i < n; i++) d = Math.min(d, sdSeg(x, y, z, pts[i], pts[i + 1], mix(r1, r2, i / n), mix(r1, r2, (i + 1) / n))); return d; } });
+function evalPrims(L, x, y, z, k0 = 0.03) {
+  let d = 1e9; const ax = Math.abs(x);
+  for (const p of L) {
+    const px = p.m ? ax : x, k = p.k ?? (p.sub ? 0.015 : k0);
+    if (p.bc) { const lb = hyp3(px - p.bc[0], y - p.bc[1], z - p.bc[2]) - p.br; if (p.sub ? lb > k - d : lb > d + k) continue; } // cannot change the blend
+    const di = p.f(px, y, z); d = p.sub ? smaxK(d, -di, k) : sminK(d, di, k);
+  }
+  return d;
+}
+// surface nets on a regular grid; vertices projected onto the surface, normals from the SDF gradient
+function sdfMesh(f, b0, b1, h, uvS = 1) {
+  const nx = Math.ceil((b1[0] - b0[0]) / h) + 1, ny = Math.ceil((b1[1] - b0[1]) / h) + 1, nz = Math.ceil((b1[2] - b0[2]) / h) + 1;
+  const F = new Float32Array(nx * ny * nz), done = new Uint8Array(nx * ny * nz); const I3 = (i, j, k) => i + nx * (j + ny * k);
+  // coarse-to-fine: blocks of 4 cells far from the surface take the block-centre value (only the sign matters there)
+  const B = 4, far = B * h * 1.3;
+  for (let k0 = 0; k0 < nz - 1; k0 += B) for (let j0 = 0; j0 < ny - 1; j0 += B) for (let i0 = 0; i0 < nx - 1; i0 += B) {
+    const i1 = Math.min(i0 + B, nx - 1), j1 = Math.min(j0 + B, ny - 1), k1 = Math.min(k0 + B, nz - 1);
+    const dc = f(b0[0] + (i0 + i1) * h / 2, b0[1] + (j0 + j1) * h / 2, b0[2] + (k0 + k1) * h / 2), near = Math.abs(dc) < far;
+    for (let k = k0; k <= k1; k++) for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const q = I3(i, j, k); if (near) { if (!done[q]) { F[q] = f(b0[0] + i * h, b0[1] + j * h, b0[2] + k * h); done[q] = 1; } } else if (!done[q]) F[q] = dc; }
+  }
+  const cx = nx - 1, cy = ny - 1, cz = nz - 1, V = new Int32Array(cx * cy * cz).fill(-1), P = [];
+  const C3 = (i, j, k) => i + cx * (j + cy * k);
+  const CO = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1]];
+  const ED = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+  const val = new Float32Array(8);
+  for (let k = 0; k < cz; k++) for (let j = 0; j < cy; j++) for (let i = 0; i < cx; i++) {
+    let m = 0; for (let c = 0; c < 8; c++) { const v = F[I3(i + CO[c][0], j + CO[c][1], k + CO[c][2])]; val[c] = v; if (v < 0) m |= 1 << c; }
+    if (m === 0 || m === 255) continue;
+    let sx = 0, sy = 0, sz = 0, n = 0;
+    for (const [a, b] of ED) { const va = val[a], vb = val[b]; if ((va < 0) === (vb < 0)) continue; const t = va / (va - vb); sx += CO[a][0] + (CO[b][0] - CO[a][0]) * t; sy += CO[a][1] + (CO[b][1] - CO[a][1]) * t; sz += CO[a][2] + (CO[b][2] - CO[a][2]) * t; n++; }
+    V[C3(i, j, k)] = P.length / 3; P.push(b0[0] + (i + sx / n) * h, b0[1] + (j + sy / n) * h, b0[2] + (k + sz / n) * h);
+  }
+  const idx = [];
+  const quad = (a, b, c, d) => { if (a < 0 || b < 0 || c < 0 || d < 0) return; idx.push(a, b, c, a, c, d); };
+  for (let k = 1; k < nz - 1; k++) for (let j = 1; j < ny - 1; j++) for (let i = 1; i < nx - 1; i++) {
+    const s0 = F[I3(i, j, k)] < 0;
+    if (s0 !== (F[I3(i + 1, j, k)] < 0)) quad(V[C3(i, j - 1, k - 1)], V[C3(i, j, k - 1)], V[C3(i, j, k)], V[C3(i, j - 1, k)]);
+    if (s0 !== (F[I3(i, j + 1, k)] < 0)) quad(V[C3(i - 1, j, k - 1)], V[C3(i, j, k - 1)], V[C3(i, j, k)], V[C3(i - 1, j, k)]);
+    if (s0 !== (F[I3(i, j, k + 1)] < 0)) quad(V[C3(i - 1, j - 1, k)], V[C3(i, j - 1, k)], V[C3(i, j, k)], V[C3(i - 1, j, k)]);
+  }
+  // project + normals
+  const nv = P.length / 3, N = new Float32Array(nv * 3), e = h * 0.35;
+  for (let v = 0; v < nv; v++) {
+    let x = P[v * 3], y = P[v * 3 + 1], z = P[v * 3 + 2], gx = 0, gy = 0, gz = 0;
+    for (let it = 0; it < 2; it++) {
+      const d = f(x, y, z); gx = f(x + e, y, z) - f(x - e, y, z); gy = f(x, y + e, z) - f(x, y - e, z); gz = f(x, y, z + e) - f(x, y, z - e);
+      const gl = hyp3(gx, gy, gz) / (2 * e) || 1; gx /= 2 * e * gl; gy /= 2 * e * gl; gz /= 2 * e * gl;
+      const st = Math.max(-h * 0.5, Math.min(h * 0.5, d / gl)); x -= gx * st; y -= gy * st; z -= gz * st;
+    }
+    P[v * 3] = x; P[v * 3 + 1] = y; P[v * 3 + 2] = z; N[v * 3] = gx; N[v * 3 + 1] = gy; N[v * 3 + 2] = gz;
+  }
+  // orient triangles along the field gradient
+  for (let t = 0; t < idx.length; t += 3) {
+    const a = idx[t] * 3, b = idx[t + 1] * 3, c = idx[t + 2] * 3;
+    const ux = P[b] - P[a], uy = P[b + 1] - P[a + 1], uz = P[b + 2] - P[a + 2], wx = P[c] - P[a], wy = P[c + 1] - P[a + 1], wz = P[c + 2] - P[a + 2];
+    const fx = uy * wz - uz * wy, fy = uz * wx - ux * wz, fz = ux * wy - uy * wx;
+    if (fx * (N[a] + N[b] + N[c]) + fy * (N[a + 1] + N[b + 1] + N[c + 1]) + fz * (N[a + 2] + N[b + 2] + N[c + 2]) < 0) { const s = idx[t + 1]; idx[t + 1] = idx[t + 2]; idx[t + 2] = s; }
+  }
+  const UV = new Float32Array(nv * 2); for (let v = 0; v < nv; v++) { UV[v * 2] = (P[v * 3] + P[v * 3 + 2]) * uvS; UV[v * 2 + 1] = P[v * 3 + 1] * uvS; }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N, 3)); g.setAttribute('uv', new THREE.BufferAttribute(UV, 2)); g.setIndex(idx);
+  return g;
+}
+// Mauryan mane: rows of layered flame-locks flowing back from the face. q in mane frame (+z = face direction)
+function maneLocks(x, y, z, { th0 = 0.5, rowH = 0.3, N = 15, amp = 0.04, curl = 0.22 } = {}) {
+  const r = hyp3(x, y, z) || 1e-6, th = Math.acos(Math.max(-1, Math.min(1, z / r)));
+  if (th < th0) return 0;
+  const v = (th - th0) / rowH, iv = Math.floor(v), t = v - iv;
+  const u = (Math.atan2(y, x) / (2 * Math.PI) + 1) * N + (iv & 1) * 0.5, iu = Math.floor(u);
+  let fu = u - iu - 0.5; fu -= (((iu + iv) & 1) ? 1 : -1) * curl * t * t; // flame tips flick alternately
+  const w = 0.5 * Math.sqrt(sstep(0, 0.22, t)) * Math.pow(1 - t, 0.65) + 1e-3, a = Math.abs(fu) / w; // round root, pointed tip
+  if (a >= 1) return 0;
+  let hh = Math.sqrt(1 - a * a) * (0.6 + 0.4 * Math.sin(Math.PI * Math.min(t, 0.85) / 1.7)) * Math.min(1, (1 - t) * 3);
+  hh *= 1 - 0.3 * gss(fu, 0.05) * sstep(0.15, 0.4, t); // incised centre line
+  return amp * hh * sstep(0, 0.12, th - th0);
+}
+// head in head frame (origin = skull centre, +z = forward), facing details for a Mauryan lion: open roaring jaw
+const LION_HEAD = [
+  pE([0, 0, 0], [0.11, 0.094, 0.1]),
+  pE([0.04, 0.04, 0.072], [0.05, 0.026, 0.036], { m: 1, k: 0.025 }), // heavy brows
+  pE([0.075, -0.035, 0.04], [0.056, 0.056, 0.066], { m: 1, k: 0.03 }), // cheeks
+  pC([[0, 0.03, 0.07], [0, -0.015, 0.15]], 0.04, 0.036, { k: 0.03 }), // broad nose bridge
+  pE([0, -0.05, 0.1], [0.08, 0.05, 0.07], { k: 0.03 }), // upper muzzle
+  pE([0.038, -0.07, 0.132], [0.046, 0.038, 0.036], { m: 1, k: 0.02 }), // whisker pads
+  pE([0, -0.02, 0.163], [0.036, 0.024, 0.02], { k: 0.015 }), // nose pad
+  pC([[0.05, -0.07, 0.0], [0.04, -0.13, 0.1]], 0.035, 0.028, { m: 1, k: 0.03 }), // jaw rami
+  pC([[0, -0.12, 0.04], [0, -0.145, 0.13]], 0.04, 0.03, { k: 0.03 }), // lower jaw
+  pE([0, -0.1, 0.155], [0.052, 0.026, 0.075], { rot: [-0.15, 0, 0], sub: 1, k: 0.01 }), // open roaring mouth
+  pE([0, -0.118, 0.12], [0.03, 0.01, 0.045], { rot: [0.15, 0, 0], k: 0.008 }), // tongue
+  pE([0.052, 0.014, 0.093], [0.032, 0.012, 0.016], { m: 1, sub: 1, k: 0.008 }), // eye under the brow
+  pE([0.08, 0.07, -0.045], [0.03, 0.03, 0.016], { m: 1, rot: [-0.4, 0.5, -0.6], k: 0.02 }), // small ears
+  pE([0.083, 0.073, -0.033], [0.017, 0.017, 0.008], { m: 1, rot: [-0.4, 0.5, -0.6], sub: 1, k: 0.005 }),
+];
+function headDetails(b, M) { // eyeballs, fangs; M = head frame matrix
+  const add = (g, p, r = [0, 0, 0], s = [1, 1, 1]) => { _m.compose(new V3(...p), _q.setFromEuler(_e.set(...r)), new V3(...s)); b.addM(g, 'stone', M.clone().multiply(_m)); };
+  for (const s of [-1, 1]) {
+    add(sph(0.014, 8, 6), [s * 0.052, 0.01, 0.086], [0, s * 0.3, 0], [1.5, 0.6, 0.7]);
+    add(new THREE.ConeGeometry(0.0065, 0.022, 5), [s * 0.034, -0.1, 0.17], [Math.PI, 0, 0]);
+  }
+}
+function headFn(hc, pitch, yaw = 0, sc = 1) {
+  const R = rot3(pitch, yaw, 0); const M = new THREE.Matrix4().compose(new V3(...hc), _q.setFromEuler(_e.set(pitch, yaw, 0, 'XYZ')), new V3(sc, sc, sc));
+  return { M, f: (x, y, z) => { const a = (x - hc[0]) / sc, b = (y - hc[1]) / sc, d = (z - hc[2]) / sc; return sc * evalPrims(LION_HEAD, R[0] * a + R[3] * b + R[6] * d, R[1] * a + R[4] * b + R[7] * d, R[2] * a + R[5] * b + R[8] * d, 0.03); } };
+}
+function maneFn(c, r, tilt, opt) {
+  const R = rot3(tilt, 0, 0);
+  return (x, y, z) => { const a = x - c[0], b = y - c[1], d = z - c[2]; const u = R[0] * a + R[3] * b + R[6] * d, v = R[1] * a + R[4] * b + R[7] * d, w = R[2] * a + R[5] * b + R[8] * d; return sdEll(u, v, w, r[0], r[1], r[2]) - maneLocks(u, v, w, opt); };
+}
+function paw(L, c, dir = 1) { // paw pad + four toes (front at +z*dir)
+  L.push(pE(c, [0.052, 0.034, 0.066], { m: 1, k: 0.03 }));
+  for (let t = 0; t < 4; t++) L.push(pE([c[0] + (t - 1.5) * 0.024, c[1] - 0.004, c[2] + dir * (0.05 - Math.abs(t - 1.5) * 0.008)], [0.015, 0.022, 0.024], { m: 1, k: 0.006 }));
+}
+function clawDetails(b, M, c, dir = 1) {
+  for (const s of [-1, 1]) for (let t = 0; t < 4; t++) { _m.compose(new V3(s * (c[0] + (t - 1.5) * 0.024), 0.012, c[2] + dir * (0.075 - Math.abs(t - 1.5) * 0.008)), _q.setFromEuler(_e.set(dir * Math.PI / 2 + 0.5 * dir, 0, 0)), new V3(1, 1, 1)); b.addM(new THREE.ConeGeometry(0.005, 0.015, 4), 'stone', M.clone().multiply(_m)); }
+}
+// seated Mauryan lion (Sarnath type): forelegs straight, haunches down. faces +z, ~1 unit tall, ground y=0
+const MANE = { th0: 0.5, rowH: 0.42, N: 13, amp: 0.012, curl: 0.14 };
+// explicit flame-locks laid in overlapping rows on the mane ellipsoid (c, r, tilt = same frame as maneFn); lion-local geometry
+function maneLockGeo(c, r, tilt, { th0 = 0.36, rows = 4, rowH = 0.42, N = 11, len = 1.55, wid = 1.1, thick = 0.026, curl = 0.7, seed = 3 } = {}) {
+  const Mf = new THREE.Matrix4().makeRotationX(tilt).setPosition(...c), rnd = rng(seed), G = [];
+  const P = (th, ph) => { const d = [Math.sin(th) * Math.cos(ph), Math.sin(th) * Math.sin(ph), Math.cos(th)]; const k = 1 / Math.sqrt((d[0] / r[0]) ** 2 + (d[1] / r[1]) ** 2 + (d[2] / r[2]) ** 2); const p = d.map(x => x * k); const n = [p[0] / r[0] ** 2, p[1] / r[1] ** 2, p[2] / r[2] ** 2], l = Math.hypot(...n); return [p, n.map(x => x / l)]; };
+  for (let row = 0; row < rows; row++) {
+    const n = N + row, dph = Math.PI * 2 / n;
+    for (let k = 0; k < n; k++) {
+      const ph0 = (k + (row & 1) * 0.5 + (rnd() - 0.5) * 0.15) * dph, tha = th0 + (row - 0.15) * rowH, side = ((k + row) & 1) ? 1 : -1, L = len * rowH * (0.9 + rnd() * 0.2);
+      const g = surf((u, v) => {
+        const al = u * Math.PI * 2 + Math.PI / 2, ca = Math.cos(al), sa = Math.sin(al);
+        const w = wid * dph * 0.5 * Math.sqrt(sstep(0, 0.22, v)) * Math.pow(1 - Math.pow(v, 1.8), 0.8) + 1e-4;
+        const [p, nn] = P(tha + v * L, ph0 + ca * w + side * curl * v * v * dph * 0.5);
+        const h = (sa > 0 ? Math.pow(sa, 0.55) * thick * (1 - 0.35 * v) : sa * thick * 0.3) + thick * 0.5 * v * v - 0.005;
+        return [p[0] + nn[0] * h, p[1] + nn[1] * h, p[2] + nn[2] * h];
+      }, 6, 4, { closeU: true });
+      g.applyMatrix4(Mf); G.push(g);
+    }
+  }
+  return mergeGeometries(G);
+}
+function seatedLionDef() {
+  const H = headFn([0, 0.735, 0.26], -0.1, 0, 1.2);
+  const L = [
+    pE([0, 0.42, 0.13], [0.16, 0.19, 0.15]), // chest
+    pC([[0, 0.46, 0.02], [0, 0.3, -0.15], [0, 0.2, -0.22]], 0.15, 0.13, { k: 0.06 }), // torso falling to the rump
+    pE([0.1, 0.18, -0.14], [0.1, 0.16, 0.2], { m: 1, rot: [0.25, 0, 0], k: 0.05 }), // haunches
+    pC([[0.13, 0.06, -0.24], [0.14, 0.04, 0.02]], 0.05, 0.036, { m: 1, k: 0.03 }), // hind shanks folded on the ground
+    pE([0.105, 0.43, 0.12], [0.072, 0.12, 0.09], { m: 1, k: 0.04 }), // shoulders
+    pC([[0.105, 0.4, 0.15], [0.108, 0.23, 0.205]], 0.066, 0.05, { m: 1, k: 0.035 }), // upper forelegs
+    pC([[0.108, 0.23, 0.205], [0.105, 0.055, 0.235]], 0.047, 0.04, { m: 1, k: 0.025 }), // lower forelegs, straight
+    pE([0.108, 0.24, 0.195], [0.04, 0.035, 0.03], { m: 1, k: 0.02 }), // wrist bone
+    pC([[0, 0.5, 0.08], [0, 0.68, 0.2]], 0.13, 0.1, { k: 0.05 }), // neck
+  ];
+  paw(L, [0.105, 0.034, 0.26], 1); paw(L, [0.14, 0.03, 0.03], 1);
+  // ribs: shallow grooves on the flanks
+  L.push({ m: 1, sub: 1, k: 0.01, f: (x, y, z) => { const rib = Math.abs(((z + 0.4) / 0.045) % 1 - 0.5); const wdw = sstep(-0.14, -0.08, z) * (1 - sstep(0.0, 0.06, z)); if (wdw <= 0) return 1; return Math.sqrt((x - 0.17) ** 2 + ((y - 0.36) * 0.8) ** 2) - 0.03 * wdw + rib * 0.01 + (1 - wdw) * 0.03; } });
+  const MC = [0, 0.6, 0.125], MR = [0.245, 0.335, 0.22], mane = maneFn(MC, MR, -0.25, MANE), locks = sculpt('locksSeated', () => maneLockGeo(MC, MR, -0.25));
+  const f = (x, y, z) => { let d = evalPrims(L, x, y, z); d = sminK(d, mane(x, y, z), 0.04); d = sminK(d, H.f(x, y, z), 0.025); return Math.max(d, -y); };
+  const det = (b, M) => { b.addM(locks, 'stone', M); headDetails(b, M.clone().multiply(H.M)); clawDetails(b, M, [0.105, 0, 0.26]); clawDetails(b, M, [0.14, 0, 0.03]); };
+  return { f, det, b0: [-0.3, 0, -0.45], b1: [0.3, 0.98, 0.56] };
+}
+// standing lion (single-lion capital): faces +z, tail behind, ~0.85 tall
+function standingLionDef() {
+  const H = headFn([0, 0.74, 0.45], 0.08, 0, 1.15);
+  const L = [
+    pE([0, 0.48, 0.3], [0.15, 0.19, 0.16]), // chest
+    pC([[0, 0.52, 0.22], [0, 0.48, -0.08], [0, 0.5, -0.3]], 0.16, 0.135, { k: 0.06 }), // barrel + loins
+    pE([0, 0.4, 0.0], [0.12, 0.08, 0.2], { sub: 1, k: 0.08 }), // belly tuck
+    pE([0.085, 0.47, -0.3], [0.075, 0.15, 0.13], { m: 1, k: 0.05 }), // thighs
+    pC([[0.095, 0.4, -0.32], [0.095, 0.2, -0.4]], 0.06, 0.042, { m: 1, k: 0.03 }), // gaskins
+    pC([[0.095, 0.2, -0.4], [0.095, 0.05, -0.36]], 0.037, 0.034, { m: 1, k: 0.02 }), // hocks
+    pE([0.1, 0.5, 0.28], [0.07, 0.14, 0.1], { m: 1, k: 0.04 }), // shoulders
+    pC([[0.1, 0.44, 0.3], [0.102, 0.26, 0.33]], 0.066, 0.05, { m: 1, k: 0.035 }),
+    pC([[0.102, 0.26, 0.33], [0.1, 0.055, 0.35]], 0.046, 0.04, { m: 1, k: 0.025 }),
+    pC([[0, 0.6, 0.33], [0, 0.7, 0.47]], 0.12, 0.1, { k: 0.05 }), // neck
+    pC([[0, 0.56, -0.4], [0, 0.42, -0.5], [0.02, 0.25, -0.52], [0.05, 0.14, -0.47]], 0.03, 0.022, { k: 0.02 }), // tail
+    pE([0.055, 0.12, -0.46], [0.035, 0.05, 0.035], { k: 0.015 }), // tail tuft
+  ];
+  paw(L, [0.1, 0.034, 0.37], 1); paw(L, [0.095, 0.032, -0.33], 1);
+  L.push({ m: 1, sub: 1, k: 0.01, f: (x, y, z) => { const rib = Math.abs(((z + 0.4) / 0.045) % 1 - 0.5); const wdw = sstep(-0.1, -0.03, z) * (1 - sstep(0.12, 0.2, z)); if (wdw <= 0) return 1; return Math.sqrt((x - 0.175) ** 2 + ((y - 0.47) * 0.9) ** 2) - 0.03 * wdw + rib * 0.01 + (1 - wdw) * 0.03; } });
+  const MC = [0, 0.64, 0.34], MR = [0.22, 0.27, 0.22], mane = maneFn(MC, MR, -0.15, MANE), locks = sculpt('locksStand', () => maneLockGeo(MC, MR, -0.15, { th0: 0.5, rows: 5, seed: 5 }));
+  const f = (x, y, z) => { let d = evalPrims(L, x, y, z); d = sminK(d, mane(x, y, z), 0.04); d = sminK(d, H.f(x, y, z), 0.025); return Math.max(d, -y); };
+  const det = (b, M) => { b.addM(locks, 'stone', M); headDetails(b, M.clone().multiply(H.M)); clawDetails(b, M, [0.1, 0, 0.37]); clawDetails(b, M, [0.095, 0, -0.33]); };
+  return { f, det, b0: [-0.3, 0, -0.62], b1: [0.3, 0.98, 0.78] };
+}
+const _sculptCache = {};
+const asParts = (o) => ({ parts: Object.fromEntries(Object.entries(o).map(([k, g]) => [k, [g]])) });
+const sculpt = (key, make) => (_sculptCache[key] ||= make());
 // stylised seated lion (faces +z), approx 1 unit tall
 export function lion({ seed = 1 } = {}) {
-  const b = new AB();
-  const body = sph(1, 16, 12); body.scale(0.22, 0.28, 0.42); b.add(body, 'stone', [0, 0.35, -0.12], [0.5, 0, 0]);
-  const mane = sph(0.27, 20, 16); noisify(mane, 0.03, 18, seed); mane.scale(1, 1.05, 0.9); b.add(mane, 'stone', [0, 0.62, 0.1]);
-  // mane flame-locks
-  for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2; const c = new THREE.ConeGeometry(0.05, 0.14, 5); b.add(c, 'stone', [Math.cos(a) * 0.24, 0.62 + Math.sin(a) * 0.25, 0.08], [Math.PI / 2 - 0.2, 0, a - Math.PI / 2], [1, 1, 0.6]); }
-  const head = sph(0.15, 16, 12); head.scale(1, 0.95, 1.05); b.add(head, 'stone', [0, 0.66, 0.28]);
-  const snout = sph(0.08, 12, 8); snout.scale(1.1, 0.8, 1.2); b.add(snout, 'stone', [0, 0.6, 0.41]);
-  b.add(box(0.12, 0.03, 0.08), 'stone', [0, 0.54, 0.4]); // open jaw
-  for (const s of [-1, 1]) {
-    b.add(sph(0.04, 6, 5), 'stone', [s * 0.1, 0.79, 0.25]);
-    b.add(cyl(0.05, 0.045, 0.46, 8), 'stone', [s * 0.11, 0.22, 0.3]);
-    b.add(sph(0.06, 8, 6), 'stone', [s * 0.11, 0.03, 0.35], [0, 0, 0], [1, 0.6, 1.4]);
-    const haunch = sph(0.15, 10, 8); haunch.scale(0.8, 1, 1.3); b.add(haunch, 'stone', [s * 0.14, 0.17, -0.28]);
+  const g = sculpt('lion1', () => { const D = seatedLionDef(); const b = new AB(); b.add(sdfMesh(D.f, D.b0, D.b1, 0.02), 'stone'); D.det(b, new THREE.Matrix4()); return b.build(); });
+  return { stone: g.stone.clone() };
+}
+// four seated lions back to back (Sarnath), one fused sculpture. lion local origin pushed out by 'off'
+function fourLions(off = 0.2, h = 0.024) {
+  return sculpt('lion4_' + off + '_' + h, () => {
+    const D = seatedLionDef();
+    const f = (x, y, z) => { // evaluate the two nearest lions of the four, fused smoothly
+      const a = Math.atan2(x, z), q = Math.round(a / (Math.PI / 2)), q2 = a / (Math.PI / 2) > q ? q + 1 : q - 1;
+      let d = 1e9; for (const s of [q, q2]) { const t = s * Math.PI / 2, c = Math.cos(t), sn = Math.sin(t); d = sminK(d, D.f(x * c - z * sn, y, x * sn + z * c - off), 0.04); }
+      return d;
+    };
+    const R = 0.56 + off; const b = new AB(); b.add(sdfMesh(f, [-R, 0, -R], [R, 1.02, R], h), 'stone');
+    for (let i = 0; i < 4; i++) D.det(b, new THREE.Matrix4().makeRotationY(i * Math.PI / 2).multiply(new THREE.Matrix4().makeTranslation(0, 0, off)));
+    return b.build();
+  });
+}
+// relief animals for the abacus, side view facing +x, ~1 unit long, z = depth out of the drum
+const RELIEF = {
+  elephant: () => [pE([0, 0.56, 0], [0.38, 0.27, 0.22]), pE([0.36, 0.63, 0], [0.15, 0.18, 0.15]), pC([[0.47, 0.6, 0.02], [0.56, 0.42, 0.03], [0.58, 0.22, 0.04], [0.63, 0.12, 0.04]], 0.065, 0.032, { k: 0.03 }),
+    pE([0.27, 0.62, 0.13], [0.1, 0.15, 0.04], { k: 0.02 }), pC([[0.45, 0.47, 0.05], [0.56, 0.4, 0.07]], 0.02, 0.012), pC([[-0.38, 0.62, 0], [-0.44, 0.35, 0.02]], 0.02, 0.015),
+    ...[[0.22, 0.04], [-0.24, 0.04], [0.16, -0.05], [-0.2, -0.05]].map(([x, z]) => pC([[x, 0.45, z], [x, 0.0, z]], 0.075, 0.07, { k: 0.03 }))],
+  bull: () => [pE([0, 0.52, 0], [0.36, 0.17, 0.16]), pE([0.24, 0.68, 0], [0.09, 0.08, 0.08], { k: 0.06 }), pC([[0.28, 0.56, 0], [0.42, 0.6, 0.02]], 0.11, 0.08, { k: 0.04 }), pC([[0.44, 0.62, 0.02], [0.55, 0.44, 0.03]], 0.065, 0.045),
+    pE([0.38, 0.38, 0], [0.06, 0.1, 0.06]), pC([[0.45, 0.68, 0.04], [0.48, 0.78, 0.05], [0.44, 0.84, 0.05]], 0.022, 0.012, { k: 0.01 }), pC([[-0.35, 0.6, 0], [-0.42, 0.3, 0.02], [-0.4, 0.14, 0.03]], 0.018, 0.015),
+    ...[[0.25, 0.04, 0.12], [0.2, -0.05, -0.05], [-0.25, 0.04, -0.1], [-0.28, -0.05, 0.08]].map(([x, z, s]) => pC([[x, 0.45, z], [x + s * 0.5, 0.2, z], [x + s, 0.0, z]], 0.05, 0.03, { k: 0.02 }))],
+  horse: () => [pE([0, 0.55, 0], [0.34, 0.15, 0.14]), pC([[0.26, 0.6, 0], [0.4, 0.82, 0.02]], 0.1, 0.07, { k: 0.04 }), pC([[0.4, 0.85, 0.02], [0.56, 0.72, 0.03]], 0.06, 0.04, { k: 0.02 }), pC([[0.38, 0.9, 0.02], [0.37, 0.98, 0.03]], 0.02, 0.008, { k: 0.01 }),
+    pC([[0.24, 0.48, 0.04], [0.42, 0.36, 0.04], [0.5, 0.18, 0.05]], 0.045, 0.03), pC([[0.22, 0.46, -0.05], [0.36, 0.28, -0.05], [0.4, 0.08, -0.05]], 0.045, 0.03),
+    pC([[-0.26, 0.5, 0.04], [-0.38, 0.3, 0.04], [-0.55, 0.14, 0.05]], 0.05, 0.03), pC([[-0.24, 0.48, -0.05], [-0.32, 0.26, -0.05], [-0.44, 0.06, -0.05]], 0.05, 0.03),
+    pC([[-0.33, 0.62, 0], [-0.48, 0.55, 0.02], [-0.58, 0.38, 0.03]], 0.035, 0.02, { k: 0.02 })],
+  lion: () => [pE([0, 0.48, 0], [0.34, 0.15, 0.14]), pE([0.3, 0.58, 0], [0.15, 0.2, 0.15], { k: 0.05 }), pE([0.44, 0.6, 0.02], [0.09, 0.08, 0.08], { k: 0.03 }), pE([0.52, 0.57, 0.03], [0.06, 0.05, 0.05], { k: 0.02 }),
+    pC([[-0.33, 0.55, 0], [-0.5, 0.62, 0.02], [-0.56, 0.8, 0.03]], 0.025, 0.018), pE([-0.56, 0.82, 0.03], [0.03, 0.04, 0.03]),
+    ...[[0.25, 0.04, 0.1], [0.2, -0.05, -0.06], [-0.22, 0.04, -0.1], [-0.26, -0.05, 0.07]].map(([x, z, s]) => pC([[x, 0.42, z], [x + s * 0.5, 0.2, z], [x + s, 0.0, z]], 0.055, 0.035, { k: 0.02 }))],
+};
+function reliefAnimal(kind) {
+  return sculpt('relief_' + kind, () => {
+    const L = RELIEF[kind](); const flat = 0.6;
+    const f = (x, y, z) => Math.max(evalPrims(L, x, y, z / flat, 0.05) * flat, -y - 0.02);
+    return sdfMesh(f, [-0.72, -0.04, -0.035], [0.72, 1.02, 0.2], 0.032, 1); // open at the back: it is sunk into the drum
+  });
+}
+// wrap a relief (x along, y up, z out) around a drum of radius R, centred at angle a, base height y0, scale s
+function wrapOnDrum(g, R, a, y0, s) {
+  const o = g.clone(); const p = o.attributes.position, n = o.attributes.normal;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i) * s, y = p.getY(i) * s, z = p.getZ(i) * s, t = a + x / R, r = R + z;
+    p.setXYZ(i, Math.sin(t) * r, y0 + y, Math.cos(t) * r);
+    const nx = n.getX(i), nz = n.getZ(i); n.setXYZ(i, Math.cos(t) * nx + Math.sin(t) * nz, n.getY(i), -Math.sin(t) * nx + Math.cos(t) * nz);
   }
-  return b.build();
+  return o;
+}
+// 24-spoke dharmachakra, lying in the xy plane facing +z, radius 1
+function chakraGeo() {
+  return sculpt('chakra', () => {
+    const b = new AB();
+    b.add(new THREE.TorusGeometry(0.9, 0.1, 6, 40), 'stone');
+    b.add(new THREE.TorusGeometry(0.62, 0.035, 4, 32), 'stone', [0, 0, 0.03]);
+    b.add(cyl(0.2, 0.24, 0.16, 16), 'stone', [0, 0, 0.02], [Math.PI / 2, 0, 0]);
+    b.add(sph(0.11, 10, 6), 'stone', [0, 0, 0.1], [0, 0, 0], [1, 1, 0.6]);
+    for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2; b.add(box(0.045, 0.62, 0.06), 'stone', [Math.sin(a) * 0.52, Math.cos(a) * 0.52, 0.02], [0, 0, -a]); }
+    return b.build().stone;
+  });
+}
+// inverted-lotus bell: bell profile with rounded petals hanging down (tips at the bottom lip)
+function lotusBell(rb, bh, petals = 28) {
+  const K = [[0, 0.96], [0.03, 1.2], [0.08, 1.32], [0.16, 1.33], [0.3, 1.26], [0.48, 1.12], [0.66, 0.97], [0.82, 0.86], [0.94, 0.8], [1, 0.79]];
+  const prof = (t) => keyInterp(K, t)[0];
+  const nu = petals * 5, nv = 26;
+  return surf((u, v) => {
+    const t = v, a = u * Math.PI * 2; let r = prof(t) * rb;
+    if (t > 0.025 && t < 0.97) {
+      const pu = u * petals, fu = pu - Math.floor(pu) - 0.5, fu2 = (pu + 0.5) - Math.floor(pu + 0.5) - 0.5;
+      const tip = sstep(0.05, 0.22, t), w = 0.5 * Math.sqrt(clamp01((t - 0.05) / 0.17)) + 1e-4;
+      const main = Math.abs(fu) < w ? Math.sqrt(1 - (fu / w) ** 2) : 0;
+      const under = Math.abs(fu2) < 0.5 ? Math.sqrt(1 - (fu2 / 0.5) ** 2) * sstep(0.02, 0.1, t) : 0;
+      const top = 1 - sstep(0.85, 0.97, t);
+      r += rb * (0.06 * Math.max(main * (0.7 + 0.3 * tip), under * 0.45) * top + 0.012 * gss(fu, 0.04) * tip * top - 0.02 * sstep(0, 0.04, t) * (1 - sstep(0.04, 0.08, t)));
+    }
+    return [Math.sin(a) * r, t * bh, Math.cos(a) * r];
+  }, nu, nv, { closeU: true, uS: 4, vS: 1 });
+}
+// twisted rope (cable) moulding ring
+function cableRing(R, r0, twists = 48) {
+  return surf((u, v) => {
+    const A = u * Math.PI * 2, B = v * Math.PI * 2, r = r0 * (1 - 0.22 * Math.pow(0.5 + 0.5 * Math.cos(twists * A - B), 3));
+    const rr = R + Math.cos(B) * r; return [Math.sin(A) * rr, Math.sin(B) * r, Math.cos(A) * rr];
+  }, twists * 3, 8, { closeU: true });
+}
+// abacus drum: wheels alternating with relief animals
+function abacus(b, y, abR, abH, items = ['elephant', 'bull', 'horse', 'lion']) {
+  b.add(lathe([[0, 0], [abR * 0.97, 0], [abR, abH * 0.06], [abR, abH * 0.94], [abR * 0.97, abH], [0, abH]], 64), 'stone', [0, y, 0]);
+  b.add(new THREE.TorusGeometry(abR * 0.995, abH * 0.035, 5, 64), 'stone', [0, y + abH * 0.08, 0], [Math.PI / 2, 0, 0]);
+  b.add(new THREE.TorusGeometry(abR * 0.995, abH * 0.035, 5, 64), 'stone', [0, y + abH * 0.92, 0], [Math.PI / 2, 0, 0]);
+  const wr = abH * 0.36, n = items.length, arc = abR * Math.PI * 2 / (2 * n);
+  const wheel = chakraGeo(); // build first: AB.add reuses the shared _m
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2;
+    _m.compose(new V3(Math.sin(a) * (abR + wr * 0.04), y + abH / 2, Math.cos(a) * (abR + wr * 0.04)), _q.setFromEuler(_e.set(0, a, 0)), new V3(wr, wr, wr * 0.9));
+    b.addM(wheel, 'stone', _m);
+    const s = Math.min(abH * 0.75, (arc - wr * 1.15) / 0.62); // animal ~1.2 s long
+    b.add(wrapOnDrum(reliefAnimal(items[i]), abR - s * 0.015, a + Math.PI / n, y + abH * 0.15, s), 'stone');
+  }
 }
 // Ashokan pillar. capital: 'four' (4 lions) or 'one' (single standing lion)
 export function ashokaPillar({ height = 12, capital = 'four', inscribed = false, girth = 1 } = {}) {
   const hr = height * girth; // radial scale: thicker pillars keep their capital proportions
-  const b = new AB(); const shaftH = height * 0.82;
-  b.add(cyl(hr * 0.035, hr * 0.044, shaftH, 32), inscribed ? 'inscr' : 'stone', [0, shaftH / 2, 0]);
-  let y = shaftH;
-  // bell (inverted lotus) with petals
-  const bell = lathe([[hr * 0.034, 0], [hr * 0.05, 0.02 * height], [hr * 0.058, 0.05 * height], [hr * 0.05, 0.07 * height], [hr * 0.033, 0.08 * height], [0, 0.08 * height]], 32);
-  b.add(bell, 'stone', [0, y, 0]);
-  for (let i = 0; i < 24; i++) b.add(box(hr * 0.006, height * 0.07, hr * 0.004), 'stone', [Math.cos(i / 24 * Math.PI * 2) * hr * 0.051, y + height * 0.035, Math.sin(i / 24 * Math.PI * 2) * hr * 0.051], [0, -i / 24 * Math.PI * 2 + Math.PI / 2, 0.15]);
-  y += height * 0.08;
-  b.add(cyl(hr * 0.032, hr * 0.032, height * 0.012, 24), 'stone', [0, y, 0]); y += height * 0.012;
-  // abacus drum with chakra + animals relief
-  const abH = height * (capital === 'one' ? 0.045 : 0.035), abR = hr * (capital === 'one' ? 0.052 : 0.047);
-  b.add(cyl(abR, abR, abH, 32), 'stone', [0, y + abH / 2, 0]);
-  for (let i = 0; i < 4; i++) {
-    const a = i / 4 * Math.PI * 2;
-    const wheel = new THREE.TorusGeometry(abH * 0.35, abH * 0.06, 6, 20); b.add(wheel, 'stone', [Math.cos(a) * abR, y + abH / 2, Math.sin(a) * abR], [0, Math.PI / 2 - a, 0]);
-    for (let k = 0; k < 8; k++) b.add(box(abH * 0.04, abH * 0.65, abH * 0.04), 'stone', [Math.cos(a) * abR, y + abH / 2, Math.sin(a) * abR], [0, Math.PI / 2 - a, 0]).add(box(abH * 0.04, abH * 0.65, abH * 0.04), 'stone', [Math.cos(a) * abR, y + abH / 2, Math.sin(a) * abR], [k / 8 * Math.PI, Math.PI / 2 - a, 0]);
-    // small animal between wheels
-    const a2 = a + Math.PI / 4; const an = sph(abH * 0.3, 8, 6); an.scale(1.8, 1, 0.5);
-    b.add(an, 'stone', [Math.cos(a2) * abR, y + abH / 2, Math.sin(a2) * abR], [0, Math.PI / 2 - a2, 0]);
-  }
-  y += abH;
-  const L = lion({});
-  if (capital === 'four') {
-    const s = hr * 0.075;
-    for (let i = 0; i < 4; i++) b.merge(new AB().merge({ parts: Object.fromEntries(Object.entries(L).map(([k, g]) => [k, [g]])) }), [Math.sin(i / 4 * Math.PI * 2) * s * 0.28, y, Math.cos(i / 4 * Math.PI * 2) * s * 0.28], [0, i / 4 * Math.PI * 2, 0], s);
+  const b = new AB(); const four = capital === 'four';
+  // plain stepped base block
+  const bH = height * 0.012, bw = hr * 0.15;
+  b.add(box(bw, bH, bw), 'stone', [0, bH / 2, 0]); b.add(box(bw * 0.8, bH, bw * 0.8), 'stone', [0, bH * 1.5, 0]);
+  let y = bH * 2; const shaftH = height * 0.8 - y, rb = hr * 0.044, rt = hr * 0.035;
+  // polished shaft with slight entasis
+  const prof = []; for (let i = 0; i <= 12; i++) { const t = i / 12; prof.push([mix(rb, rt, t) + rb * 0.025 * Math.sin(Math.PI * t), y + t * shaftH]); }
+  b.add(lathe(prof, 48), inscribed ? 'inscr' : 'stone');
+  y += shaftH;
+  b.add(new THREE.TorusGeometry(rt * 1.02, hr * 0.0035, 6, 48), 'stone', [0, y - hr * 0.002, 0], [Math.PI / 2, 0, 0]); // astragal
+  // inverted lotus bell
+  const bellH = hr * (four ? 0.065 : 0.055); b.add(lotusBell(rt * 1.02, bellH), 'stone', [0, y, 0]); y += bellH;
+  const neckR = rt * 1.02 * 0.79;
+  b.add(new THREE.TorusGeometry(neckR * 1.04, hr * 0.0035, 6, 48), 'stone', [0, y + hr * 0.002, 0], [Math.PI / 2, 0, 0]); y += hr * 0.005; // thin torus
+  const cabH = hr * 0.011; b.add(cyl(neckR * 0.98, neckR * 0.98, cabH, 32), 'stone', [0, y + cabH / 2, 0]);
+  b.add(cableRing(neckR * 0.98, cabH * 0.5), 'stone', [0, y + cabH / 2, 0]); y += cabH;
+  // abacus with four 24-spoke wheels and four animals in relief
+  const abR = hr * (four ? 0.05 : 0.047), abH = hr * (four ? 0.036 : 0.04);
+  abacus(b, y, abR, abH); y += abH;
+  if (four) {
+    const off = 0.17, s = abR / (0.42 + off); // forepaws reach the abacus rim
+    b.merge(asParts(fourLions(off)), [0, y, 0], [0, 0, 0], s);
   } else {
-    const s = hr * 0.09; // single standing lion
-    const st = new AB();
-    const body = sph(1, 18, 12); body.scale(0.2, 0.22, 0.5); st.add(body, 'stone', [0, 0.55, 0]);
-    const mane = sph(0.25, 18, 14); noisify(mane, 0.03, 16, 3); st.add(mane, 'stone', [0, 0.72, 0.35]);
-    const head = sph(0.14, 14, 10); st.add(head, 'stone', [0, 0.8, 0.52]); st.add(sph(0.07, 10, 8), 'stone', [0, 0.74, 0.64], [0, 0, 0], [1.1, 0.8, 1.2]);
-    for (const [x, z] of [[0.1, 0.35], [-0.1, 0.35], [0.1, -0.35], [-0.1, -0.35]]) st.add(cyl(0.05, 0.045, 0.45, 8), 'stone', [x, 0.22, z]);
-    st.add(taperTube([[0, 0.6, -0.48], [0, 0.4, -0.6], [0.05, 0.15, -0.6]], () => 0.025, 6, 5), 'stone');
-    b.merge(st, [0, y, 0], [0, 0, 0], s);
+    const s = hr * 0.091; const D = sculpt('lionStand', () => { const D = standingLionDef(); const st = new AB(); st.add(sdfMesh(D.f, D.b0, D.b1, 0.017), 'stone'); D.det(st, new THREE.Matrix4()); return st.build(); });
+    b.merge(asParts(D), [0, y, 0], [0, 0, 0], s);
   }
   return b.build();
 }
