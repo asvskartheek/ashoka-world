@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 28, `cook/stills/r28/` (raw 60.1, calibrated 79, median of 3 critics)
+Best so far: round 29, `cook/stills/r29/` (round 28 scored raw 60.1 / calibrated 79; round 29 adds an A/B-confirmed S04 improvement)
 
 ## Decisions
 
@@ -498,4 +498,16 @@ Overall raw 60.1, calibrated 79. Best so far (round 26: 59.3). Materials and det
 A/B forced choice, round 28 vs round 26 (2 critics): S01 new by both (60, 65); S02 split (new 58 / old 55); S03 split (new 62 / old 52); S04 old by both (60, 55): haze over S04's clear daylight.
 Measured: S01 sat +0.034 bright -0.027; S02 sat -0.028 bright -0.008.
 Next: round 29 = S04 haze cut (rendering).
+Stop check: bar no | floor no (about 7.4h) | approved no | final no -> next round
+
+## Round 29
+
+Time: about 13:37 to 13:44 UTC
+Focus: S04, the only shot where both round-28 A/B critics preferred round 26 (haze over clear daylight).
+Changes: S04 atmosphere density 0.0005 to 0.00015, floor 0.00015 to 0.00004, sun in-scatter 0.03 to 0.02, sky haze 0.15 to 0.04. S01 to S03 are round 28's stills.
+Stills: `cook/stills/r29/` | Side by side: `cook/compare/r29/all.jpg` | A/B: `cook/compare/r29/ab_S04.jpg` (key in ab_key.txt)
+A/B forced choice, S04 round 29 vs round 26 (2 critics): new preferred by both (52, 55): "warmer, more saturated light with more contrast; the other looks hazier".
+Measured: S04 sat +0.004 bright -0.057.
+Scores: regular critics not re-run (only S04 changed; the A/B test is the better instrument for a one-shot change). Round 29 = round 28 with S04 improved; working best.
+Status: every shot's new render (accumulation renderer, atmosphere pass, set dressing) now beats or ties round 26 in paired A/B tests: S01 new 2/2, S02 split, S03 split, S04 new 2/2.
 Stop check: bar no | floor no (about 7.4h) | approved no | final no -> next round
