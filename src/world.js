@@ -439,7 +439,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 6, D + 6), M.hallFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(cx, fy + 0.4 + 0.01, cz); floor.receiveShadow = true; G.add(floor);
   const refl = new Reflector(new THREE.PlaneGeometry(W + 6, D + 6), { textureWidth: 1024, textureHeight: 576, clipBias: 0.003, color: 0xffffff });
   refl.material.transparent = true; refl.material.depthWrite = false;
-  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.88, 0.72), 0.24 );');
+  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.8, 0.58), 0.17 );');
   refl.rotation.x = -Math.PI / 2; refl.position.set(cx, fy + 0.4 + 0.02, cz); G.add(refl); ref.hallReflector = refl;
   // big banner behind throne
   // hanging cloth banner behind the throne (gently rippled), on a gilt rod

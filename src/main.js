@@ -152,7 +152,7 @@ window.renderShot = async (id, time = 0) => {
   if (N <= 1 || !renderPass) {
     comp.render(); comp.render();
   } else {
-    const d = S.dof || DOF[id] || {}; const opt = { focus: qn('focus', d.focus ?? 20), aperture: qn('aperture', d.aperture ?? 0), sky: ACC.sky, envSky: ACC.env };
+    const d = S.dof || DOF[id] || {}; const opt = { focus: qn('focus', d.focus ?? 20), aperture: qn('aperture', d.aperture ?? 0), sky: ACC.sky, envSky: S.envSky ?? ACC.env };
     // the sky light takes over fraction opt.sky of the hemisphere sky term and opt.envSky of the environment map;
     // the environment's lower hemisphere (hazy ground, radiance horizon*0.8) is handed to the hemisphere ground term
     const env0 = shotState.env; scene.environmentIntensity = env0 * (1 - opt.envSky);
