@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import * as A from './assets.js';
 import { rng } from './textures.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
 import { height, HILL, MOAT, riverDist, riverHalfWidth, WATER_Y, makeGroundMask } from './env.js';
 
 const C = (h) => new THREE.Color(h);
@@ -19,7 +20,7 @@ export class Instancer {
       thatch: M.thatch, tiles: M.roofTiles, tilesRed: M.roofTilesRed, brick: M.brick, brickPale: M.brickPale, mud: M.mud, basket: M.straw,
       goods0: std({ color: 0xd8761e, roughness: 0.6 }), goods1: std({ color: 0xb02a1e, roughness: 0.5 }), goods2: std({ color: 0x6a8a2a, roughness: 0.6 }), goods3: std({ color: 0xe0b030, roughness: 0.7 }),
       sail: M.fabric(0xe0d4b8),
-      gold: M.gold, iron: M.iron, eye: std({ color: 0x1a1410, roughness: 0.3 }), lips: std({ color: 0x5a2a22, roughness: 0.6 }), stubble: std({ color: 0x4a3428, roughness: 0.8 }),
+      gold: M.gold, iron: M.iron, eye: std({ color: 0x1a1410, roughness: 0.3 }), lips: std({ color: 0x5a2a22, roughness: 0.6 }), stubble: std({ color: 0xffffff, roughness: 0.75 }),
       contact: new THREE.MeshBasicMaterial({ color: 0x000000, alphaMap: contactTex(), transparent: true, opacity: 0.75, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }),
     };
     for (const k of ['garment', 'shawl', 'accent']) this.base[k].side = THREE.DoubleSide;
@@ -166,7 +167,7 @@ export function buildWorld(scene, M) {
   for (const [x, z] of towersAt) { const key = Math.round(x / 8) + ',' + z; if (seen.has(key)) continue; seen.add(key); I.put('tower', x, 0, z, 0, 1); }
 
   // gatehouse
-  const gh = A.gatehouse({ w: 22, d: 11, h: 14 }); I.register('gatehouse', gh, {}); I.put('gatehouse', 0, 0, 0, 0, 1);
+  const gh = A.gatehouse({ w: 22, d: 11, h: 14 }); I.register('gatehouse', gh, {}); I.put('gatehouse', 0, 0, 0, 0, [1.2, 1.25, 1.2]);
   // inner taller gate pavilion behind
   I.register('gatehouse2', A.gatehouse({ w: 20, d: 9, h: 18 }), {}); I.put('gatehouse2', -2, 0, -24, 0, 0.95);
   // banners with chakra on poles flanking the gate
@@ -370,7 +371,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   b.add(new THREE.BoxGeometry(0.8, colH + 2, D), 'wallP', [W / 2 + 0.4, fy + (colH + 2) / 2, 0]);
   // throne dais: 4 steps
   const tx = W / 2 - 9;
-  for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(16 - k * 1.6, 0.3, 14 - k * 1.6), 'pstone', [tx + k * 0.8, fy + 0.15 + k * 0.3, 0]);
+  for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(10 - k * 1.2, 0.3, 12 - k * 1.4), 'pstone', [tx + 1 + k * 0.6, fy + 0.15 + k * 0.3, 0]);
   const dy = fy + 1.2; ref.pois.throne = new THREE.Vector3(cx + tx + 3.5, dy, cz);
   // throne: seat, back, lion armrests
   b.add(new THREE.BoxGeometry(1.6, 0.7, 1.4), 'cwood', [tx + 3.5, dy + 0.35, 0]);
@@ -381,7 +382,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const lionG = A.lion({});
   for (const s of [-1, 1]) { const lb = new A.AB(); for (const [k, g] of Object.entries(lionG)) lb.add(g, 'gold'); b.merge(lb, [tx + 3.3, dy + 0.15, s * 1.05], [0, -Math.PI / 2, 0], 1.25); }
   // stepped carpet runner
-  b.add(new THREE.BoxGeometry(14, 0.02, 3), 'rug', [tx - 8, fy + 0.01, 0]);
+  b.add(new THREE.BoxGeometry(6, 0.02, 3), 'rug', [tx - 7, fy + 0.01, 0]);
   // low writing desks and mats
   const parts = b.build();
   const std = (o) => new THREE.MeshStandardMaterial(o);
@@ -389,22 +390,25 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   I.put('hall', cx, 0.4, cz, 0, 1);
   // separate polished floor (reflective-ish)
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 6, D + 6), M.hallFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(cx, fy + 0.4 + 0.01, cz); floor.receiveShadow = true; G.add(floor);
+  const refl = new Reflector(new THREE.PlaneGeometry(W + 6, D + 6), { textureWidth: 1024, textureHeight: 576, clipBias: 0.003, color: 0xffffff });
+  refl.material.transparent = true; refl.material.depthWrite = false;
+  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.92, 0.8), 0.32 );');
+  refl.rotation.x = -Math.PI / 2; refl.position.set(cx, fy + 0.4 + 0.02, cz); G.add(refl); ref.hallReflector = refl;
   // big banner behind throne
   const ban = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 7.5, 6, 12), M.bannerHall);
   ban.position.set(cx + W / 2 - 0.2, fy + 6.2, cz); ban.rotation.y = -Math.PI / 2; G.add(ban);
   for (const s of [-1, 1]) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 7.6), M.clothMaroon); st.position.set(cx + W / 2 - 0.25, fy + 6.2, cz + s * 2.2); st.rotation.y = -Math.PI / 2; G.add(st); }
   // brass pot of lotuses near steps
   const pot = new THREE.Mesh(A.lathe([[0, 0], [0.35, 0.05], [0.55, 0.35], [0.5, 0.7], [0.38, 0.85], [0.45, 0.95], [0.4, 0.97]], 32), M.gold);
-  const yy = fy + 0.4; pot.position.set(cx + tx - 9.5, yy, cz + 3.6); pot.castShadow = true; G.add(pot);
+  const yy = fy + 0.4; pot.position.set(cx + tx - 5.2, yy, cz + 2.4); pot.castShadow = true; G.add(pot);
   const lotusMat = new THREE.MeshStandardMaterial({ color: 0xf0a0b8, roughness: 0.6, side: THREE.DoubleSide });
   for (let i = 0; i < 9; i++) { const a = i / 9 * 6.28; const fl = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 8, 1, true), lotusMat); fl.position.set(pot.position.x + Math.cos(a) * 0.25, yy + 1.1 + (i % 3) * 0.08, pot.position.z + Math.sin(a) * 0.25); fl.rotation.x = Math.PI; G.add(fl); const lf = new THREE.Mesh(new THREE.CircleGeometry(0.22, 10), new THREE.MeshStandardMaterial({ color: 0x4a6a2a, side: THREE.DoubleSide })); lf.position.set(pot.position.x + Math.cos(a + 0.3) * 0.45, yy + 0.98, pot.position.z + Math.sin(a + 0.3) * 0.45); lf.rotation.x = -Math.PI / 2 + 0.4; G.add(lf); }
   // scrolls
   const scrollG = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 10); const paper = new THREE.MeshStandardMaterial({ color: 0xe0cc98, roughness: 0.8 });
-  for (let i = 0; i < 7; i++) { const s = new THREE.Mesh(scrollG, paper); s.rotation.z = Math.PI / 2; s.rotation.y = 0.3; s.position.set(cx + tx - 9 + (i % 3) * 0.1, fy + 0.4 + 0.5 + Math.floor(i / 3) * 0.1, cz + 8 - 0.2 + (i % 3) * 0.11); G.add(s); }
 
   // ---- people in the hall (floor at fy + 0.4). Composition relative to shot-2 camera.
   const Y = fy + 0.4;
-  const HC = { x: cx + 4.2, z: cz + 7.2 }; const hf = new THREE.Vector2(cx + tx + 1 - HC.x, cz - 1.5 - HC.z).normalize(); const hl = new THREE.Vector2(hf.y, -hf.x);
+  const HC = { x: cx + 18, z: cz + 7.2 }; const hf = new THREE.Vector2(cx + tx + 1 - HC.x, cz - 1.5 - HC.z).normalize(); const hl = new THREE.Vector2(hf.y, -hf.x);
   const hat = (fw, lf) => [HC.x + hf.x * fw + hl.x * lf, HC.z + hf.y * fw + hl.y * lf];
   const nearCol = (x, z) => { const gx = (x - (cx - W / 2)) / sp, gz = (z - (cz - D / 2)) / sp; return Math.hypot((gx - Math.round(gx)) * sp, (gz - Math.round(gz)) * sp) < 1.5; };
   const toThrone = (x, z) => Math.atan2(cx + tx + 3.5 - x, cz - z);
@@ -416,19 +420,19 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   person(cx + tx - 3.0, cz - 7.0, -Math.PI / 2 - 0.6, { type: 'noble', pose: 'stand', y: Y });
   person(cx + tx - 0.5, cz - 8.0, -Math.PI / 2 - 0.6, { type: 'man', pose: 'stand', y: Y });
   // monks in rows, left foreground leading toward the throne
-  for (let row = 0; row < 4; row++) for (let k = 0; k < 6; k++) seat(1.8 + k * 1.25 + row * 0.3, 1.3 + row * 1.25, 'monk', { turn: -0.2 });
+  for (let row = 0; row < 4; row++) for (let k = 0; k < 5; k++) seat(1.4 + k * 1.15 + row * 0.25, 1.2 + row * 1.2, 'monk', { turn: -0.2 });
   // nobles / scholars seated further along on the left (facing throne)
-  for (let row = 0; row < 3; row++) for (let k = 0; k < 4; k++) seat(10.5 + k * 1.4, 1.5 + row * 1.5, k % 2 ? 'noble' : 'man');
+  for (let row = 0; row < 3; row++) for (let k = 0; k < 4; k++) seat(3.5 + k * 1.4, 6.2 + row * 1.4, k % 2 ? 'noble' : 'man');
   // ministers seated near the dais on the right side
-  for (let k = 0; k < 6; k++) { const x = cx + tx - 5 - (k % 3) * 1.7, z = cz + 3.5 + Math.floor(k / 3) * 1.7; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: k % 2 ? 'noble' : 'man', pose: 'sit', y: Y }); }
+  for (let k = 0; k < 6; k++) { const x = cx + tx - 4 - (k % 3) * 1.7, z = cz - 4.5 - Math.floor(k / 3) * 1.7; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: k % 2 ? 'noble' : 'man', pose: 'sit', y: Y }); }
   // scribes at low desks, right foreground
   const scribeDesk = new A.AB();
-  for (const [fw, lf] of [[3.4, -2.4], [5.6, -3.2]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); }
+  for (const [fw, lf] of [[2.6, -2.2], [4.6, -3.0]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); for (let q = 0; q < 4; q++) scribeDesk.add(new THREE.CylinderGeometry(0.045, 0.045, 0.42, 10), 'paper', [dx - cx + (q % 2) * 0.1 - 0.05, fy + 0.47 + Math.floor(q / 2) * 0.08, dz - cz + (q % 2) * 0.09], [0, toThrone(x, z) + 0.5, Math.PI / 2]); }
   // standing courtiers in the far back right
   for (let i = 0; i < 10; i++) { const x = cx + tx - 14 + (i % 5) * 2.4, z = cz - 10 - Math.floor(i / 5) * 2; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: i % 2 ? 'noble' : 'man', pose: 'stand', y: Y }); }
   // mats under the monk rows
   for (let row = 0; row < 4; row++) { const [x, z] = hat(5.2 + row * 0.3, 1.3 + row * 1.25); scribeDesk.add(new THREE.BoxGeometry(8, 0.03, 1.1), 'mat', [x - cx, fy + 0.015, z - cz], [0, Math.atan2(hf.x, hf.y) + Math.PI / 2, 0]); }
-  I.register('hallProps', scribeDesk.build(), { mats: { cwood: M.carvedWood, mat: new THREE.MeshStandardMaterial({ color: 0xc8b07a, map: M.thatch.map, roughness: 1 }) } }); I.put('hallProps', cx, 0.4, cz, 0, 1);
+  I.register('hallProps', scribeDesk.build(), { mats: { paper: new THREE.MeshStandardMaterial({ color: 0xe0cc98, roughness: 0.8 }), cwood: M.carvedWood, mat: new THREE.MeshStandardMaterial({ color: 0xc8b07a, map: M.thatch.map, roughness: 1 }) } }); I.put('hallProps', cx, 0.4, cz, 0, 1);
   // ---- garden north of hall with lotus pond + fountains (visible through open side)
   const gp = new THREE.Mesh(new THREE.PlaneGeometry(60, 24), new THREE.MeshStandardMaterial({ color: 0x3a5a58, roughness: 0.04, metalness: 0.3 }));
   gp.rotation.x = -Math.PI / 2; gp.position.set(cx - 10, 0.75, cz - D / 2 - 26); G.add(gp);
@@ -515,10 +519,11 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   const r = rng(91);
   for (let i = 0; i < 220; i++) { const a = r() * 6.28, d = 30 + r() * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; I.ground('rock' + (i % 4), x, z, r() * 6, 0.4 + r() * 1.6, { dy: -0.25 }); }
   for (let i = 0; i < 9000; i++) { const a = r() * 6.28, d = R * 1.18 + 4 + Math.pow(r(), 1.6) * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; const [cx2, cz2] = at(4, 0); if (Math.hypot(x - cx2, z - cz2) < 3) continue; I.ground('grass', x, z, r() * 6, 0.7 + r() * 0.8); }
-  for (const [fw, lf, s] of [[2.5, 5.5, 1.5], [4.5, 8.5, 1.9], [1.5, 9.5, 2.2], [7, 12.5, 1.3], [3, 3.6, 0.6], [6, 4.2, 0.45], [9, 3.6, 0.5]]) { const [x, z] = at(fw, lf); I.ground('rock' + ((fw * 3 | 0) % 4), x, z, fw * 2, s, { dy: -0.18 * s }); }
+  for (const [fw, lf, s] of [[4, 2.6, 1.2], [6, 3.9, 2.0], [9, 6.2, 2.6], [5, 1.5, 0.6], [12, 7.5, 1.8], [3, 1.7, 0.5], [7.5, 5.0, 1.0], [3.2, 2.4, 0.8]]) { const [x, z] = at(fw, lf); I.ground('rock' + ((fw * 3 | 0) % 4), x, z, fw * 2, s, { dy: -0.18 * s }); }
   // path edging stones along both sides of the path to the stairs
   for (let i = 0; i < 26; i++) { const fw = 3 + i * 0.9; for (const lf of [1.9, -2.2]) { const [x, z] = at(fw, lf + Math.sin(i) * 0.2); I.ground('rock' + (i % 4), x, z, i, 0.22 + r() * 0.1, { dy: -0.04 }); } }
   for (let i = 0; i < 60; i++) { const a = r() * 6.28, d = 55 + r() * 150; treeAt(sx + Math.cos(a) * d, sz + Math.sin(a) * d, 0.9); }
+  for (let i = 0; i < 900; i++) { const a = r() * 6.28, d = 260 + r() * 1400; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; if (height(x, z) < 0.3 || Math.abs(x - 880) < 120 && Math.abs(z - 270) < 120 || (x > -300 && x < 400 && z > -520 && z < 160)) continue; treeAt(x, z, 1.1, d > 500); }
   // big overhanging tree near the camera (top right) and one far left
   { const [x, z] = at(5, -9); I.ground('treeBig', x, z, 2.0, 1.0); }
   { const [x, z] = at(22, 30); I.ground('treeBig2', x, z, 0.4, 1.0); }
@@ -607,9 +612,9 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   person(sx + 10.5, 338, -0.3, { type: 'woman', pose: 'walk', y: Y }); person(sx + 10.8, 342, 0.2, { type: 'woman', pose: 'stand', y: Y });
   person(sx - 9.6, 344, Math.PI / 2, { type: 'man', pose: 'stand', y: Y }); person(sx - 8.8, 340, -Math.PI / 2 - 0.2, { type: 'woman', pose: 'stand', y: Y });
   oxCart(sx - 1.0, 280, 0.05, 'sacks');
-  mahoutElephant(sx + 7.5, 312, 0.1, 'elephantH'); mahoutElephant(sx + 5, 262, 0.05, 'elephant'); mahoutElephant(sx + 2, 240, 0.1, 'elephant');
+  mahoutElephant(sx + 9.5, 322, -0.15, 'elephantH'); mahoutElephant(sx + 5, 262, 0.05, 'elephant'); mahoutElephant(sx + 2, 240, 0.1, 'elephant');
   const r = rng(51);
-  for (let q = 0; q < 140; q++) { const zz = 190 + r() * 140, xx = sx - 7 + r() * 15; person(xx, zz, r() < 0.6 ? (r() - 0.5) * 0.6 : Math.PI + (r() - 0.5) * 0.6, { y: Y }); }
+  for (let q = 0; q < 280; q++) { const zz = 190 + r() * 140, xx = sx - 7 + r() * 15; person(xx, zz, r() < 0.6 ? (r() - 0.5) * 0.6 : Math.PI + (r() - 0.5) * 0.6, { y: Y }); }
   for (let q = 0; q < 16; q++) person(sx - 6 + r() * 10, 230 - r() * 25, Math.PI, { type: 'soldier', pose: 'walk', y: Y });
   // town outskirts houses (fill around street, behind facades)
   const r2 = rng(61);

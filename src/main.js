@@ -59,6 +59,7 @@ export function applyShot(S) {
 }
 window.renderShot = async (id, time = 0) => {
   const S = SHOTS[id]; applyShot(S);
+  if (world.ref.hallReflector) world.ref.hallReflector.visible = id == 2;
   water.material.uniforms.time.value = time; clouds.material.uniforms.time.value = time;
   const t1 = performance.now(); comp.render(); comp.render(); const gl = renderer.getContext(); const px = new Uint8Array(4); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
   log('rendered shot', id, (performance.now() - t1) | 0, 'ms');

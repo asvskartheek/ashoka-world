@@ -4,7 +4,7 @@ export const SHOTS = {
        sun: { az: 152, el: 3.2 }, light: { az: 62, el: 11 }, sky: { zenith: 0x5a6a9a, horizon: 0xf0b8a0, band: 0xffa070, bandAmt: 0.9, glow: 2.2, sunCol: 0xffc890, intensity: 1.3 }, exposure: 0.85, cloud: 0.6,
        fog: { color: 0xe8b8a0, density: 0.00022 }, shadow: { center: [40, 0, -120], size: 420 },
        grade: { lift: [0.03, 0.01, 0.02], gain: [1.08, 0.98, 0.9], sat: 1.12, contrast: 1.06 }, sunInt: 3.2, sunCol: 0xffb07a, hemi: 0.5 },
-  2: { name: 'palace_hall', pos: [134.2, 4.6, -307.8], target: [158, 3.7, -316.5], fov: 62,
+  2: { name: 'palace_hall', pos: [148, 4.55, -307.8], target: [158, 4.1, -318.5], fov: 62,
        sun: { az: -140, el: 34 }, env: 0.6, sky: { zenith: 0x4a7ac8, horizon: 0xd8e4ee, glow: 0.4, intensity: 1.3 }, exposure: 0.75, cloud: 0.62,
        fog: { color: 0xc8d4dc, density: 0.0012 }, shadow: { center: [130, 0, -315], size: 110 },
        grade: { lift: [0.03, 0.015, 0.0], gain: [1.1, 1.0, 0.86], sat: 1.12, contrast: 1.06 }, sunInt: 5.0, sunCol: 0xffd8a8, hemi: 0.7 },
