@@ -41,7 +41,7 @@ export function applyShot(S) {
   const u = sky.material.uniforms; u.sunPosition.value.copy(dir);
   u.zenith.value.set(S.sky.zenith); u.horizon.value.set(S.sky.horizon); u.band.value.set(S.sky.band || 0xffc090); u.bandAmt.value = S.sky.bandAmt || 0; u.glow.value = S.sky.glow ?? 1; u.sunCol.value.set(S.sky.sunCol || S.sunCol); u.intensity.value = S.sky.intensity || 1;
   const cu = clouds.material.uniforms; cu.sunDir.value.copy(dir); cu.cover.value = S.cloud;
-  const warm = new THREE.Color(S.sunCol); cu.sunCol.value.copy(warm).multiplyScalar(S.sun.el < 10 ? 1.3 : 1.05); cu.shade.value.copy(S.sun.el < 10 ? new THREE.Color(0x8a6a80) : new THREE.Color(0xd0d8e4));
+  const warm = new THREE.Color(S.sunCol); cu.sunCol.value.copy(S.sun.el < 10 ? warm.clone().multiplyScalar(1.3) : new THREE.Color(0xfffaf2)); cu.shade.value.copy(S.sun.el < 10 ? new THREE.Color(0x8a6a80) : new THREE.Color(0xd0d8e4));
   water.material.uniforms.sunDirection.value.copy(dir);
   water.material.uniforms.waterColor.value.set(S.water?.color ?? 0x3a5058); water.material.uniforms.distortionScale.value = S.water?.distortion ?? 2.2;
   renderer.toneMappingExposure = S.exposure;

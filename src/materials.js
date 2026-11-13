@@ -111,7 +111,7 @@ export function buildMaterials() {
   const plaster = T.plasterWall({ base: [222, 200, 170], seed: 17 });
   M.plaster = worldUV(std(pbr(plaster, 0.9)), 0.22, { grime: { h: 1.1, amt: 0.55 } });
   M.plasterPink = worldUV(std({ ...pbr(plaster, 0.9), map: T.tinted(plaster.map, [1.0, 0.93, 0.9]) }), 0.22, { grime: { h: 1.1, amt: 0.55 } });
-  M.trimRed = std({ color: 0x9c3b2c, roughness: 0.85 });
+  M.trimRed = std({ color: 0x8a4a36, roughness: 0.9 });
   M.mud = worldUV(std({ map: plaster.map, color: 0xb88a62, roughness: 1 }), 0.3);
 
   const floor = T.floorTex({});

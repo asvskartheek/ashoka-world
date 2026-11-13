@@ -388,8 +388,8 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   // back (north) wall: partial wall with windows, east end wall behind throne
   // throne dais: 4 steps
   const tx = W / 2 - 16.2;
-  for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(10 - k * 1.2, 0.3, 12 - k * 1.4), 'pstone', [tx + 1 + k * 0.6, fy + 0.15 + k * 0.3, 0]);
-  const dy = fy + 1.2; ref.pois.throne = new THREE.Vector3(cx + tx + 3.5, dy, cz);
+  for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(10 - k * 1.2, 0.22, 12 - k * 1.4), 'pstone', [tx + 1 + k * 0.6, fy + 0.11 + k * 0.22, 0]);
+  const dy = fy + 0.88; ref.pois.throne = new THREE.Vector3(cx + tx + 3.5, dy, cz);
   // throne: seat, back, lion armrests
   b.add(new THREE.BoxGeometry(1.6, 0.7, 1.4), 'cwood', [tx + 3.5, dy + 0.35, 0]);
   b.add(new THREE.BoxGeometry(0.22, 1.9, 1.9), 'cwood', [tx + 4.3, dy + 0.95, 0]);
@@ -582,7 +582,7 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   const wb = new A.AB();
   const wallH = 10, gateW = 7, gateH = 7.5;
   wb.add(new THREE.BoxGeometry(18, 16, 12), 'brick', [0, 8, 0]); // gate block
-  wb.add(new THREE.BoxGeometry(gateW, gateH, 12.4), 'dark', [0, gateH / 2, 0]); // passage
+  wb.add(new THREE.BoxGeometry(gateW, gateH, 12.4), 'passage', [0, gateH / 2, 0]); // passage (lit tunnel)
   wb.add(new THREE.BoxGeometry(gateW + 1.2, 0.8, 12.6), 'timber', [0, gateH + 0.4, 0]);
   for (let i = 0; i < 8; i++) wb.add(new THREE.BoxGeometry(1.2, 1.4, 1.2), 'brick', [-8 + i * 2.28, 16.7, 6]).add(new THREE.BoxGeometry(1.2, 1.4, 1.2), 'brick', [-8 + i * 2.28, 16.7, -6]);
   for (const s of [-1, 1]) {
@@ -597,7 +597,7 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
     for (let i = 0; i < 38; i++) wb.add(new THREE.BoxGeometry(1.1, 1.3, 1.1), 'brick', [s * (18.5 + i * 2.35), wallH + 0.65, 2.6]);
   }
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) wb.add(new THREE.BoxGeometry(0.8, 1.2, 0.3), 'dark', [s * 13 + (i - 1) * 2.5, 13, 5.05]);
-  I.register('townGate', wb.build(), { mats: { brick: M.brickPale, tiles: M.roofTilesRed } });
+  I.register('townGate', wb.build(), { mats: { brick: M.brickPale, tiles: M.roofTilesRed, passage: new THREE.MeshStandardMaterial({ color: 0x9a8268, roughness: 1, emissive: 0x3a2c1c }) } });
   I.put('townGate', sx, 0.3, gz, 0, 1.15);
   // banners on poles in the street
   I.register('bannerW', { banner: new THREE.PlaneGeometry(1.4, 3.6, 4, 8) }, { mats: { banner: M.bannerWhite } });
@@ -613,10 +613,10 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   // left side (west) faces east, right side faces west. Street half-width ~9
   let z = 352; let i = 0;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx - 12.5, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 12.5 + 4.62, 1.0, z - w / 2, 0, [0.12, 1.2, w]); z -= w + 0.4; i++; }
+    I.put(k, sx - 12.5, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 12.5 + 4.62, 0.85, z - w / 2, 0, [0.12, 0.9, w]); z -= w + 0.4; i++; }
   z = 340; i = 2;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); I.put('trim', sx + 13.5 - 4.62, 1.0, z - w / 2, 0, [0.12, 1.2, w]); z -= w + 0.4; i++; }
+    I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); z -= w + 0.4; i++; }
   // pots, baskets and grain sacks along both street edges
   I.register('streetGoods', (() => { const g = new A.AB(); const rr = rng(8); for (let q = 0; q < 7; q++) g.add(A.lathe([[0, 0], [0.18 + rr() * 0.08, 0.05], [0.26, 0.22], [0.16, 0.42], [0.1, 0.46], [0.12, 0.5]], 12), q % 3 ? 'clay' : 'basket', [(rr() - 0.5) * 1.6, 0, (rr() - 0.5) * 1.2], [0, rr() * 6, 0], 0.7 + rr() * 0.6); for (let q = 0; q < 3; q++) { const sk = new THREE.SphereGeometry(0.3, 10, 8); sk.scale(1, 0.75, 1.3); g.add(sk, 'sack', [(rr() - 0.5) * 1.4, 0.2, (rr() - 0.5) * 1.0]); } return g.build(); })(), {});
   { const rg = rng(19); for (let zz = 350; zz > gz + 20; zz -= 4.5) for (const s of [-1, 1]) { if (s < 0 && zz < 346 && zz > 296) continue; I.ground('streetGoods', sx + s * (s < 0 ? 5.6 : 6.6), zz + (rg() - 0.5) * 2, rg() * 6, 1); } }

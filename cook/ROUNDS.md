@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 16, `cook/stills/r16/` (raw 55, calibrated 74)
+Best so far: round 21, `cook/stills/r21/` (raw 55.8, calibrated 75, median of 3 critics)
 
 ## Decisions
 
@@ -322,3 +322,24 @@ Measured: S01 sat +0.052 bright -0.086; S02 sat -0.035 bright +0.018; S03 sat -0
 Repeated items across both critics: (1) people read as mannequins with flat skin and cloth shading, S02 worst; (2) S01 sun disc not seen, river empty; (3) S03 path edging stones read as "stepping-stone discs", ground bare, rocks not seen.
 Stop check: bar no | floor no (about 2.9h) | approved no | final no -> next round
 Next focus: round 21 = skin and cloth shading (global), S01 sun and river, S03 ground.
+
+## Round 21
+
+Time: about 09:12 to 09:24 UTC (end measured)
+Focus: repeated critic items: people shading (S02 worst), S01 sun and river, S03 ground.
+Changes: skin is a MeshPhysicalMaterial with a low warm sheen and faint clearcoat (first try at sheen 0.6 read waxy, cut to 0.22); cloth gets a soft grey sheen (white sheen washed saffron to pink, corrected); S01 sun disc about twice the size and brighter; S03 path edging stones removed (read as stamped discs), 260 grass clumps along the path edges.
+Stills: `cook/stills/r21/` | Side by side: `cook/compare/r21/all.jpg`
+Scores, eyeballed: median of 3 critics (general-purpose, sonnet, haiku), raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated |
+|---|---|---|---|---|---|---|---|
+| S01 | 70 | 60 | 62 | 45 | 40 | 55 | 74 |
+| S02 | 65 | 55 | 60 | 40 | 35 | 51 | 70 |
+| S03 | 80 | 65 | 70 | 58 | 48 | 64 | 83 |
+| S04 | 62 | 55 | 55 | 50 | 40 | 52 | 71 |
+
+Overall raw 55.8, calibrated 75. Best so far (round 16 was 55.0 on 2 critics). Note: from this round, 3 critics and a true median, as the Cook rules ask when critics split by more than 10.
+Measured: S01 sat +0.053; S02 sat -0.052; S03 sat -0.003; S04 sat -0.003.
+Repeated across all three critics: S04 red dado band reads as an unnatural barrier, gate opening is a black void, sky reads overcast beige; S02 figures still the biggest gap, dais too blocky and tall; S01 far city sparse and river empty.
+Stop check: bar no | floor no (about 3.2h) | approved no | final no -> next round
+Next focus: round 22 = S04 sky, gate, dado; S02 dais.
