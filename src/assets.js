@@ -419,18 +419,19 @@ export function lion({ seed = 1 } = {}) {
   return b.build();
 }
 // Ashokan pillar. capital: 'four' (4 lions) or 'one' (single standing lion)
-export function ashokaPillar({ height = 12, capital = 'four', inscribed = false } = {}) {
+export function ashokaPillar({ height = 12, capital = 'four', inscribed = false, girth = 1 } = {}) {
+  const hr = height * girth; // radial scale: thicker pillars keep their capital proportions
   const b = new AB(); const shaftH = height * 0.82;
-  b.add(cyl(height * 0.035, height * 0.044, shaftH, 32), inscribed ? 'inscr' : 'stone', [0, shaftH / 2, 0]);
+  b.add(cyl(hr * 0.035, hr * 0.044, shaftH, 32), inscribed ? 'inscr' : 'stone', [0, shaftH / 2, 0]);
   let y = shaftH;
   // bell (inverted lotus) with petals
-  const bell = lathe([[height * 0.034, 0], [height * 0.05, 0.02 * height], [height * 0.058, 0.05 * height], [height * 0.05, 0.07 * height], [height * 0.033, 0.08 * height], [0, 0.08 * height]], 32);
+  const bell = lathe([[hr * 0.034, 0], [hr * 0.05, 0.02 * height], [hr * 0.058, 0.05 * height], [hr * 0.05, 0.07 * height], [hr * 0.033, 0.08 * height], [0, 0.08 * height]], 32);
   b.add(bell, 'stone', [0, y, 0]);
-  for (let i = 0; i < 24; i++) b.add(box(height * 0.006, height * 0.07, height * 0.004), 'stone', [Math.cos(i / 24 * Math.PI * 2) * height * 0.051, y + height * 0.035, Math.sin(i / 24 * Math.PI * 2) * height * 0.051], [0, -i / 24 * Math.PI * 2 + Math.PI / 2, 0.15]);
+  for (let i = 0; i < 24; i++) b.add(box(hr * 0.006, height * 0.07, hr * 0.004), 'stone', [Math.cos(i / 24 * Math.PI * 2) * hr * 0.051, y + height * 0.035, Math.sin(i / 24 * Math.PI * 2) * hr * 0.051], [0, -i / 24 * Math.PI * 2 + Math.PI / 2, 0.15]);
   y += height * 0.08;
-  b.add(cyl(height * 0.032, height * 0.032, height * 0.012, 24), 'stone', [0, y, 0]); y += height * 0.012;
+  b.add(cyl(hr * 0.032, hr * 0.032, height * 0.012, 24), 'stone', [0, y, 0]); y += height * 0.012;
   // abacus drum with chakra + animals relief
-  const abH = height * (capital === 'one' ? 0.045 : 0.035), abR = height * (capital === 'one' ? 0.052 : 0.047);
+  const abH = height * (capital === 'one' ? 0.045 : 0.035), abR = hr * (capital === 'one' ? 0.052 : 0.047);
   b.add(cyl(abR, abR, abH, 32), 'stone', [0, y + abH / 2, 0]);
   for (let i = 0; i < 4; i++) {
     const a = i / 4 * Math.PI * 2;
@@ -443,10 +444,10 @@ export function ashokaPillar({ height = 12, capital = 'four', inscribed = false 
   y += abH;
   const L = lion({});
   if (capital === 'four') {
-    const s = height * 0.075;
+    const s = hr * 0.075;
     for (let i = 0; i < 4; i++) b.merge(new AB().merge({ parts: Object.fromEntries(Object.entries(L).map(([k, g]) => [k, [g]])) }), [Math.sin(i / 4 * Math.PI * 2) * s * 0.28, y, Math.cos(i / 4 * Math.PI * 2) * s * 0.28], [0, i / 4 * Math.PI * 2, 0], s);
   } else {
-    const s = height * 0.09; // single standing lion
+    const s = hr * 0.09; // single standing lion
     const st = new AB();
     const body = sph(1, 18, 12); body.scale(0.2, 0.22, 0.5); st.add(body, 'stone', [0, 0.55, 0]);
     const mane = sph(0.25, 18, 14); noisify(mane, 0.03, 16, 3); st.add(mane, 'stone', [0, 0.72, 0.35]);

@@ -5,10 +5,10 @@ Rounds 1 to 8 happened before the Cook skill was adopted. They are back-filled f
 Started: 2026-11-12 23:31 UTC (this rebuild; a first session before that was lost)
 Time: floor 8h (from 2026-11-13 06:20 UTC) | cap none
 Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 | motion 9/10
-Calibration offset: pending (user: v0.8 = 65%; offset = 65 minus round-08 critic median)
+Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 08, `cook/stills/r08/`, commit 802912b
+Best so far: round 09, `cook/stills/r09/`
 
 ## Decisions
 
@@ -47,3 +47,71 @@ Measured (tools/color_check.py, render minus reference, 4×4 grid):
 - S04: saturation +0.027 (worst +0.191), brightness -0.099 (worst -0.301)
 - Render: 41 / 49 / 23 / 25 s per still (S01 to S04) at 1448×1086, 1 sample.
 Next focus: round 09, first Cook round, after intake.
+
+## Calibration (round 08)
+
+3 fresh-context critics (general-purpose, sonnet, haiku), images and rubric only. Medians, eyeballed:
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean |
+|---|---|---|---|---|---|---|
+| S01 | 62 | 45 | 48 | 35 | 30 | 44 |
+| S02 | 60 | 50 | 55 | 30 | 28 | 45 |
+| S03 | 70 | 50 | 55 | 45 | 38 | 52 |
+| S04 | 55 | 45 | 50 | 35 | 30 | 43 |
+
+Raw overall about 46. User estimate for v0.8: 65. Calibration offset: +19 (critics are harsher than the user). Calibrated = raw + 19.
+
+## Round 09
+
+Time: 06:20 to 06:55 UTC | elapsed 0.6h of 8h floor
+Usage: not readable
+Focus: colour and light in all shots, because the measured colour check showed the largest gaps (S01 +0.29 saturation, all shots too dark).
+Changes:
+- S01: pastel sunset sky, sat 0.78, exposure up, key light raised to 17°.
+- S02 to S04: exposure up 15 to 25%, warmer grades, softer lighter daytime skies, more fill light.
+- Stupa brick less saturated, more weathering.
+- Harness: `tools/round.sh` (stills, side-by-side, colour check), `tools/color_grid.py` (per-cell deltas).
+Stills: `cook/stills/r09/` | Side by side: `cook/compare/r09/all.jpg`
+Scores, eyeballed: critic median (3 critics: general-purpose, sonnet, haiku), raw then calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r08 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 62 | 35 | 50 | 40 | 25 | 42 | 61 | -2 |
+| S02 | 60 | 40 | 55 | 35 | 25 | 43 | 62 | -2 |
+| S03 | 78 | 55 | 62 | 50 | 38 | 57 | 76 | +5 |
+| S04 | 65 | 55 | 58 | 40 | 28 | 49 | 68 | +6 |
+
+Overall raw 48, calibrated 67.
+Measured (tools/color_check.py, render minus reference):
+- S01: saturation -0.054, brightness -0.046
+- S02: saturation -0.103, brightness -0.014
+- S03: saturation -0.050, brightness +0.002
+- S04: saturation -0.006, brightness -0.029
+Top gaps from critics: S01 lost its visible sun (light fell); people and near-field props are the weakest everywhere; S02 back wall and banner are wrong.
+Stop check: bar no | floor no | stills approved no | final no -> next round
+
+## Round 10
+
+Time: 06:55 to 07:35 UTC | elapsed 1.3h
+Focus: S04 composition (weakest shot by mean at r08), depth over breadth.
+Changes:
+- New second stupa hill (HILL2) behind the town gate with a white plastered stupa, trees and the hill pavilion; terrain blends smoothly into the town.
+- Street narrowed to about 17 m between facades; gate 70 m closer and ×1.15; flat-roof boxes removed from the street front.
+- Pillar enlarged and moved to the left third, 19 m from camera; stalls, carts, elephants, crowd moved to the shorter street; crowd types mixed (saris, robes, soldiers, nobles).
+- S01 sun moved toward the frame (az 161), sun disc enlarged.
+Stills: `cook/stills/r10/` | Side by side: `cook/compare/r10/all.jpg`
+Scores, eyeballed: critic median (3 critics), raw then calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r09 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 60 | 35 | 50 | 30 | 25 | 40 | 59 | -2 |
+| S02 | 55 | 30 | 40 | 25 | 25 | 35 | 54 | -8 (render unchanged: critic noise) |
+| S03 | 70 | 55 | 60 | 45 | 38 | 54 | 73 | -3 |
+| S04 | 55 | 45 | 50 | 35 | 25 | 42 | 61 | -7 |
+
+Overall raw 43, calibrated 62. Lower than r09. Two causes: (1) a real regression, the non-uniform pillar scale squashed the S04 lion capital into a blob; the S01 sun is still just above the frame top. (2) Critic noise: S02 was not changed and dropped 8 points, so the per-round noise is about ±5 to 8. From here, judge trends over two rounds and per-dimension, not a single round mean.
+Measured: S01 sat +0.062 bright -0.013; S02 sat -0.103 bright -0.013; S03 sat -0.043 bright -0.003; S04 sat +0.021 bright -0.063.
+Top gaps from critics: 1) people and near-field props (all shots, worst in S02); 2) S02 back wall, flat banner, mirror floor, slatted ceiling; 3) S01 no sun, flat foreground lawn, mirror moat.
+Best so far: round 09.
+Stop check: bar no | floor no | stills approved no | final no -> next round
+Next focus: round 11 fixes the regressions (pillar girth parameter, S01 sun framing), then S02 hall in depth.

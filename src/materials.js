@@ -38,7 +38,7 @@ export function buildMaterials() {
   M.brick = worldUV(std({ map: brick.map, bumpMap: brick.bump, bumpScale: 1.2, roughness: 0.92 }), 0.45);
   const brickPale = T.brickTex({ base: [182, 120, 86], var_: 30, weathering: 0.8, seed: 31 });
   M.brickPale = worldUV(std({ map: brickPale.map, bumpMap: brickPale.bump, bumpScale: 1.2, roughness: 0.92 }), 0.45);
-  const stupaBrick = T.brickTex({ base: [168, 98, 66], rows: 24, cols: 8, var_: 46, weathering: 0.5, seed: 33 });
+  const stupaBrick = T.brickTex({ base: [160, 108, 80], rows: 24, cols: 8, var_: 52, weathering: 0.85, seed: 33 });
   M.stupaBrick = std({ map: stupaBrick.map, bumpMap: stupaBrick.bump, bumpScale: 1.5, roughness: 0.95 });
 
   const logs = T.woodTex({ base: [104, 80, 58], dark: [52, 40, 30], light: [140, 120, 96], rings: 10, seed: 5 });
@@ -48,12 +48,12 @@ export function buildMaterials() {
   M.timberUV = std({ map: timber.map, bumpMap: timber.bump, bumpScale: 1, roughness: 0.85 });
   const polished = T.woodTex({ base: [120, 52, 22], dark: [62, 24, 10], light: [168, 90, 40], rings: 26, seed: 7, polish: true });
   M.polishedWood = std({ map: polished.map, bumpMap: polished.bump, bumpScale: 0.3, roughness: 0.32, metalness: 0.0 });
-  M.carvedWood = worldUV(std({ map: polished.map, bumpMap: polished.bump, bumpScale: 0.6, roughness: 0.45, color: 0xb08870 }), 1.2);
+  M.carvedWood = worldUV(std({ map: polished.map, bumpMap: polished.bump, bumpScale: 0.6, roughness: 0.5, color: 0x80583e }), 1.2);
 
   const thatch = T.thatchTex({});
   M.thatch = std({ map: thatch.map, bumpMap: thatch.bump, bumpScale: 3, roughness: 1 });
   const tiles = T.tileTex({ base: [104, 76, 58] });
-  M.roofTiles = std({ map: tiles.map, bumpMap: tiles.bump, bumpScale: 2, roughness: 0.85 });
+  M.roofTiles = std({ map: tiles.map, bumpMap: tiles.bump, bumpScale: 2, roughness: 0.85, side: THREE.DoubleSide });
   const tilesRed = T.tileTex({ base: [150, 82, 56], seed: 12 });
   M.roofTilesRed = std({ map: tilesRed.map, bumpMap: tilesRed.bump, bumpScale: 2, roughness: 0.8 });
 

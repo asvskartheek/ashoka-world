@@ -12,6 +12,7 @@ import { fbm } from './textures.js';
 export const RIVER = [[-900, 900], [-520, 350], [-330, 0], [-300, -300], [-250, -650], [-120, -1100], [150, -1800], [500, -2700], [900, -4000]];
 export const MOAT = { x0: -300, x1: 340, z0: 7, z1: 37 };
 export const HILL = { x: 1000, z: -120, h: 55, r: 210, top: 48 };
+export const HILL2 = { x: 950, z: 92, h: 44, r: 84, top: 40 };
 export const WATER_Y = -0.7;
 
 function distSeg(px, pz, ax, az, bx, bz) {
@@ -32,13 +33,17 @@ export function height(x, z) {
   const far = Math.hypot(x - 300, z + 100);
   h += smooth(1500, 4200, far) * (fbm(x * 0.0006, z * 0.0006, 4, 4096) * 420 - 110) + smooth(3000, 7000, far) * 160;
   // the stupa hill
+  const d2 = Math.hypot(x - HILL2.x, z - HILL2.z);
+  const hill2 = HILL2.h * Math.exp(-Math.pow(d2 / HILL2.r, 2.2)) * (0.9 + fbm(x * 0.013 + 5, z * 0.013, 4, 4096) * 0.2);
   const dh = Math.hypot(x - HILL.x, z - HILL.z);
   const hill = HILL.h * Math.exp(-Math.pow(dh / HILL.r, 2.2)) * (0.85 + fbm(x * 0.01, z * 0.01, 4, 4096) * 0.3);
   h += Math.min(hill, HILL.top + (hill - HILL.top) * 0.08);
   // flatten city & town platforms
   const city = (x > -260 && x < 360 && z > -520 && z < 120) ? 1 : 0;
-  const town = Math.hypot(x - 880, z - 270) < 160 ? 1 : 0;
-  if (city || town) h = h * 0.1 + 0.4;
+  h += Math.min(hill2, HILL2.top + (hill2 - HILL2.top) * 0.08);
+  if (city) h = h * 0.1 + 0.4;
+  const townF = 1 - smooth(110, 175, Math.hypot(x - 880, z - 300));
+  h = THREE.MathUtils.lerp(h, h * 0.1 + 0.4, townF);
   // river channel
   const rd = riverDist(x, z), hw = riverHalfWidth(z);
   h = THREE.MathUtils.lerp(-4.5, h, smooth(hw - 25, hw + 30, rd));
@@ -135,7 +140,7 @@ export function buildSky() {
         float toward = smoothstep(-0.6, 1.0, mu);
         c = mix(c, band, bandAmt * exp(-h * 9.0) * (0.35 + 0.65 * toward));
         c += sunCol * glow * (0.35 * pow(max(mu, 0.0), 6.0) + 0.6 * pow(max(mu, 0.0), 60.0));
-        c += sunCol * 40.0 * smoothstep(0.99985, 0.99993, mu);
+        c += sunCol * 30.0 * smoothstep(0.99955, 0.9998, mu);
         // below horizon: hazy ground colour
         c = mix(c, horizon * 0.8, smoothstep(0.0, -0.05, d.y));
         gl_FragColor = vec4(c * intensity, 1.0);

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as A from './assets.js';
 import { rng } from './textures.js';
 import { Reflector } from 'three/addons/objects/Reflector.js';
-import { height, HILL, MOAT, riverDist, riverHalfWidth, WATER_Y, makeGroundMask } from './env.js';
+import { height, HILL, HILL2, MOAT, riverDist, riverHalfWidth, WATER_Y, makeGroundMask } from './env.js';
 
 const C = (h) => new THREE.Color(h);
 // ---------------- instancing registry ----------------
@@ -368,7 +368,6 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   b.add(new THREE.BoxGeometry(W * 0.7, 3, D * 0.45), 'cwood', [0, by + 7, 0]);
   b.add(A.curvedRoof(W * 0.8, D * 0.6, 5, 0.18, 8), 'tiles', [0, by + 8.4, 0]);
   // back (north) wall: partial wall with windows, east end wall behind throne
-  b.add(new THREE.BoxGeometry(0.8, colH + 2, D), 'wallP', [W / 2 + 0.4, fy + (colH + 2) / 2, 0]);
   // throne dais: 4 steps
   const tx = W / 2 - 9;
   for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(10 - k * 1.2, 0.3, 12 - k * 1.4), 'pstone', [tx + 1 + k * 0.6, fy + 0.15 + k * 0.3, 0]);
@@ -392,12 +391,15 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 6, D + 6), M.hallFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(cx, fy + 0.4 + 0.01, cz); floor.receiveShadow = true; G.add(floor);
   const refl = new Reflector(new THREE.PlaneGeometry(W + 6, D + 6), { textureWidth: 1024, textureHeight: 576, clipBias: 0.003, color: 0xffffff });
   refl.material.transparent = true; refl.material.depthWrite = false;
-  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.92, 0.8), 0.32 );');
+  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.9, 0.75), 0.18 );');
   refl.rotation.x = -Math.PI / 2; refl.position.set(cx, fy + 0.4 + 0.02, cz); G.add(refl); ref.hallReflector = refl;
   // big banner behind throne
-  const ban = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 7.5, 6, 12), M.bannerHall);
-  ban.position.set(cx + W / 2 - 0.2, fy + 6.2, cz); ban.rotation.y = -Math.PI / 2; G.add(ban);
-  for (const s of [-1, 1]) { const st = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 7.6), M.clothMaroon); st.position.set(cx + W / 2 - 0.25, fy + 6.2, cz + s * 2.2); st.rotation.y = -Math.PI / 2; G.add(st); }
+  // hanging cloth banner behind the throne (gently rippled), on a gilt rod
+  const banG = new THREE.PlaneGeometry(3.0, 6.6, 8, 20); { const p = banG.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 3.1 + p.getY(i) * 0.4) * 0.05 + Math.sin(p.getY(i) * 1.7) * 0.03); banG.computeVertexNormals(); }
+  const ban = new THREE.Mesh(banG, M.bannerHall); ban.castShadow = true;
+  ban.position.set(cx + tx + 6.2, fy + 0.4 + 6.0, cz - 1.0); ban.rotation.y = -Math.PI / 2; G.add(ban);
+  const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.8, 10), M.gold); rod.rotation.x = Math.PI / 2; rod.position.set(cx + tx + 6.2, fy + 0.4 + 9.35, cz - 1.0); G.add(rod);
+  for (const s of [-1, 1]) { const k = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), M.gold); k.position.set(cx + tx + 6.2, fy + 0.4 + 9.35, cz - 1.0 + s * 1.95); G.add(k); }
   // brass pot of lotuses near steps
   const pot = new THREE.Mesh(A.lathe([[0, 0], [0.35, 0.05], [0.55, 0.35], [0.5, 0.7], [0.38, 0.85], [0.45, 0.95], [0.4, 0.97]], 32), M.gold);
   const yy = fy + 0.4; pot.position.set(cx + tx - 5.2, yy, cz + 2.4); pot.castShadow = true; G.add(pot);
@@ -533,7 +535,7 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
 // ---------------- BRICK TOWN STREET ----------------
 function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   const sx = 880; // street centre x; street runs north (-z) from z=360 to gate at z=180
-  const gz = 180; ref.pois.townGate = new THREE.Vector3(sx, 0.4, gz);
+  const gz = 250; ref.pois.townGate = new THREE.Vector3(sx, 0.4, gz);
   // ---- fortified brick wall with gate tower block and pavilions
   const wb = new A.AB();
   const wallH = 10, gateW = 7, gateH = 7.5;
@@ -554,10 +556,10 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   }
   for (let i = 0; i < 3; i++) for (const s of [-1, 1]) wb.add(new THREE.BoxGeometry(0.8, 1.2, 0.3), 'dark', [s * 13 + (i - 1) * 2.5, 13, 5.05]);
   I.register('townGate', wb.build(), { mats: { brick: M.brickPale, tiles: M.roofTilesRed } });
-  I.put('townGate', sx, 0.3, gz, 0, 1);
+  I.put('townGate', sx, 0.3, gz, 0, 1.15);
   // banners on poles in the street
   I.register('bannerW', { banner: new THREE.PlaneGeometry(1.4, 3.6, 4, 8) }, { mats: { banner: M.bannerWhite } });
-  for (const [x, z, h] of [[sx - 5, 250, 12], [sx + 1, 215, 10], [sx - 2, 230, 11]]) { I.put('pole', x, 0.4 + h / 2, z, 0, [1, h, 1]); I.put('bannerW', x + 0.75, 0.4 + h - 2.2, z, 0.4, 1); }
+  for (const [x, z, h] of [[sx - 3, 300, 12], [sx + 2, 278, 10], [sx - 1, 288, 11]]) { I.put('pole', x, 0.4 + h / 2, z, 0, [1, h, 1]); I.put('bannerW', x + 0.75, 0.4 + h - 2.2, z, 0.4, 1); }
   // ---- buildings along both sides
   const bl = (name, opts) => I.register(name, A.house(opts), { mats: { tiles: M.roofTilesRed } });
   bl('tA', { w: 12, d: 9, h: 7.5, style: 'balcony', wall: 'plasterPink', seed: 11, roof: 'tiles' });
@@ -565,38 +567,38 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   bl('tC', { w: 11, d: 9, h: 6.5, style: 'flat', wall: 'plasterPink', seed: 13 });
   bl('tD', { w: 9, d: 8, h: 8.5, style: 'hip', wall: 'plaster', seed: 14, roof: 'tiles' });
   I.register('trim', { trimRed: new THREE.BoxGeometry(1, 1, 1) }, { mats: { trimRed: M.trimRed } });
-  const kinds = ['tA', 'tB', 'tC', 'tD'];
+  const kinds = ['tA', 'tB', 'tD', 'tA'];
   // left side (west) faces east, right side faces west. Street half-width ~9
   let z = 352; let i = 0;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx - 15, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 15 + 4.62, 0.9, z - w / 2, 0, [0.12, 0.8, w]); z -= w + 0.4; i++; }
+    I.put(k, sx - 12.5, 0.4, z - w / 2, Math.PI / 2, 1); I.put('trim', sx - 12.5 + 4.62, 0.9, z - w / 2, 0, [0.12, 0.8, w]); z -= w + 0.4; i++; }
   z = 340; i = 2;
   while (z > gz + 16) { const k = kinds[i % 4]; const w = { tA: 12, tB: 10, tC: 11, tD: 9 }[k];
-    I.put(k, sx + 17, 0.4, z - w / 2, -Math.PI / 2, 1); z -= w + 0.4; i++; }
+    I.put(k, sx + 13.5, 0.4, z - w / 2, -Math.PI / 2, 1); z -= w + 0.4; i++; }
   // stalls & awnings in front of buildings, hanging textiles
   I.register('awning', { thatch: new THREE.PlaneGeometry(1, 1), pole: new THREE.CylinderGeometry(0.06, 0.07, 1, 6) }, {});
   const clothG = new THREE.PlaneGeometry(0.7, 1.8, 2, 6); { const p = clothG.attributes.position; for (let q = 0; q < p.count; q++) p.setZ(q, Math.sin(p.getY(q) * 3) * 0.04); clothG.computeVertexNormals(); }
   I.register('textile', { cloth: clothG }, { mats: { cloth: new THREE.MeshStandardMaterial({ color: 0xffffff, map: M.cloth, side: THREE.DoubleSide, roughness: 0.9 }) }, colors: { cloth: (k) => C(pick(rng(k * 3 + 1), ['#3a5a9a', '#c83a2a', '#d8a030', '#7a3a7a', '#2a7a6a', '#e07a2a', '#e8d8b0', '#a02a5a'])) } });
   for (let zz = 345; zz > gz + 25; zz -= 7) {
     for (const s of [-1, 1]) {
-      const xFace = sx + s * (s < 0 ? 10.0 : 12.0);
-      if (s < 0 && zz < 335 && zz > 300) continue; // keep pillar area clear
+      const xFace = sx + s * (s < 0 ? 7.6 : 8.6);
+      if (s < 0 && zz < 346 && zz > 296) continue; // keep pillar area clear
       I.ground(s < 0 ? 'stall' : 'stall2', xFace + s * -0.5, zz, s < 0 ? Math.PI / 2 : -Math.PI / 2, 1);
       if ((zz | 0) % 3 === 0) for (let q = 0; q < 5; q++) I.put('textile', xFace - s * 1.0, 2.0, zz - 1.6 + q * 0.75, s < 0 ? Math.PI / 2 : -Math.PI / 2, 1);
     }
   }
   // left foreground shopfront with textiles & brass pots (ref 4 left)
-  I.register('shopL', A.stall({ w: 7, d: 3.5, seed: 21 }), {}); I.ground('shopL', sx - 11.5, 342, Math.PI / 2, 1.1);
-  for (let q = 0; q < 10; q++) I.put('textile', sx - 11.8, 2.3, 338.5 + q * 0.75, Math.PI / 2, 1.1);
+  I.register('shopL', A.stall({ w: 7, d: 3.5, seed: 21 }), {}); I.ground('shopL', sx - 8.6, 352, Math.PI / 2, 1.1);
+  for (let q = 0; q < 10; q++) I.put('textile', sx - 9.0, 2.3, 348.5 + q * 0.75, Math.PI / 2, 1.1);
   // ---- inscribed pillar with single lion, stone railing
-  const px = sx - 6.5, pz = 326; ref.pois.townPillar = new THREE.Vector3(px, 0.4, pz);
-  I.register('pillarTown', A.ashokaPillar({ height: 12, capital: 'one', inscribed: true }), { mats: { stone: M.pinkStone, inscr: M.inscription } });
-  I.put('pillarTown', px, 0.4, pz, -Math.PI / 2 + 0.25, [1.25, 1, 1.25]);
-  I.put('plinth', px, 0.55, pz, 0, [2.6, 0.6, 2.6]);
+  const px = sx - 5, pz = 328; ref.pois.townPillar = new THREE.Vector3(px, 0.4, pz);
+  I.register('pillarTown', A.ashokaPillar({ height: 10.5, capital: 'one', inscribed: true, girth: 1.75 }), { mats: { stone: M.pinkStone, inscr: M.inscription } });
+  I.put('pillarTown', px, 0.4, pz, -Math.PI / 2 + 0.25, 1);
+  I.put('plinth', px, 0.55, pz, 0, [4.4, 0.7, 4.4]);
   const rail = new A.AB(); const sq = [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [-3.6, -3.6]];
   rail.merge({ parts: Object.fromEntries(Object.entries(A.vedika(sq, { h: 1.0, spacing: 1.2 })).map(([k, g]) => [k, [g]])) });
   for (const [x, zq] of [[-3.6, -3.6], [3.6, -3.6], [3.6, 3.6], [-3.6, 3.6], [0, 3.6], [3.6, 0], [0, -3.6], [-3.6, 0]]) rail.add(new THREE.SphereGeometry(0.28, 12, 8), 'stone', [x, 1.35, zq]);
-  I.register('pillarRail2', rail.build(), { mats: { stone: M.pinkStone } }); I.put('pillarRail2', px, 0.4, pz, 0, 1);
+  I.register('pillarRail2', rail.build(), { mats: { stone: M.pinkStone } }); I.put('pillarRail2', px, 0.4, pz, 0, 1.2);
   // big neem tree behind the pillar canopy over top-left
   I.ground('treeBig', sx - 14, 316, 0.3, 1.05);
   // ---- crowd: people reading the pillar, monks, merchants, soldiers marching, elephants, ox cart
@@ -611,17 +613,17 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   for (let q = 0; q < 6; q++) person(sx + 4.5 + (q % 2) * 1.4, 318 - Math.floor(q / 2) * 3.0, 0.05, { type: 'soldier', pose: 'walk', y: Y });
   person(sx + 10.5, 338, -0.3, { type: 'woman', pose: 'walk', y: Y }); person(sx + 10.8, 342, 0.2, { type: 'woman', pose: 'stand', y: Y });
   person(sx - 9.6, 344, Math.PI / 2, { type: 'man', pose: 'stand', y: Y }); person(sx - 8.8, 340, -Math.PI / 2 - 0.2, { type: 'woman', pose: 'stand', y: Y });
-  oxCart(sx - 1.0, 280, 0.05, 'sacks');
-  mahoutElephant(sx + 9.5, 322, -0.15, 'elephantH'); mahoutElephant(sx + 5, 262, 0.05, 'elephant'); mahoutElephant(sx + 2, 240, 0.1, 'elephant');
+  oxCart(sx - 1.5, 302, 0.05, 'sacks');
+  mahoutElephant(sx + 9.5, 322, -0.15, 'elephantH'); mahoutElephant(sx + 4, 292, 0.05, 'elephant'); mahoutElephant(sx + 1, 276, 0.1, 'elephant');
   const r = rng(51);
-  for (let q = 0; q < 280; q++) { const zz = 190 + r() * 140, xx = sx - 7 + r() * 15; person(xx, zz, r() < 0.6 ? (r() - 0.5) * 0.6 : Math.PI + (r() - 0.5) * 0.6, { y: Y }); }
-  for (let q = 0; q < 16; q++) person(sx - 6 + r() * 10, 230 - r() * 25, Math.PI, { type: 'soldier', pose: 'walk', y: Y });
+  for (let q = 0; q < 170; q++) { const zz = 262 + r() * 78, xx = sx - 4.5 + r() * 10; person(xx, zz, r() < 0.5 ? (r() - 0.5) * 0.8 : Math.PI + (r() - 0.5) * 0.8, { y: Y, type: pick(r, ['man', 'man', 'woman', 'woman', 'woman', 'monk', 'soldier', 'noble', 'scribe']) }); }
+  for (let q = 0; q < 16; q++) person(sx - 4 + r() * 8, 284 - r() * 18, Math.PI, { type: 'soldier', pose: 'walk', y: Y });
   // town outskirts houses (fill around street, behind facades)
   const r2 = rng(61);
-  for (let q = 0; q < 70; q++) { const xx = sx - 80 + r2() * 170, zz = gz + 10 + r2() * 170; if (Math.abs(xx - sx) < 26) continue; I.put(pick(r2, ['tA', 'tB', 'tC', 'tD']), xx, 0.4, zz, Math.round(r2() * 4) * Math.PI / 2, 1); }
+  for (let q = 0; q < 70; q++) { const xx = sx - 80 + r2() * 170, zz = gz + 10 + r2() * 170; if (Math.abs(xx - sx) < 21) continue; I.put(pick(r2, ['tA', 'tB', 'tC', 'tD']), xx, 0.4, zz, Math.round(r2() * 4) * Math.PI / 2, 1); }
   for (let q = 0; q < 26; q++) treeAt(sx - 90 + r2() * 190, gz - 20 - r2() * 80, 1.0);
   // hill path with monk procession (visible above the gate, ref 4)
-  for (let q = 0; q < 14; q++) { const t = q / 14; const xx = 905 + t * 80, zz = 165 - t * 230; person(xx + Math.sin(q) * 2, zz, Math.PI - 0.4, { type: q % 4 ? 'monk' : 'man', pose: 'walk' }); }
+  for (let q = 0; q < 14; q++) { const t = q / 14; const xx = 925 + t * 65, zz = 215 - t * 110; person(xx + Math.sin(q) * 2, zz, Math.PI - 0.4, { type: q % 4 ? 'monk' : 'man', pose: 'walk' }); }
   // hilltop pavilion to the right of the stupa (ref 4)
   const hp = new A.AB();
   hp.add(new THREE.BoxGeometry(22, 1.2, 12), 'stone', [0, 0.6, 0]);
@@ -629,5 +631,8 @@ function buildTown(G, I, M, ref, person, treeAt, oxCart, mahoutElephant) {
   hp.add(new THREE.BoxGeometry(22, 0.5, 12), 'timber', [0, 5.4, 0]); hp.add(A.curvedRoof(25, 15, 4, 0.15, 6), 'tiles', [0, 5.6, 0]);
   for (let q = 0; q < 70; q++) hp.add(new THREE.BoxGeometry(0.07, 0.9, 0.07), 'timber', [-10.5 + q * 0.3, 1.65, 6]);
   I.register('hillPav', hp.build(), { mats: { stone: M.paleStone, tiles: M.roofTilesRed } });
-  const hpx = HILL.x - 30, hpz = HILL.z + 55; I.ground('hillPav', hpx, hpz, -0.3, 1, { dy: -0.5 });
+  const hpx = HILL2.x + 28, hpz = HILL2.z + 4;
+  I.register('stupaWhite', A.stupa({ R: 8 }), { mats: { dome: M.plaster, plaster: M.plaster, stone: M.weatheredStone, medhi: M.plaster } });
+  I.ground('stupaWhite', HILL2.x, HILL2.z, 0, 1, { dy: -0.3 });
+  for (let q = 0; q < 24; q++) { const a = r2() * 6.28, d = 20 + r2() * 60; treeAt(HILL2.x + Math.cos(a) * d, HILL2.z + Math.sin(a) * d, 1.0); } I.ground('hillPav', hpx, hpz, -0.3, 1, { dy: -0.5 });
 }
