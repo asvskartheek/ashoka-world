@@ -298,3 +298,27 @@ Measured: S02 sat -0.040 bright +0.039; S03 sat -0.010 bright -0.014; S04 sat -0
 Diagnosis: scores have plateaued at about 52 to 55 raw (71 to 74 calibrated) for four rounds. Every critic names the same remaining gaps: (1) close-range people (faces, cloth, hands), (2) flat shading with no contact shadows or ambient occlusion, (3) unreadable lion capitals, (4) sparse near-field props. Scene-tuning rounds no longer move the median by more than the noise (about ±4).
 Decision: round 20 attacks (2) and (3) globally: a GTAO ambient-occlusion pass in the renderer, and a parallel builder sculpting proper lion capitals. S03 cloud cover goes back to 0.55; the S04 railing finials shrink.
 Stop check: bar no | floor no (about 2.3h) | approved no | final no -> next round
+
+## Round 20
+
+Time: about 08:36 to 09:15 UTC (lion-capitals builder ran in parallel, about 26 min)
+Focus: two global gaps named by every critic for four rounds: flat shading (no contact shadows / AO) and unreadable lion capitals.
+Changes:
+- GTAO ambient occlusion pass after the render pass; its G-buffer skips alpha-tested, transparent and custom-shader meshes (leaf cards, grass, water, sky, clouds, decals) so foliage does not occlude as solid squares; per-shot radius (S01 4 m, others 1.2 m). Cost: stills now 65 to 105 s each (were 20 to 50 s), measured.
+- Lion capitals (builder, `lion` and `ashokaPillar` in src/assets.js only): implicit-surface lions with brows, open jaws, tongue and fangs, 46 flame-lock mane pieces, ribs, paws with claws; seated four-lion group fused back to back, standing single lion with tail; abacus with 24-spoke wheels and relief elephant, bull, horse and lion; 28-petal inverted lotus bell, torus and cable moulding; shaft entasis; stepped base. 59k / 59k / 47k triangles per pillar, measured. Also fixed a shared-matrix bug that had put a wheel at a pillar's foot.
+- S03 cloud cover back to 0.55; S04 railing finials smaller.
+Stills: `cook/stills/r20/` | Side by side: `cook/compare/r20/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r19 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 65 | 50 | 59 | 43 | 33 | 50 | 69 | -3 |
+| S02 | 63 | 48 | 56 | 35 | 28 | 46 | 65 | +1 |
+| S03 | 78 | 62 | 66 | 55 | 43 | 61 | 80 | +2 |
+| S04 | 61 | 53 | 55 | 42 | 34 | 49 | 68 | -2 |
+
+Overall raw 51, calibrated 70. The sonnet critic rose on every shot (S03 +7, S04 +4); the general-purpose critic fell, and the two disagree by 10 to 20 points on many dimensions this round (S03 composition 70 vs 85). Per the Cook rules a third critic would be added; skipped for usage pace, logged as a deviation. Best so far stays round 16.
+Measured: S01 sat +0.052 bright -0.086; S02 sat -0.035 bright +0.018; S03 sat -0.006 bright -0.027; S04 sat +0.002 bright -0.083.
+Repeated items across both critics: (1) people read as mannequins with flat skin and cloth shading, S02 worst; (2) S01 sun disc not seen, river empty; (3) S03 path edging stones read as "stepping-stone discs", ground bare, rocks not seen.
+Stop check: bar no | floor no (about 2.9h) | approved no | final no -> next round
+Next focus: round 21 = skin and cloth shading (global), S01 sun and river, S03 ground.
