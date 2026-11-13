@@ -32,12 +32,21 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 // Per sub-frame: sub-pixel projection jitter (AA), sun direction inside a small disc (soft penumbrae), optional lens-disc
 // jitter about a focus distance (DOF), a shadow-casting directional "sky light" that samples the sky hemisphere (real sky
 // occlusion; it carries a fraction of the hemisphere light's sky term), and a time offset hook (motion blur later).
-// URL: ?spp=N (1 = legacy single frame), &sky=0..1 (sky fraction moved to the sky light), &sundisc=deg, &focus=m, &aperture=m (lens radius), &shutter=s
+// URL: ?spp=N (default 8; 1 = legacy single frame), &sky=0..1 (fraction of the hemisphere sky term moved to the sky light), &envsky=0..1 (fraction of the
+// environment map's diffuse moved to it), &sundisc=deg (sun disc radius), &focus=m, &aperture=m (lens radius, 0 = pinhole), &shutter=s, &aoscale, &reflevery
 const qn = (k, d) => (q.get(k) !== null && q.get(k) !== '' ? +q.get(k) : d);
-const ACC = { spp: Math.max(1, Math.round(qn('spp', 8))), sky: qn('sky', 1.0), sunDisc: qn('sundisc', 0.9), reflEvery: Math.max(1, qn('reflevery', 4)), shutter: qn('shutter', 0), aoScale: qn('aoscale', 0.85) };
+const ACC = { spp: Math.max(1, Math.round(qn('spp', 8))), sky: qn('sky', 1.0), sunDisc: qn('sundisc', 0.9), reflEvery: Math.max(1, qn('reflevery', 4)), shutter: qn('shutter', 0), aoScale: qn('aoscale', 0.85), env: qn('envsky', 0.5) };
 // per-shot lens defaults (focus distance in m, lens radius in m); S.dof in shots.js or URL params override
 const DOF = { 2: { focus: 14, aperture: 0.006 }, 4: { focus: 11, aperture: 0.012 } };
-const HEMI_SKY = new THREE.Color(0xbfd4ff);
+const HEMI_SKY = new THREE.Color(0xbfd4ff), HEMI_GROUND = new THREE.Color(0x8a7050);
+// sky radiance along direction d, replicating the sky dome shader (env.js buildSky) minus the sun disc; linear RGB
+function skyRadiance(d, out) {
+  const u = sky.material.uniforms, s = u.sunPosition.value.clone().normalize(), h = Math.max(d.y, 0), sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  out.copy(u.horizon.value).lerp(u.zenith.value, Math.pow(sm(0, 0.75, h), 0.55));
+  const mu = d.dot(s); out.lerp(u.band.value, u.bandAmt.value * Math.exp(-h * 9) * (0.35 + 0.65 * sm(-0.6, 1, mu)));
+  const m = Math.max(mu, 0); out.add(u.sunCol.value.clone().multiplyScalar(u.glow.value * (0.35 * Math.pow(m, 6) + 0.6 * Math.pow(m, 60))));
+  return out.multiplyScalar(u.intensity.value);
+}
 const skyLight = new THREE.DirectionalLight(HEMI_SKY, 0); skyLight.castShadow = true; skyLight.visible = ACC.spp > 1;
 skyLight.shadow.mapSize.set(1024, 1024); skyLight.shadow.bias = -0.0006; skyLight.shadow.normalBias = 0.04;
 scene.add(skyLight, skyLight.target);
@@ -81,10 +90,10 @@ export function applyShot(S) {
   sun.color.set(S.sunCol); sun.intensity = S.sunInt;
   const sc = sun.shadow.camera; const s = S.shadow.size / 2; sc.left = -s; sc.right = s; sc.top = s; sc.bottom = -s; sc.near = 100; sc.far = 3500; sc.updateProjectionMatrix();
   hemi.intensity = S.hemi;
-  hemi.color.copy(HEMI_SKY);
+  hemi.color.copy(HEMI_SKY); hemi.groundColor.copy(HEMI_GROUND);
   const ss = sun.shadow.camera, kc = skyLight.shadow.camera; kc.left = ss.left; kc.right = ss.right; kc.top = ss.top; kc.bottom = ss.bottom; kc.near = 100; kc.far = 3500; kc.updateProjectionMatrix();
   skyLight.target.position.copy(c); skyLight.target.updateMatrixWorld();
-  shotState = { ldir: ldir.clone(), center: c.clone(), hemi: S.hemi };
+  shotState = { ldir: ldir.clone(), center: c.clone(), hemi: S.hemi, env: S.env ?? 0.45 };
   scene.fog = new THREE.FogExp2(S.fog.color, S.fog.density);
   // environment lighting from the sky
   const envScene = new THREE.Scene(); const sk2 = sky.clone(); sk2.material = sky.material; envScene.add(sk2);
@@ -119,8 +128,11 @@ function renderSub(i, N, base, opt, target) {
   const ymin = 0.08, u = (i + base.rot1) / N - Math.floor((i + base.rot1) / N);
   const y = ymin + (1 - ymin) * u, az = i * 2.39996323 + base.rot2 * 6.2832, rr = Math.sqrt(1 - y * y);
   skyLight.position.copy(st.center).add(new THREE.Vector3(rr * Math.sin(az), y, rr * Math.cos(az)).multiplyScalar(1500));
-  // uniform sky of up-irradiance f*hemi: radiance L = f*hemi/pi, one direction carries L * solid angle
-  skyLight.intensity = 2 * opt.sky * st.hemi * (1 - ymin);
+  // uniform sky of up-irradiance f*hemi: radiance L = f*hemi/pi, one direction carries L * solid angle;
+  // plus the moved fraction of the environment map's diffuse: its sky radiance along this direction * envIntensity * solid angle
+  const omega = 2 * Math.PI * (1 - ymin), sd = new THREE.Vector3(rr * Math.sin(az), y, rr * Math.cos(az));
+  skyLight.color.copy(HEMI_SKY).multiplyScalar(opt.sky * st.hemi * omega / Math.PI).add(skyRadiance(sd, new THREE.Color()).multiplyScalar(opt.envSky * st.env * omega));
+  skyLight.intensity = 1;
   // time (motion-blur hook; the scene is static except water and clouds)
   const t = base.time + ACC.shutter * ((i + 0.5) / N - 0.5);
   water.material.uniforms.time.value = t; clouds.material.uniforms.time.value = t;
@@ -140,8 +152,13 @@ window.renderShot = async (id, time = 0) => {
   if (N <= 1 || !renderPass) {
     comp.render(); comp.render();
   } else {
-    const d = S.dof || DOF[id] || {}; const opt = { focus: qn('focus', d.focus ?? 20), aperture: qn('aperture', d.aperture ?? 0), sky: ACC.sky };
-    hemi.color.copy(HEMI_SKY).multiplyScalar(1 - opt.sky);
+    const d = S.dof || DOF[id] || {}; const opt = { focus: qn('focus', d.focus ?? 20), aperture: qn('aperture', d.aperture ?? 0), sky: ACC.sky, envSky: ACC.env };
+    // the sky light takes over fraction opt.sky of the hemisphere sky term and opt.envSky of the environment map;
+    // the environment's lower hemisphere (hazy ground, radiance horizon*0.8) is handed to the hemisphere ground term
+    const env0 = shotState.env; scene.environmentIntensity = env0 * (1 - opt.envSky);
+    const Lg = sky.material.uniforms.horizon.value.clone().multiplyScalar(0.8 * sky.material.uniforms.intensity.value);
+    hemi.intensity = 1; hemi.color.copy(HEMI_SKY).multiplyScalar(shotState.hemi * (1 - opt.sky));
+    hemi.groundColor.copy(HEMI_GROUND).multiplyScalar(shotState.hemi).add(Lg.multiplyScalar(Math.PI * opt.envSky * env0));
     const base = { pos: camera.position.clone(), quat: camera.quaternion.clone(), time, rot1: halton(id * 7 + 3, 2), rot2: halton(id * 7 + 3, 3) };
     const cc = renderer.getClearColor(new THREE.Color()), ca = renderer.getClearAlpha();
     renderer.setClearColor(0x000000, 0); renderer.setRenderTarget(accRT); renderer.clear(true, false, false); renderer.setClearColor(cc, ca);
