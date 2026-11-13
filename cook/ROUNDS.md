@@ -502,7 +502,7 @@ Stop check: bar no | floor no (about 7.4h) | approved no | final no -> next roun
 
 ## Round 29
 
-Time: about 13:37 to 13:44 UTC
+Time: about 13:37 to 13:41 UTC (end measured)
 Focus: S04, the only shot where both round-28 A/B critics preferred round 26 (haze over clear daylight).
 Changes: S04 atmosphere density 0.0005 to 0.00015, floor 0.00015 to 0.00004, sun in-scatter 0.03 to 0.02, sky haze 0.15 to 0.04. S01 to S03 are round 28's stills.
 Stills: `cook/stills/r29/` | Side by side: `cook/compare/r29/all.jpg` | A/B: `cook/compare/r29/ab_S04.jpg` (key in ab_key.txt)
