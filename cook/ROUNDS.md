@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 22, `cook/stills/r22/` (raw 55.9, calibrated 75, median of 3 critics; round 21 within 0.1)
+Best so far: round 24, `cook/stills/r24/` (raw 56.1, calibrated 75, median of 3 critics)
 
 ## Decisions
 
@@ -384,3 +384,23 @@ Measured: S01 sat +0.055; S02 sat -0.041; S03 sat +0.003; S04 sat -0.021.
 Critics did not notice the close-range people work at S02's framing. Their consistent composition note: in R02 the foreground monks and scribes are huge (1 to 3 m from camera, cropped by the frame edges), the court fills the left half; ours sit 2 to 8 m away and read small.
 Stop check: bar no | floor no (about 3.6h) | approved no | final no -> next round
 Next focus: round 24 = S02 foreground scale: monks and scribes moved close to camera and cropped by the frame as in R02, more seated courtiers at left.
+
+## Round 24
+
+Time: about 09:58 to 10:04 UTC
+Focus: S02 composition: R02's foreground monks and scribes are huge and cropped by the frame (critics' consistent note).
+Changes: S02 eye height 1.2 m above the floor, lens 54°; monk rows start 1.05 m from camera (6 per row, 4 rows), cropped at bottom-left; scribes at 2.1 m and 3.5 m, bottom-right, in white and cream. S01, S03, S04 stills are round 23's.
+Stills: `cook/stills/r24/` | Side by side: `cook/compare/r24/all.jpg`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r23 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 62 | 55 | 60 | 50 | 38 | 53 | 72 | +1 (unchanged render) |
+| S02 | 70 | 60 | 65 | 48 | 40 | 57 | 76 | +7 |
+| S03 | 78 | 65 | 65 | 58 | 50 | 63 | 82 | +3 (unchanged render) |
+| S04 | 60 | 55 | 55 | 45 | 42 | 51 | 70 | -2 (unchanged render) |
+
+Overall raw 56.1, calibrated 75. Best so far. S02 (the weakest shot in every round so far) gained 7 from the framing change alone; it is no longer the weakest.
+Weakest now: S04 (51) and S01 (53). Repeated items: S04 flat diffuse light with no clear sun direction, plain facades without goods, hill stupa not seen, pillar inscription not legible; S01 empty foreground band, hazy far field, gate reads squat.
+Stop check: bar no | floor no (about 3.7h) | approved no | final no -> next round
+Next focus: round 25 = S04 light (stronger, lower warm sun with cast shadows), facade goods, legible inscription.

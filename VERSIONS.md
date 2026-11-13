@@ -31,3 +31,5 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.20 | [v0.20](versions/v0.20/compare.jpg) | Cook round 20: GTAO ambient occlusion, sculpted lion capitals (builder). Raw 51 / calibrated 70 (critics split by 10-20 points). |
 | v0.21 | [v0.21](versions/v0.21/compare.jpg) | Cook round 21: physical skin and cloth sheen, larger sun disc, S03 path ground. Raw 55.8 / calibrated 75 (median of 3 critics), best so far. |
 | v0.22 | [v0.22](versions/v0.22/compare.jpg) | Cook round 22: S04 blue sky with white clouds, lit gate passage, softer dado; S02 shallower dais. Raw 55.9 / calibrated 75 (median of 3), best so far. |
+| v0.23 | [v0.23](versions/v0.23/compare.jpg) | Cook round 23: close-range seated people (builder), darker skin, white-clad king, denser S01 city and boats. Raw 54 / calibrated 73. |
+| v0.24 | [v0.24](versions/v0.24/compare.jpg) | Cook round 24: S02 reframed like R02 (huge foreground monks and scribes, seated eye height). Raw 56.1 / calibrated 75, best so far. |
