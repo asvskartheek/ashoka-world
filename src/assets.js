@@ -1174,7 +1174,7 @@ function gallery(b, y, W, D, H, { sp = 2.2, railH = 1.1, bal = 0.34, postR = 0.1
 export function watchtower({ h = 15, w = 6, seed = 1 } = {}) {
   const b = new AB(); const r = rng(seed);
   const yd = h * 0.66, gH = h * 0.14, ys = yd * 0.76; // gallery floor, gallery height, top of sheathing
-  const w0 = w * 0.78, w1 = w * 0.6, wg = w * 0.86; // shaft width at ground / at deck, gallery width
+  const w0 = w * 0.72, w1 = w * 0.56, wg = w * 0.8; // shaft width at ground / at deck, gallery width
   const hw = (y) => mix(w0, w1, y / yd) / 2;
   // corner posts (logs), battered
   for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
@@ -1274,7 +1274,7 @@ export function gatehouse({ w = 22, d = 10, h = 13 } = {}) {
   b.add(roofSkirt(Wo1, Do1, W2 + 0.6, D2 + 0.6, rise1, 0.16, 10, 5), 'tiles', [0, ye1, 0]);
   eaveTrim(b, ye1, Wo1, Do1);
   // pavilion storey
-  const y2 = ye1 + rise1 - 0.15, g2 = H * 0.13;
+  const y2 = ye1 + rise1 - 0.15, g2 = H * 0.15;
   b.add(box(W2 + 0.6, 0.35, D2 + 0.6), 'timber', [0, y2 + 0.17, 0]);
   for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) b.add(cyl(0.3, 0.34, g2 + 1.2 + rise1, 9), 'log', [sx * W2 / 2, y2 + 0.35 + g2 - (g2 + 1.2 + rise1) / 2, sz * D2 / 2]);
   gallery(b, y2 + 0.35, W2, D2, g2, { sp: 2.0, railH: 0.95, arm: 1.6, postR: 0.15, inset: 1.3 });
