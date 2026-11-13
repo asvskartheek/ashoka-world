@@ -1,5 +1,7 @@
 # Version log
 
+From round 9 on, the detailed ledger is `cook/ROUNDS.md` (Cook Loop). This file keeps one line per version.
+
 Each version keeps its approval stills and a reference-vs-render comparison in `versions/vX.Y/`.
 Shots: 1 = city gate at sunset, 2 = palace audience hall, 3 = stupa hill with Ashoka pillar, 4 = market street with inscribed pillar.
 Render times are per frame at 1448×1086 in headless Chromium with software WebGL (SwiftShader, 4 CPU cores).
