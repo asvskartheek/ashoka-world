@@ -211,11 +211,11 @@ export function buildWorld(scene, M) {
     [-40, 40, -150, -100], // inner plaza
   ];
   const free = (x, z, m = 0) => !keep.some(([a, b, c, d]) => x > a - m && x < b + m && z > c - m && z < d + m);
-  for (let x = wall.x0 + 18; x < wall.x1 - 10; x += 15) for (let z = -24; z > wall.z0 + 12; z -= 14) {
+  for (let x = wall.x0 + 16; x < wall.x1 - 8; x += 11) for (let z = -22; z > wall.z0 + 10; z -= 10.5) {
     const r = rng(x * 31 + z * 17); const jx = x + (r() - 0.5) * 3, jz = z + (r() - 0.5) * 3;
     if (!free(jx, jz, 6)) continue;
     if (r() < 0.2) { treeAt(jx, jz, 1.15); continue; }
-    I.put(pick(r, houseKinds), jx, 0.4, jz, Math.round(r() * 4) * Math.PI / 2 + (r() - 0.5) * 0.06, 0.9 + r() * 0.25);
+    I.put(pick(r, houseKinds), jx, 0.4, jz, Math.round(r() * 4) * Math.PI / 2 + (r() - 0.5) * 0.06, [0.62 + r() * 0.3, 0.75 + r() * 0.5, 0.62 + r() * 0.3]);
     if (r() < 0.55) treeAt(jx + 7, jz + 6, 0.95);
   }
   // avenue trees and people
@@ -270,9 +270,9 @@ export function buildWorld(scene, M) {
     I.put(name, bx + off, WATER_Y - 0.3, z, R() * 0.6 - 0.3 + (R() < 0.5 ? 0 : Math.PI), 1);
   }
   // river traffic in the stretch visible from the gate shot (R01 top left)
-  for (let i = 0; i < 34; i++) {
+  for (let i = 0; i < 60; i++) {
     const z = -300 - R() * 1300; let bx = -300, bd = 1e9; for (let x = -900; x < 400; x += 6) { const d = riverDist(x, z); if (d < bd) { bd = d; bx = x; } }
-    const hw = riverHalfWidth(z); I.put('boat' + (i % 3), bx + (R() - 0.5) * hw * 1.4, WATER_Y - 0.3, z, R() * 6, 1.1 + R() * 0.6);
+    const hw = riverHalfWidth(z); I.put('boat' + (i % 3), bx + (R() - 0.5) * hw * 1.4, WATER_Y - 0.3, z, R() * 6, 1.8 + R() * 0.9);
   }
   // far bank trees and countryside
   for (let i = 0; i < 2600; i++) {
