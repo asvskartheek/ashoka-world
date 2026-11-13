@@ -450,3 +450,31 @@ Scores, eyeballed: median of 3 critics (sonnet, haiku, general-purpose), raw / c
 Overall raw 59.3, calibrated 78. Best so far by about 3 points (above the critic noise): large structural changes do register.
 User feedback this round: subagents allowed, Fable model only for the most creative ideation; bar unchanged at 99.2. A Fable strategist is preparing a plan to break the plateau.
 Stop check: bar no | floor no (about 5h) | approved no | final no -> next round
+
+## Round 27
+
+Time: about 11:20 to 13:27 UTC (two builders in parallel for about 70 to 110 min)
+Focus: the Fable plan's moves 1, 2 and 4 (atmosphere and lens pass, accumulation renderer, set dressing).
+Changes:
+- Atmosphere and lens pass (builder A; src/atmo.js, src/env.js, src/shots.js): depth grab, height fog integrated along the view ray with sun in-scatter, radial god rays toward the sun, halation, local contrast, shadow and highlight tints; per-shot `atmo` blocks. About 0.6 s per composer run (measured by the builder).
+- Accumulation renderer (builder B; src/main.js, render.js): `?spp=N` (default 8), sub-pixel Halton jitter, 0.9° sun disc, lens-disc DOF (S02, S04), shadow-casting sky light per sub-frame taking the hemisphere sky term and half the environment diffuse, reflections every 4th sub-frame, post chain once on the average. About 3× the time per still (S01 255 s, S02 241 s, S03 163 s, S04 172 s, measured).
+- Set dressing (owner; src/world.js): instanced prop kit (produce heaps, basket stacks, goods mats, sacks, firewood, ladders) along the S04 street edges and the S01 market road.
+Stills: `cook/stills/r27/` | Side by side: `cook/compare/r27/all.jpg` | A/B sheets vs round 26: `cook/compare/r27/ab_S0*.jpg`, key in `ab_key.txt`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r26 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 62 | 55 | 58 | 50 | 35 | 52 | 71 | -7 |
+| S02 | 60 | 55 | 55 | 45 | 38 | 51 | 70 | -5 |
+| S03 | 72 | 60 | 60 | 55 | 50 | 59 | 78 | -7 |
+| S04 | 55 | 55 | 50 | 45 | 45 | 50 | 69 | -6 |
+
+Overall raw 53, calibrated 72. The haiku critic swung from generous (round 26) to harsh (round 27), which drives much of the drop; the paired A/B critics are the cleaner signal:
+A/B forced choice, round 27 (new) vs round 26 (old), 2 critics (sonnet, general-purpose):
+- S01: old preferred by both (60, 60): the new haze washes out the far city and the sunset.
+- S02: old preferred by both (62, 55): the new floor and dais read cool, bluish and glassy.
+- S03: new preferred by both (65, 55): warmer, more natural light.
+- S04: split (new 58 / old 55).
+Measured: S01 sat +0.011 bright +0.001; S02 sat -0.005 bright -0.027; S03 sat 0.000 bright -0.044; S04 sat -0.020 bright -0.047.
+Decision: keep the renderer, the atmosphere pass and the set dressing (S03 wins clearly); fix the two side effects in round 28: S01 haze density 0.00018 to 0.00007 and sky haze 0.3 to 0.14; S02 sky-light environment share 0.5 to 0.25 (per-shot `envSky` override) and a warmer, softer floor reflection. Best so far stays round 26.
+Stop check: bar no | floor no (about 7.1h) | approved no | final no -> next round
