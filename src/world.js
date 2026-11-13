@@ -410,13 +410,13 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 6, D + 6), M.hallFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(cx, fy + 0.4 + 0.01, cz); floor.receiveShadow = true; G.add(floor);
   const refl = new Reflector(new THREE.PlaneGeometry(W + 6, D + 6), { textureWidth: 1024, textureHeight: 576, clipBias: 0.003, color: 0xffffff });
   refl.material.transparent = true; refl.material.depthWrite = false;
-  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.88, 0.7), 0.11 );');
+  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.88, 0.72), 0.24 );');
   refl.rotation.x = -Math.PI / 2; refl.position.set(cx, fy + 0.4 + 0.02, cz); G.add(refl); ref.hallReflector = refl;
   // big banner behind throne
   // hanging cloth banner behind the throne (gently rippled), on a gilt rod
-  const banG = new THREE.PlaneGeometry(3.0, 6.6, 8, 20); { const p = banG.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 3.1 + p.getY(i) * 0.4) * 0.05 + Math.sin(p.getY(i) * 1.7) * 0.03); banG.computeVertexNormals(); }
+  const banG = new THREE.PlaneGeometry(2.4, 5.4, 8, 20); { const p = banG.attributes.position; for (let i = 0; i < p.count; i++) p.setZ(i, Math.sin(p.getX(i) * 3.1 + p.getY(i) * 0.4) * 0.05 + Math.sin(p.getY(i) * 1.7) * 0.03); banG.computeVertexNormals(); }
   const ban = new THREE.Mesh(banG, M.bannerHall); ban.castShadow = true;
-  ban.position.set(cx + tx + 6.2, fy + 0.4 + 6.0, cz - 1.0); ban.rotation.y = -Math.PI / 2; G.add(ban);
+  ban.position.set(cx + tx + 6.2, fy + 0.4 + 6.6, cz - 1.0); ban.rotation.y = -Math.PI / 2; G.add(ban);
   const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.8, 10), M.gold); rod.rotation.x = Math.PI / 2; rod.position.set(cx + tx + 6.2, fy + 0.4 + 9.35, cz - 1.0); G.add(rod);
   for (const s of [-1, 1]) { const k = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), M.gold); k.position.set(cx + tx + 6.2, fy + 0.4 + 9.35, cz - 1.0 + s * 1.95); G.add(k); }
   // brass pot of lotuses near steps

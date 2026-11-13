@@ -256,3 +256,24 @@ Measured: S01 sat +0.045 bright -0.068; S04 sat +0.030 bright -0.073.
 Best so far stays round 16.
 Stop check: bar no | floor no (about 2.1h) | approved no | final no -> next round
 Next focus: round 18 = fix the S04 regression (higher camera so the railing sits at the bottom edge as in R04, elephant back to mid-distance right), keep S03 and S01 changes.
+
+## Round 18
+
+Time: about 08:27 to 08:31 UTC (end measured)
+Focus: fix the round-17 S04 regression.
+Changes: S04 camera raised to 3.3 m and moved closer so the pillar railing sits along the bottom-left edge as in R04 (no longer a fence across mid-frame), crowd recedes down the street, elephant back to mid-distance right with crowd cleared around it, camera tilted so the lion is inside the frame. S01 to S03 stills are round 17's.
+Stills: `cook/stills/r18/` | Side by side: `cook/compare/r18/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r17 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 70 | 53 | 61 | 45 | 35 | 53 | 72 | +4 (unchanged render) |
+| S02 | 69 | 48 | 55 | 35 | 28 | 47 | 66 | +1 (unchanged) |
+| S03 | 82 | 64 | 67 | 50 | 42 | 61 | 80 | +3 (unchanged) |
+| S04 | 65 | 58 | 60 | 43 | 35 | 52 | 71 | +5 |
+
+Overall raw 53, calibrated 72. S04 recovered (sonnet critic: 51 to 55, the same critic was flat on the unchanged shots). Best so far stays round 16 (55 raw).
+Measured: S04 sat +0.010 bright -0.085.
+Top gaps: S02 reads as a sunset sky and a matte floor (critics now ask for more gloss), small king, oversized banner; S03 and S04 skies read hazy, too few clouds; S01 needs a busier river and denser city; people still read as mannequins close up.
+Stop check: bar no | floor no (about 2.2h) | approved no | final no -> next round
+Next focus: round 19 = S02 (weakest shot every round): daylight sky, glossier floor, crown, smaller banner; clearer skies for S03 and S04.
