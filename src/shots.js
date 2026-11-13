@@ -19,5 +19,5 @@ export const SHOTS = {
        sun: { az: 140, el: 36 }, env: 0.38, sky: { zenith: 0x4e88d6, horizon: 0xdce8f2, glow: 0.5, intensity: 1.3 }, exposure: 1.0, cloud: 0.6,
        fog: { color: 0xd6dcdc, density: 0.0004 }, shadow: { center: [885, 0, 280], size: 160 },
        grade: { lift: [0.035, 0.025, 0.01], gain: [1.08, 1.02, 0.92], sat: 1.14, contrast: 1.05 }, sunInt: 6.6, sunCol: 0xffd8a8, hemi: 0.55,
-       atmo: { density: 0.0005, falloff: 0.01, floor: 0.00015, ambMix: 0.6, sunK: 0.03, skyFog: 0.15, skySun: 0.2, hal: 0.12, lc: 0.3 } },
+       atmo: { density: 0.00015, falloff: 0.01, floor: 0.00004, ambMix: 0.6, sunK: 0.02, skyFog: 0.04, skySun: 0.08, hal: 0.12, lc: 0.3 } },
 };
