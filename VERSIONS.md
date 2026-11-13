@@ -36,3 +36,4 @@ Render times are per frame at 1448×1086 in headless Chromium with software WebG
 | v0.25 | [v0.25](versions/v0.25/compare.jpg) | Cook round 25: S04 directional sun and shopfront textiles. Raw 52.7 / calibrated 72 (unchanged shots dropped 4 to 5 points: critic noise). |
 | v0.26 | [v0.26](versions/v0.26/compare.jpg) | Cook round 26: rebuilt timber gatehouse and braced watchtowers (builder), S03 overhanging canopy, S04 stall in frame. Raw 59.3 / calibrated 78, best so far. |
 | v0.27 | [v0.27](versions/v0.27/compare.jpg) | Cook round 27: atmosphere and lens pass, accumulation renderer (spp 8), set dressing. Raw 53 / calibrated 72; A/B: S03 better, S01 and S02 worse (haze, cold floor). |
+| v0.28 | [v0.28](versions/v0.28/compare.jpg) | Cook round 28: S01 lighter haze, S02 warmer floor (keeps accumulation, atmosphere, set dressing). Raw 60.1 / calibrated 79, best so far. |

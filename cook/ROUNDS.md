@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 26, `cook/stills/r26/` (raw 59.3, calibrated 78, median of 3 critics)
+Best so far: round 28, `cook/stills/r28/` (raw 60.1, calibrated 79, median of 3 critics)
 
 ## Decisions
 
@@ -478,3 +478,24 @@ A/B forced choice, round 27 (new) vs round 26 (old), 2 critics (sonnet, general-
 Measured: S01 sat +0.011 bright +0.001; S02 sat -0.005 bright -0.027; S03 sat 0.000 bright -0.044; S04 sat -0.020 bright -0.047.
 Decision: keep the renderer, the atmosphere pass and the set dressing (S03 wins clearly); fix the two side effects in round 28: S01 haze density 0.00018 to 0.00007 and sky haze 0.3 to 0.14; S02 sky-light environment share 0.5 to 0.25 (per-shot `envSky` override) and a warmer, softer floor reflection. Best so far stays round 26.
 Stop check: bar no | floor no (about 7.1h) | approved no | final no -> next round
+
+## Round 28
+
+Time: about 13:27 to 13:45 UTC
+Focus: fix the two round-27 side effects named by both A/B critics.
+Changes: S01 haze density 0.00018 to 0.00007, sky haze 0.3 to 0.14; per-shot `envSky` override in main.js, S02 envSky 0.25 (less cool environment light moved into the sky light); warmer, softer hall floor reflection. S03 and S04 stills are round 27's.
+Stills: `cook/stills/r28/` | Side by side: `cook/compare/r28/all.jpg` | A/B sheets vs round 26: `cook/compare/r28/ab_S0*.jpg`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r26 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 68 | 62 | 66 | 52 | 45 | 59 | 78 | 0 |
+| S02 | 70 | 58 | 62 | 50 | 40 | 56 | 75 | 0 |
+| S03 | 80 | 70 | 70 | 62 | 55 | 67 | 86 | +1 |
+| S04 | 62 | 62 | 60 | 58 | 50 | 58 | 77 | +2 |
+
+Overall raw 60.1, calibrated 79. Best so far (round 26: 59.3). Materials and detail rose in every shot (accumulation, atmosphere, set dressing).
+A/B forced choice, round 28 vs round 26 (2 critics): S01 new by both (60, 65); S02 split (new 58 / old 55); S03 split (new 62 / old 52); S04 old by both (60, 55): haze over S04's clear daylight.
+Measured: S01 sat +0.034 bright -0.027; S02 sat -0.028 bright -0.008.
+Next: round 29 = S04 haze cut (rendering).
+Stop check: bar no | floor no (about 7.4h) | approved no | final no -> next round
