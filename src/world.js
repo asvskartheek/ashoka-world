@@ -125,7 +125,7 @@ export function buildWorld(scene, M) {
   I.register('palm', A.palm({ seed: 3 }), { mats: { leaves: new THREE.MeshStandardMaterial({ color: 0x4a6a2a, roughness: 0.8, side: THREE.DoubleSide }) } });
   for (let i = 0; i < 3; i++) I.register('blob' + i, A.blobTree({ seed: 400 + i, height: 9 + i * 2 }), { colors: { blob: (k) => C(0x5a7a34).offsetHSL((rng(k)() - 0.5) * 0.05, 0, (rng(k * 7)() - 0.5) * 0.12) }, shadow: true });
   I.register('shrub', A.shrub({ seed: 9 }), {});
-  I.register('grass', A.grassClump({ seed: 3 }), { shadow: false, colors: { grass: (k) => C(0xa8a058).offsetHSL((rng(k)() - 0.5) * 0.05, 0, (rng(k * 5)() - 0.5) * 0.2) } });
+  I.register('grass', A.grassClump({ seed: 3 }), { shadow: false, colors: { grass: (k) => C(0xc2a862).offsetHSL((rng(k)() - 0.5) * 0.05, 0, (rng(k * 5)() - 0.5) * 0.2) } });
   for (let i = 0; i < 4; i++) I.register('rock' + i, { stone: A.rockGeo(500 + i, 1) }, { mats: { stone: M.rock } });
   const treeAt = (x, z, s = 1, far = false) => {
     const r = rng(Math.floor(x * 7.1 + z * 13.3)); if (far) I.ground('blob' + Math.floor(r() * 3), x, z, r() * 6, s * (0.8 + r() * 0.5));
@@ -421,9 +421,9 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   for (const s of [-1, 1]) { const k = new THREE.Mesh(new THREE.SphereGeometry(0.11, 10, 8), M.gold); k.position.set(cx + tx + 6.2, fy + 0.4 + 9.35, cz - 1.0 + s * 1.95); G.add(k); }
   // brass pot of lotuses near steps
   const pot = new THREE.Mesh(A.lathe([[0, 0], [0.35, 0.05], [0.55, 0.35], [0.5, 0.7], [0.38, 0.85], [0.45, 0.95], [0.4, 0.97]], 32), M.gold);
-  const yy = fy + 0.4; pot.position.set(cx + tx - 5.2, yy, cz + 2.4); pot.castShadow = true; G.add(pot);
+  const yy = fy + 0.4; pot.position.set(cx + tx - 5.2, yy, cz + 2.4); pot.scale.setScalar(0.7); pot.castShadow = true; G.add(pot);
   const lotusMat = new THREE.MeshStandardMaterial({ color: 0xf0a0b8, roughness: 0.6, side: THREE.DoubleSide });
-  for (let i = 0; i < 9; i++) { const a = i / 9 * 6.28; const fl = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 8, 1, true), lotusMat); fl.position.set(pot.position.x + Math.cos(a) * 0.25, yy + 1.1 + (i % 3) * 0.08, pot.position.z + Math.sin(a) * 0.25); fl.rotation.x = Math.PI; G.add(fl); const lf = new THREE.Mesh(new THREE.CircleGeometry(0.22, 10), new THREE.MeshStandardMaterial({ color: 0x4a6a2a, side: THREE.DoubleSide })); lf.position.set(pot.position.x + Math.cos(a + 0.3) * 0.45, yy + 0.98, pot.position.z + Math.sin(a + 0.3) * 0.45); lf.rotation.x = -Math.PI / 2 + 0.4; G.add(lf); }
+  for (let i = 0; i < 9; i++) { const a = i / 9 * 6.28; const fl = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.28, 8, 1, true), lotusMat); fl.position.set(pot.position.x + Math.cos(a) * 0.25, yy + 0.8 + (i % 3) * 0.06, pot.position.z + Math.sin(a) * 0.25); fl.rotation.x = Math.PI; G.add(fl); const lf = new THREE.Mesh(new THREE.CircleGeometry(0.22, 10), new THREE.MeshStandardMaterial({ color: 0x4a6a2a, side: THREE.DoubleSide })); lf.position.set(pot.position.x + Math.cos(a + 0.3) * 0.45, yy + 0.7, pot.position.z + Math.sin(a + 0.3) * 0.45); lf.rotation.x = -Math.PI / 2 + 0.4; G.add(lf); }
   // scrolls
   const scrollG = new THREE.CylinderGeometry(0.05, 0.05, 0.5, 10); const paper = new THREE.MeshStandardMaterial({ color: 0xe0cc98, roughness: 0.8 });
 
@@ -434,7 +434,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const nearCol = (x, z) => { const gx = (x - (cx - W / 2)) / sp, gz = (z - (cz - D / 2)) / sp; return Math.hypot((gx - Math.round(gx)) * sp, (gz - Math.round(gz)) * sp) < 1.5; };
   const toThrone = (x, z) => Math.atan2(cx + tx + 3.5 - x, cz - z);
   const seat = (fw, lf, type, extra = {}) => { const [x, z] = hat(fw, lf); if (nearCol(x, z)) return; person(x, z, toThrone(x, z) + (extra.turn || 0), { type, pose: 'sit', y: Y, ...extra }); };
-  person(cx + tx + 3.65, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', s: 1.25, y: dy + 0.78, col: { garment: C('#f2ead6'), shawl: C('#9a2a3a') } });
+  person(cx + tx + 3.65, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', s: 1.4, y: dy + 0.72, col: { garment: C('#f2ead6'), shawl: C('#9a2a3a') } });
   person(cx + tx + 4.6, cz + 1.9, -Math.PI / 2 - 0.3, { type: 'noble', pose: 'stand', y: dy + 0.4, col: { garment: C('#efe6d4'), shawl: C('#e8dcc8') } }); // chauri bearer
   { // fly-whisk (chauri) held up by the bearer, and a bronze gong on a stand at the throne's left
     const fan = new A.AB(); fan.add(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 8), 'gold', [0, 0.8, 0]);
@@ -459,7 +459,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   for (let k = 0; k < 6; k++) { const x = cx + tx - 4 - (k % 3) * 1.7, z = cz - 4.5 - Math.floor(k / 3) * 1.7; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: k % 2 ? 'noble' : 'man', pose: 'sit', y: Y }); }
   // scribes at low desks, right foreground
   const scribeDesk = new A.AB();
-  for (const [fw, lf] of [[2.6, -2.2], [4.6, -3.0]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); for (let q = 0; q < 4; q++) scribeDesk.add(new THREE.CylinderGeometry(0.045, 0.045, 0.42, 10), 'paper', [dx - cx + (q % 2) * 0.1 - 0.05, fy + 0.47 + Math.floor(q / 2) * 0.08, dz - cz + (q % 2) * 0.09], [0, toThrone(x, z) + 0.5, Math.PI / 2]); }
+  for (const [fw, lf] of [[3.4, -1.25], [5.4, -1.9]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); for (let q = 0; q < 4; q++) scribeDesk.add(new THREE.CylinderGeometry(0.045, 0.045, 0.42, 10), 'paper', [dx - cx + (q % 2) * 0.1 - 0.05, fy + 0.47 + Math.floor(q / 2) * 0.08, dz - cz + (q % 2) * 0.09], [0, toThrone(x, z) + 0.5, Math.PI / 2]); }
   // standing courtiers in the far back right
   for (let i = 0; i < 10; i++) { const x = cx + tx - 14 + (i % 5) * 2.4, z = cz - 10 - Math.floor(i / 5) * 2; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: i % 2 ? 'noble' : 'man', pose: 'stand', y: Y }); }
   // mats under the monk rows

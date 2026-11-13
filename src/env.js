@@ -32,7 +32,7 @@ export function height(x, z) {
   // distant rolling hills / ridgelines
   const far = Math.hypot(x - 300, z + 100);
   const north = smooth(-1200, -2600, z); // the river plain to the north stays flat (S01 sunset horizon)
-  h += (1 - north * 0.85) * (smooth(1500, 4200, far) * (fbm(x * 0.0006, z * 0.0006, 4, 4096) * 300 - 80) + smooth(3000, 7000, far) * 110);
+  h += (1 - north * 0.85) * (smooth(1500, 4200, far) * (fbm(x * 0.0006, z * 0.0006, 4, 4096) * 420 - 100) + smooth(3000, 7000, far) * 180);
   // the stupa hill
   const d2 = Math.hypot(x - HILL2.x, z - HILL2.z);
   const hill2 = HILL2.h * Math.exp(-Math.pow(d2 / HILL2.r, 2.2)) * (0.9 + fbm(x * 0.013 + 5, z * 0.013, 4, 4096) * 0.2);
@@ -92,7 +92,7 @@ export function buildTerrain(M, maskTex) {
       vec3 grass = texture2D(tGrass, wuv * 0.17).rgb * 0.5 + texture2D(tGrass, wuv * 0.023).rgb * 0.5;
       float big = texture2D(tGrass, wuv * 0.0021).g;
       grass *= 0.75 + big * 0.6;
-      float dryH = smoothstep(4.0, 25.0, vWPos.y) * 0.35;
+      float dryH = smoothstep(4.0, 25.0, vWPos.y) * 0.62;
       grass = mix(grass, vec3(0.42, 0.37, 0.22) * (0.8 + big * 0.4), dryH);
       vec2 muv = (vWPos.xz - maskMin) / (maskMax - maskMin);
       vec4 m = (muv.x > 0.0 && muv.x < 1.0 && muv.y > 0.0 && muv.y < 1.0) ? texture2D(tMask, muv) : vec4(0.0);
