@@ -63,7 +63,7 @@ Raw overall about 46. User estimate for v0.8: 65. Calibration offset: +19 (criti
 
 ## Round 09
 
-Time: 06:20 to 06:55 UTC | elapsed 0.6h of 8h floor
+Time: 06:20 to about 06:27 UTC (round boundaries before 06:32 were not clocked; times estimated) | elapsed about 0.1h of 8h floor
 Usage: not readable
 Focus: colour and light in all shots, because the measured colour check showed the largest gaps (S01 +0.29 saturation, all shots too dark).
 Changes:
@@ -92,7 +92,7 @@ Stop check: bar no | floor no | stills approved no | final no -> next round
 
 ## Round 10
 
-Time: 06:55 to 07:35 UTC | elapsed 1.3h
+Time: about 06:27 to 06:32 UTC (end measured) | elapsed 0.2h
 Focus: S04 composition (weakest shot by mean at r08), depth over breadth.
 Changes:
 - New second stupa hill (HILL2) behind the town gate with a white plastered stupa, trees and the hill pavilion; terrain blends smoothly into the town.
