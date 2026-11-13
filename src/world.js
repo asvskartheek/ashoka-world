@@ -11,7 +11,8 @@ export class Instancer {
     this.M = M; this.reg = new Map();
     const std = (o) => new THREE.MeshStandardMaterial(o);
     this.base = {
-      skin: std({ color: 0xffffff, roughness: 0.55 }), garment: std({ color: 0xffffff, map: M.cloth, roughness: 1, envMapIntensity: 0.5 }),
+      skin: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.52, sheen: 0.22, sheenRoughness: 0.55, sheenColor: new THREE.Color(0x8a4a30), clearcoat: 0.05, clearcoatRoughness: 0.6 }),
+      garment: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: M.cloth, roughness: 0.95, envMapIntensity: 0.5, sheen: 0.3, sheenRoughness: 0.8, sheenColor: new THREE.Color(0x707070) }),
       shawl: std({ color: 0xffffff, map: M.cloth, roughness: 1, envMapIntensity: 0.5 }), accent: std({ color: 0xffffff, map: M.cloth, roughness: 0.8 }),
       hair: M.hair, prop: M.bronze, pole: M.timberUV, ivory: M.ivory, nail: M.ivory, cloth: std({ color: 0xffffff, map: M.cloth, roughness: 0.85 }),
       trim: std({ color: 0xc89a3a, roughness: 0.6, metalness: 0.3 }), wood: M.timberUV, horn: M.horn, dark: M.dark, sack: M.sack,
@@ -561,8 +562,8 @@ function buildStupaHill(G, I, M, ref, person, treeAt) {
   for (let i = 0; i < 220; i++) { const a = r() * 6.28, d = 30 + r() * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; I.ground('rock' + (i % 4), x, z, r() * 6, 0.4 + r() * 1.6, { dy: -0.25 }); }
   for (let i = 0; i < 9000; i++) { const a = r() * 6.28, d = R * 1.18 + 4 + Math.pow(r(), 1.6) * 110; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; const [cx2, cz2] = at(4, 0); if (Math.hypot(x - cx2, z - cz2) < 3) continue; I.ground('grass', x, z, r() * 6, 0.7 + r() * 0.8); }
   for (const [fw, lf, s] of [[4, 2.6, 1.2], [6, 3.9, 2.0], [9, 6.2, 2.6], [5, 1.5, 0.6], [12, 7.5, 1.8], [3, 1.7, 0.5], [7.5, 5.0, 1.0], [3.2, 2.4, 0.8], [2.4, 1.2, 0.7], [5.5, 4.6, 1.6]]) { const [x, z] = at(fw, lf); I.ground('rock' + ((fw * 3 | 0) % 4), x, z, fw * 2, s, { dy: -0.06 * s }); }
-  // path edging stones along both sides of the path to the stairs
-  for (let i = 0; i < 26; i++) { const fw = 3 + i * 0.9; for (const lf of [1.9, -2.2]) { const [x, z] = at(fw, lf + Math.sin(i) * 0.2); I.ground('rock' + (i % 4), x, z, i, 0.22 + r() * 0.1, { dy: -0.04 }); } }
+  // denser grass along the path edges (the edging stones read as stamped discs and were removed)
+  for (let i = 0; i < 260; i++) { const fw = 2 + r() * 26, lf = (r() < 0.5 ? 1 : -1) * (1.8 + r() * 3.5); const [x, z] = at(fw, lf); I.ground('grass', x, z, r() * 6, 0.8 + r() * 0.9); }
   for (let i = 0; i < 60; i++) { const a = r() * 6.28, d = 55 + r() * 150; treeAt(sx + Math.cos(a) * d, sz + Math.sin(a) * d, 0.9); }
   for (let i = 0; i < 900; i++) { const a = r() * 6.28, d = 260 + r() * 1400; const x = sx + Math.cos(a) * d, z = sz + Math.sin(a) * d; if (height(x, z) < 0.3 || Math.abs(x - 880) < 120 && Math.abs(z - 270) < 120 || (x > -300 && x < 400 && z > -520 && z < 160)) continue; treeAt(x, z, 1.1, d > 500); }
   // big overhanging tree near the camera (top right) and one far left

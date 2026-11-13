@@ -301,7 +301,7 @@ Stop check: bar no | floor no (about 2.3h) | approved no | final no -> next roun
 
 ## Round 20
 
-Time: about 08:36 to 09:15 UTC (lion-capitals builder ran in parallel, about 26 min)
+Time: about 08:36 to 09:12 UTC, end measured (lion-capitals builder ran in parallel, about 26 min)
 Focus: two global gaps named by every critic for four rounds: flat shading (no contact shadows / AO) and unreadable lion capitals.
 Changes:
 - GTAO ambient occlusion pass after the render pass; its G-buffer skips alpha-tested, transparent and custom-shader meshes (leaf cards, grass, water, sky, clouds, decals) so foliage does not occlude as solid squares; per-shot radius (S01 4 m, others 1.2 m). Cost: stills now 65 to 105 s each (were 20 to 50 s), measured.

@@ -142,7 +142,7 @@ export function buildSky() {
         float toward = smoothstep(-0.6, 1.0, mu);
         c = mix(c, band, bandAmt * exp(-h * 9.0) * (0.35 + 0.65 * toward));
         c += sunCol * glow * (0.35 * pow(max(mu, 0.0), 6.0) + 0.6 * pow(max(mu, 0.0), 60.0));
-        c += sunCol * vec3(1.0, 0.72, 0.4) * 5.0 * smoothstep(0.99955, 0.9998, mu);
+        c += sunCol * vec3(1.0, 0.75, 0.45) * 9.0 * smoothstep(0.9992, 0.99955, mu);
         // below horizon: hazy ground colour
         c = mix(c, horizon * 0.8, smoothstep(0.0, -0.05, d.y));
         gl_FragColor = vec4(c * intensity, 1.0);
