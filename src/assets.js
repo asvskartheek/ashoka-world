@@ -483,10 +483,10 @@ export function stupa({ R = 16 } = {}) {
   };
   for (let i = 0; i < 4; i++) railSide(i * Math.PI / 2);
   // chhatra: pole with three discs
-  b.add(cyl(R * 0.022, R * 0.026, R * 0.82, 12), 'stone', [0, top + R * 0.41, 0]);
-  [[0.22, 0.4], [0.18, 0.6], [0.14, 0.78]].forEach(([rr, yy]) => {
-    b.add(cyl(R * rr * 0.97, R * rr, R * 0.022, 32), 'stone', [0, top + R * yy, 0]);
-    b.add(cyl(R * 0.03, R * rr * 0.95, R * 0.03, 32), 'stone', [0, top + R * yy - R * 0.026, 0]);
+  b.add(cyl(R * 0.02, R * 0.024, R * 0.86, 12), 'stone', [0, top + R * 0.43, 0]);
+  [[0.24, 0.36], [0.2, 0.6], [0.16, 0.82]].forEach(([rr, yy]) => {
+    b.add(cyl(R * rr * 0.98, R * rr, R * 0.016, 40), 'stone', [0, top + R * yy, 0]);
+    b.add(cyl(R * 0.035, R * 0.06, R * 0.03, 16), 'stone', [0, top + R * yy - R * 0.02, 0]);
   });
   return b.build();
 }

@@ -79,8 +79,8 @@ export function buildMaterials() {
   M.mud = worldUV(std({ map: plaster.map, color: 0xb88a62, roughness: 1 }), 0.3);
 
   const floor = T.floorTex({});
-  M.hallFloor = std({ map: floor.map, roughnessMap: floor.rough, roughness: 1, metalness: 0.0 });
-  M.hallFloor.map.repeat.set(10, 10); M.hallFloor.roughnessMap.repeat.set(10, 10);
+  M.hallFloor = std({ map: floor.map, roughnessMap: floor.rough, roughness: 1, metalness: 0.0, color: 0xd9b48c });
+  M.hallFloor.envMapIntensity = 0.35; M.hallFloor.map.repeat.set(7, 7); M.hallFloor.roughnessMap.repeat.set(7, 7);
 
   M.cloth = T.clothTex({});
   const mkCloth = (color, extra = {}) => std({ color, map: M.cloth, roughness: 0.9, ...extra });

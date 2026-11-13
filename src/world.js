@@ -136,7 +136,7 @@ export function buildWorld(scene, M) {
   const wall = { x0: -175, x1: 330, z0: -470, z1: 0 };
   ref.pois.gate = new THREE.Vector3(0, 0, 0);
   I.register('log', A.palisadeLog({ h: 9 }), {});
-  I.register('tower', A.watchtower({ h: 17, w: 6.5 }), {});
+  I.register('tower', A.watchtower({ h: 23, w: 7 }), {});
   I.register('rail', { timber: new THREE.BoxGeometry(1, 0.28, 0.3) }, {});
   const palisade = (x0, z0, x1, z1, gaps = []) => {
     const L = Math.hypot(x1 - x0, z1 - z0); const n = Math.floor(L / 0.43); const ry = Math.atan2(x1 - x0, z1 - z0);
@@ -328,7 +328,10 @@ export function buildWorld(scene, M) {
     g.lineWidth = ts(5); g.beginPath(); g.moveTo(tx(HILL.x + 40), tz(HILL.z - 40)); g.lineTo(tx(HILL.x + 6), tz(HILL.z - 6)); g.stroke();
     g.fillStyle = 'rgb(120,0,0)'; g.beginPath(); g.arc(tx(HILL.x), tz(HILL.z), ts(24), 0, Math.PI * 2); g.fill();
     // wet margins of moat
-    g.fillStyle = 'rgba(0,0,255,0.6)'; g.fillRect(tx(MOAT.x0), tz(MOAT.z0 - 4), tx(MOAT.x1) - tx(MOAT.x0), tz(MOAT.z1 + 4) - tz(MOAT.z0 - 4));
+    g.globalCompositeOperation = 'lighter'; g.fillStyle = 'rgb(0,0,150)';
+    g.fillRect(tx(6), tz(MOAT.z0 - 3), tx(MOAT.x1) - tx(6), tz(MOAT.z1 + 3) - tz(MOAT.z0 - 3));
+    g.fillRect(tx(MOAT.x0), tz(MOAT.z0 - 3), tx(6) - tx(MOAT.x0), tz(16) - tz(MOAT.z0 - 3));
+    g.globalCompositeOperation = 'source-over';
   });
   return { group: G, I, mask, ref };
 }
@@ -347,10 +350,11 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const shaft = A.lathe([[0, 0], [0.68, 0], [0.72, colH * 0.2], [0.7, colH * 0.6], [0.62, colH], [0, colH]], 28);
   for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) {
     const x = -W / 2 + i * sp, z = -D / 2 + j * sp;
-    if (Math.abs(x - (W / 2 - 9)) < 7 && Math.abs(z) < 7) continue; // clear space for throne
+    if (Math.abs(x - (W / 2 - 16.2)) < 7 && Math.abs(z) < 7) continue; // clear space for throne
     b.add(new THREE.BoxGeometry(2.1, 0.5, 2.1), 'pstone', [x, fy + 0.25, z]); b.add(new THREE.BoxGeometry(1.8, 1.1, 1.8), 'pstone', [x, fy + 1.05, z]);
     b.add(A.lathe([[0.9, 0], [0.76, 0.3], [0.72, 0.35], [0, 0.35]], 24), 'pstone', [x, fy + 1.6, z]);
     b.add(shaft, 'pwood', [x, fy + 1.95, z]);
+    for (const yy of [0.5, 1.0, colH - 0.9, colH - 0.45]) b.add(new THREE.TorusGeometry(0.71 - yy * 0.009, 0.06, 8, 28), 'cwood', [x, fy + 1.95 + yy, z], [Math.PI / 2, 0, 0]);
     // capital: ring, block, bracket arms
     b.add(new THREE.CylinderGeometry(0.62, 0.5, 0.4, 20), 'pwood', [x, fy + 1.95 + colH + 0.2, z]);
     b.add(new THREE.BoxGeometry(1.4, 0.5, 1.4), 'pwood', [x, fy + 1.95 + colH + 0.6, z]);
@@ -369,13 +373,15 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   b.add(A.curvedRoof(W * 0.8, D * 0.6, 5, 0.18, 8), 'tiles', [0, by + 8.4, 0]);
   // back (north) wall: partial wall with windows, east end wall behind throne
   // throne dais: 4 steps
-  const tx = W / 2 - 9;
+  const tx = W / 2 - 16.2;
   for (let k = 0; k < 4; k++) b.add(new THREE.BoxGeometry(10 - k * 1.2, 0.3, 12 - k * 1.4), 'pstone', [tx + 1 + k * 0.6, fy + 0.15 + k * 0.3, 0]);
   const dy = fy + 1.2; ref.pois.throne = new THREE.Vector3(cx + tx + 3.5, dy, cz);
   // throne: seat, back, lion armrests
   b.add(new THREE.BoxGeometry(1.6, 0.7, 1.4), 'cwood', [tx + 3.5, dy + 0.35, 0]);
-  b.add(new THREE.BoxGeometry(0.25, 2.4, 1.9), 'cwood', [tx + 4.3, dy + 1.2, 0]);
-  b.add(new THREE.BoxGeometry(0.3, 0.3, 2.1), 'gold', [tx + 4.3, dy + 2.45, 0]);
+  b.add(new THREE.BoxGeometry(0.22, 1.9, 1.9), 'cwood', [tx + 4.3, dy + 0.95, 0]);
+  b.add(new THREE.CylinderGeometry(0.95, 0.95, 0.24, 24, 1, false, 0, Math.PI), 'cwood', [tx + 4.3, dy + 1.9, 0], [Math.PI / 2, 0, Math.PI / 2]);
+  b.add(new THREE.TorusGeometry(0.95, 0.06, 8, 24, Math.PI), 'gold', [tx + 4.18, dy + 1.9, 0], [0, Math.PI / 2, 0]);
+  b.add(new THREE.BoxGeometry(0.26, 0.12, 2.0), 'gold', [tx + 4.18, dy + 1.88, 0]);
   b.add(new THREE.BoxGeometry(1.7, 0.18, 1.5), 'redcloth', [tx + 3.5, dy + 0.75, 0]);
   b.add(new THREE.BoxGeometry(5.5, 0.03, 6), 'rug', [tx + 2.5, dy + 0.02, 0]);
   const lionG = A.lion({});
@@ -391,7 +397,7 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(W + 6, D + 6), M.hallFloor); floor.rotation.x = -Math.PI / 2; floor.position.set(cx, fy + 0.4 + 0.01, cz); floor.receiveShadow = true; G.add(floor);
   const refl = new Reflector(new THREE.PlaneGeometry(W + 6, D + 6), { textureWidth: 1024, textureHeight: 576, clipBias: 0.003, color: 0xffffff });
   refl.material.transparent = true; refl.material.depthWrite = false;
-  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.9, 0.75), 0.18 );');
+  refl.material.fragmentShader = refl.material.fragmentShader.replace('gl_FragColor = vec4( blendOverlay( base.rgb, color ), 1.0 );', 'gl_FragColor = vec4( base.rgb * vec3(1.0, 0.88, 0.7), 0.11 );');
   refl.rotation.x = -Math.PI / 2; refl.position.set(cx, fy + 0.4 + 0.02, cz); G.add(refl); ref.hallReflector = refl;
   // big banner behind throne
   // hanging cloth banner behind the throne (gently rippled), on a gilt rod
@@ -410,19 +416,30 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
 
   // ---- people in the hall (floor at fy + 0.4). Composition relative to shot-2 camera.
   const Y = fy + 0.4;
-  const HC = { x: cx + 18, z: cz + 7.2 }; const hf = new THREE.Vector2(cx + tx + 1 - HC.x, cz - 1.5 - HC.z).normalize(); const hl = new THREE.Vector2(hf.y, -hf.x);
+  const HC = { x: cx + 9.8, z: cz + 7.6 }; const hf = new THREE.Vector2(cx + tx + 1 - HC.x, cz - 1.5 - HC.z).normalize(); const hl = new THREE.Vector2(hf.y, -hf.x);
   const hat = (fw, lf) => [HC.x + hf.x * fw + hl.x * lf, HC.z + hf.y * fw + hl.y * lf];
   const nearCol = (x, z) => { const gx = (x - (cx - W / 2)) / sp, gz = (z - (cz - D / 2)) / sp; return Math.hypot((gx - Math.round(gx)) * sp, (gz - Math.round(gz)) * sp) < 1.5; };
   const toThrone = (x, z) => Math.atan2(cx + tx + 3.5 - x, cz - z);
   const seat = (fw, lf, type, extra = {}) => { const [x, z] = hat(fw, lf); if (nearCol(x, z)) return; person(x, z, toThrone(x, z) + (extra.turn || 0), { type, pose: 'sit', y: Y, ...extra }); };
-  person(cx + tx + 3.55, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', y: dy + 0.4 - 0.05 + 0.32, col: { garment: C('#f2ead6'), shawl: C('#9a2a3a') } });
+  person(cx + tx + 3.65, cz, -Math.PI / 2, { type: 'noble', pose: 'throne', s: 1.25, y: dy + 0.78, col: { garment: C('#f2ead6'), shawl: C('#9a2a3a') } });
   person(cx + tx + 4.6, cz + 1.9, -Math.PI / 2 - 0.3, { type: 'noble', pose: 'stand', y: dy + 0.4, col: { garment: C('#efe6d4'), shawl: C('#e8dcc8') } }); // chauri bearer
+  { // fly-whisk (chauri) held up by the bearer, and a bronze gong on a stand at the throne's left
+    const fan = new A.AB(); fan.add(new THREE.CylinderGeometry(0.03, 0.03, 1.6, 8), 'gold', [0, 0.8, 0]);
+    const plume = new THREE.ConeGeometry(0.28, 0.75, 14, 4, true); fan.add(plume, 'plume', [0, 1.9, 0], [Math.PI, 0, 0]);
+    for (let i = 0; i < 18; i++) { const a = i / 18 * 6.28; fan.add(new THREE.ConeGeometry(0.05, 0.6, 5), 'plume', [Math.cos(a) * 0.14, 1.95, Math.sin(a) * 0.14], [Math.PI + Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3]); }
+    const gong = new A.AB(); gong.add(new THREE.CylinderGeometry(0.55, 0.55, 0.05, 32), 'bronze', [0, 1.6, 0], [Math.PI / 2, 0, 0]); gong.add(new THREE.SphereGeometry(0.12, 12, 8), 'bronze', [0, 1.6, 0.04]);
+    for (const s of [-1, 1]) gong.add(new THREE.CylinderGeometry(0.045, 0.05, 2.4, 8), 'cwood', [s * 0.75, 1.2, 0]); gong.add(new THREE.CylinderGeometry(0.04, 0.04, 1.6, 8), 'cwood', [0, 2.35, 0], [0, 0, Math.PI / 2]);
+    I.register('chauri', fan.build(), { mats: { gold: M.gold, plume: new THREE.MeshStandardMaterial({ color: 0xf4efe6, roughness: 0.9 }) } });
+    I.put('chauri', cx + tx + 4.3, dy + 1.25, cz + 1.75, 0, 1, { rz: 0.35 });
+    I.register('gong', gong.build(), { mats: { bronze: M.bronze, cwood: M.carvedWood } });
+    I.put('gong', cx + tx + 1.2, dy + 0.4, cz - 3.2, Math.PI / 2 - 0.3, 1);
+  }
   person(cx + tx + 2.0, cz - 3.8, -Math.PI / 2 - 0.4, { type: 'soldier', pose: 'stand', y: Y + 1.2 });
   person(cx + tx - 1.5, cz - 6.0, -Math.PI / 2 - 0.5, { type: 'soldier', pose: 'stand', y: Y });
   person(cx + tx - 3.0, cz - 7.0, -Math.PI / 2 - 0.6, { type: 'noble', pose: 'stand', y: Y });
   person(cx + tx - 0.5, cz - 8.0, -Math.PI / 2 - 0.6, { type: 'man', pose: 'stand', y: Y });
   // monks in rows, left foreground leading toward the throne
-  for (let row = 0; row < 4; row++) for (let k = 0; k < 5; k++) seat(1.4 + k * 1.15 + row * 0.25, 1.2 + row * 1.2, 'monk', { turn: -0.2 });
+  for (let row = 0; row < 4; row++) for (let k = 0; k < 5; k++) seat(1.6 + k * 1.1 + row * 0.25, 1.0 + row * 1.15, 'monk', { turn: -0.2 });
   // nobles / scholars seated further along on the left (facing throne)
   for (let row = 0; row < 3; row++) for (let k = 0; k < 4; k++) seat(3.5 + k * 1.4, 6.2 + row * 1.4, k % 2 ? 'noble' : 'man');
   // ministers seated near the dais on the right side

@@ -8,7 +8,7 @@ Bar: composition 99.9 | light 99.9 | color 99.9 | materials 99.9 | detail 99.9 |
 Calibration offset: +19 (user: v0.8 = 65%; round-08 critic median 46)
 Usage: Max plan, about 20% per hour, never 100%
 Gate: stills approved no | final render not started
-Best so far: round 09, `cook/stills/r09/`
+Best so far: round 13, `cook/stills/r13/` (raw 48.5, calibrated 67.5)
 
 ## Decisions
 
@@ -115,3 +115,52 @@ Top gaps from critics: 1) people and near-field props (all shots, worst in S02);
 Best so far: round 09.
 Stop check: bar no | floor no | stills approved no | final no -> next round
 Next focus: round 11 fixes the regressions (pillar girth parameter, S01 sun framing), then S02 hall in depth.
+
+## Round 11
+
+Time: about 06:33 to 06:38 UTC | elapsed about 0.3h
+Focus: fix round-10 regressions (S04 lion capital, S01 sun), S02 open hall.
+Changes: `ashokaPillar` gained a `girth` parameter so thick shafts keep capital proportions; S04 pillar height 10.5, girth 1.75; HILL2 lowered and moved left; S01 camera pitch 16° and sun el 2.3°; S02 east wall removed (open hall), hanging cloth banner on a gilt rod, floor reflection alpha 0.18, darker carved ceiling, roof tiles double-sided.
+Stills: `cook/stills/r11/` | Side by side: `cook/compare/r11/all.jpg`
+Scores, eyeballed: mean of 2 critics (general-purpose, sonnet), raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated |
+|---|---|---|---|---|---|---|---|
+| S01 | 62 | 40 | 54 | 35 | 25 | 43 | 62 |
+| S02 | 53 | 38 | 52 | 30 | 23 | 39 | 58 |
+| S03 | 75 | 52 | 58 | 46 | 35 | 53 | 72 |
+| S04 | 64 | 50 | 53 | 43 | 30 | 48 | 67 |
+
+Overall raw 46, calibrated 65. Critics disagree by more than 10 on several S01 and S03 dimensions; a third critic was skipped to stay inside the usage pace (logged as a deviation).
+Measured: S01 sat +0.049 bright +0.005; S02 sat -0.135 bright -0.026; S03 sat -0.046 bright 0.000; S04 sat +0.018 bright -0.060.
+
+## Round 12
+
+Time: about 06:38 to 06:42 UTC
+Focus: S01 sun and near bank, S03 chhatra and sky (repeated critic items).
+Changes: far ridges flattened toward the north so the low sun clears the horizon; S01 haze thinner; S01 moat water murkier and rippled (per-shot water colour and distortion); ground-mask bug fixed (the moat wet overlay was alpha-blended over the dirt channel and turned the whole near bank into grass; now additive and limited to the moat); S03 chhatra discs thin and spaced, bluer sky, less haze, greener hill grass; warm hall floor tint.
+Stills: `cook/stills/r12/` | critics: not run for this round (its S01, S03 and S04 are scored inside round 13).
+Measured: S01 sat +0.050 bright +0.041; S02 sat -0.104 bright -0.037; S03 sat -0.020 bright -0.021; S04 sat +0.018 bright -0.060.
+
+## Round 13
+
+Time: about 06:42 to 06:49 UTC (06:48 measured near the end)
+Focus: S02 (weakest shot), depth over breadth.
+Changes: S02 camera on a 50° lens from 14 m; throne moved one bay into the hall so columns continue behind it; throne zone column clearance now follows the throne; carved arched throne back with gilt trim; king scaled 1.25; banded column rings; chauri (fly-whisk) and bronze gong; larger floor tiles, floor env reflection 0.35, reflection alpha 0.11; warmer, more saturated grade. S01, S03, S04 stills are round 12's.
+Stills: `cook/stills/r13/` | Side by side: `cook/compare/r13/all.jpg`
+Scores, eyeballed: mean of 2 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Mean raw | Calibrated | vs r11 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 59 | 50 | 62 | 40 | 28 | 48 | 67 | +5 |
+| S02 | 65 | 45 | 56 | 33 | 25 | 45 | 64 | +6 |
+| S03 | 74 | 59 | 63 | 49 | 34 | 56 | 75 | +3 |
+| S04 | 62 | 50 | 54 | 40 | 28 | 47 | 66 | -1 |
+
+Overall raw 48.5, calibrated 67.5. Best so far.
+Measured: S01 sat +0.050 bright +0.041; S02 sat +0.007 bright -0.001; S03 sat -0.020 bright -0.021; S04 sat +0.018 bright -0.060. Every shot's mean colour delta is now within ±0.06.
+Render: about 40 to 70 s per still at 1448×1086 (not timed per shot this round).
+Top gaps from critics (all four critics, rounds 11 and 13): 1) people read as faceless low-poly capsules (worst in S02 foreground); 2) detail density and props (S01 foreground market, S04 street goods, S03 rocks and path); 3) materials: no weathering, carving or wood grain; S01 still has no visible sun disc and no boats.
+Parallel work started: a builder subagent is rebuilding the human generator (people section of src/assets.js only), with a close-up lineup harness.
+Stop check: bar no | floor no (about 0.5h of 8h) | stills approved no | final no -> next round
+Next focus: S01 sun disc and towers (round 14), integrate the new people, then props and materials.

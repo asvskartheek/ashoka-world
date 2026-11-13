@@ -43,6 +43,7 @@ export function applyShot(S) {
   const cu = clouds.material.uniforms; cu.sunDir.value.copy(dir); cu.cover.value = S.cloud;
   const warm = new THREE.Color(S.sunCol); cu.sunCol.value.copy(warm).multiplyScalar(S.sun.el < 10 ? 1.3 : 1.05); cu.shade.value.copy(S.sun.el < 10 ? new THREE.Color(0x8a6a80) : new THREE.Color(0xd0d8e4));
   water.material.uniforms.sunDirection.value.copy(dir);
+  water.material.uniforms.waterColor.value.set(S.water?.color ?? 0x3a5058); water.material.uniforms.distortionScale.value = S.water?.distortion ?? 2.2;
   renderer.toneMappingExposure = S.exposure;
   const L = S.light || S.sun; const laz = THREE.MathUtils.degToRad(L.az), lel = THREE.MathUtils.degToRad(L.el);
   const ldir = new THREE.Vector3(Math.cos(lel) * Math.sin(laz), Math.sin(lel), Math.cos(lel) * Math.cos(laz));
