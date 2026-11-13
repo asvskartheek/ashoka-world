@@ -1,0 +1,12 @@
+S01:
+saturation: mean delta +0.048, worst cell +0.213
+brightness: mean delta -0.063, worst cell -0.199
+S02:
+saturation: mean delta -0.024, worst cell -0.221
+brightness: mean delta -0.008, worst cell +0.309
+S03:
+saturation: mean delta -0.019, worst cell -0.189
+brightness: mean delta -0.015, worst cell +0.180
+S04:
+saturation: mean delta +0.039, worst cell -0.291
+brightness: mean delta -0.068, worst cell -0.241
