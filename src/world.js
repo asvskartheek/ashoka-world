@@ -453,14 +453,14 @@ function buildPalaceHall(G, I, M, ref, person, treeAt) {
   person(cx + tx - 3.0, cz - 7.0, -Math.PI / 2 - 0.6, { type: 'noble', pose: 'stand', y: Y });
   person(cx + tx - 0.5, cz - 8.0, -Math.PI / 2 - 0.6, { type: 'man', pose: 'stand', y: Y });
   // monks in rows, left foreground leading toward the throne
-  for (let row = 0; row < 4; row++) for (let k = 0; k < 5; k++) seat(1.6 + k * 1.1 + row * 0.25, 1.0 + row * 1.15, 'monk', { turn: -0.2 });
+  for (let row = 0; row < 4; row++) for (let k = 0; k < 6; k++) seat(1.05 + k * 1.0 + row * 0.25, 0.55 + row * 1.05, 'monk', { turn: -0.2 });
   // nobles / scholars seated further along on the left (facing throne)
   for (let row = 0; row < 3; row++) for (let k = 0; k < 4; k++) seat(3.5 + k * 1.4, 6.2 + row * 1.4, k % 2 ? 'noble' : 'man');
   // ministers seated near the dais on the right side
   for (let k = 0; k < 6; k++) { const x = cx + tx - 4 - (k % 3) * 1.7, z = cz - 4.5 - Math.floor(k / 3) * 1.7; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: k % 2 ? 'noble' : 'man', pose: 'sit', y: Y }); }
   // scribes at low desks, right foreground
   const scribeDesk = new A.AB();
-  for (const [fw, lf] of [[3.4, -1.25], [5.4, -1.9]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); for (let q = 0; q < 4; q++) scribeDesk.add(new THREE.CylinderGeometry(0.045, 0.045, 0.42, 10), 'paper', [dx - cx + (q % 2) * 0.1 - 0.05, fy + 0.47 + Math.floor(q / 2) * 0.08, dz - cz + (q % 2) * 0.09], [0, toThrone(x, z) + 0.5, Math.PI / 2]); }
+  for (const [fw, lf] of [[2.1, -0.85], [3.5, -1.55]]) { const [x, z] = hat(fw, lf); if (nearCol(x, z)) continue; person(x, z, toThrone(x, z) + 0.5, { type: 'scribe', pose: 'sit', y: Y, col: { garment: C('#efe7d4'), shawl: C('#e6dac0') } }); const [dx, dz] = hat(fw + 0.75, lf + 0.15); scribeDesk.add(new THREE.BoxGeometry(1.1, 0.42, 0.6), 'cwood', [dx - cx, fy + 0.21, dz - cz], [0, toThrone(x, z) + 0.5, 0]); for (let q = 0; q < 4; q++) scribeDesk.add(new THREE.CylinderGeometry(0.045, 0.045, 0.42, 10), 'paper', [dx - cx + (q % 2) * 0.1 - 0.05, fy + 0.47 + Math.floor(q / 2) * 0.08, dz - cz + (q % 2) * 0.09], [0, toThrone(x, z) + 0.5, Math.PI / 2]); }
   // standing courtiers in the far back right
   for (let i = 0; i < 10; i++) { const x = cx + tx - 14 + (i % 5) * 2.4, z = cz - 10 - Math.floor(i / 5) * 2; if (!nearCol(x, z)) person(x, z, toThrone(x, z), { type: i % 2 ? 'noble' : 'man', pose: 'stand', y: Y }); }
   // mats under the monk rows

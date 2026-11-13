@@ -363,3 +363,24 @@ Overall raw 55.9, calibrated 75. Tied with round 21 within noise; best so far by
 Unanimous weakest item: S02 foreground people (seated monks seen from behind, scribes) at close range: faces, hands, cloth folds. Next: S01 far-field density and river traffic; S04 facades and shop goods.
 Stop check: bar no | floor no (about 3.2h) | approved no | final no -> next round
 Next focus: round 23 = a second people builder focused on close-range seated figures (S02), in parallel with S01 far-field density.
+
+## Round 23
+
+Time: about 09:30 to 09:58 UTC (people builder ran in parallel, about 19 min)
+Focus: unanimous round-22 weakest item, close-range seated people in S02; S01 far-field density.
+Changes: people builder (people section of src/assets.js only): deeper eye sockets and brow, darker socket and under-nose patches, ears with rim and lobe, broader skull, thicker neck, shoulder blades, hands with four fingers; seated monk robe as a thicker separate layer with deep folds radiating from the left shoulder, thicker rolled edge, cloth rolls down the back, deeper pooled folds; scribes with top-knot and gold band, bowed head, stylus and palm leaf, shawl over the back, gold hem stripe; king with raised teaching hand, taller turban, second necklace, pleats between the knees. 23k to 24k triangles for the seated variants (measured by the builder). World: darker skin palette, king scale 1.6 in white; S01 city houses on an 11 × 10.5 m grid with varied scale, 60 river boats at 1.8 to 2.7× scale.
+Stills: `cook/stills/r23/` | Side by side: `cook/compare/r23/all.jpg`
+Scores, eyeballed: median of 3 critics, raw / calibrated (+19)
+
+| Shot | Comp | Light | Color | Materials | Detail | Median raw | Calibrated | vs r22 |
+|---|---|---|---|---|---|---|---|---|
+| S01 | 62 | 55 | 60 | 45 | 38 | 52 | 71 | -4 |
+| S02 | 58 | 52 | 55 | 45 | 38 | 50 | 69 | -2 |
+| S03 | 72 | 65 | 65 | 55 | 45 | 60 | 79 | -3 (render barely changed: noise) |
+| S04 | 55 | 60 | 60 | 52 | 42 | 54 | 73 | +2 |
+
+Overall raw 54, calibrated 73. About 2 below round 22, inside the critic noise (about ±4), but not a gain. Best so far stays round 22.
+Measured: S01 sat +0.055; S02 sat -0.041; S03 sat +0.003; S04 sat -0.021.
+Critics did not notice the close-range people work at S02's framing. Their consistent composition note: in R02 the foreground monks and scribes are huge (1 to 3 m from camera, cropped by the frame edges), the court fills the left half; ours sit 2 to 8 m away and read small.
+Stop check: bar no | floor no (about 3.6h) | approved no | final no -> next round
+Next focus: round 24 = S02 foreground scale: monks and scribes moved close to camera and cropped by the frame as in R02, more seated courtiers at left.
